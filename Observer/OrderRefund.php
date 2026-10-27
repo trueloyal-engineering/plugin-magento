@@ -88,7 +88,7 @@ class OrderRefund implements ObserverInterface
                         $refundsItems["order_id"] = $replacedOrderId;
                         $refundsItems["coupon_code"] = $this->helper->getCouponCodes($order);
                         $this->sendRequest(
-                            $order->getCustomerEmail(),
+                            $order,
                             "full_order_refund",
                             $refundsItems
                         );
@@ -103,7 +103,7 @@ class OrderRefund implements ObserverInterface
                         $refundData["coupon_code"] = $this->helper->getCouponCodes($order);
                         unset($refundData["items"][0]["items"]);
                         $refundData = $this->managePartialRefundItems($itemData, $refundData);
-                        $this->sendRequest($order->getCustomerEmail(), "partial_order_refund", $refundData);
+                        $this->sendRequest($order, "partial_order_refund", $refundData);
                         return true;
                     }
                 }
@@ -171,15 +171,15 @@ class OrderRefund implements ObserverInterface
     /**
      * Send request to trueloyal when refund generated
      *
-     * @param string $customerEmail
+     * @param \Magento\Sales\Model\Order $order
      * @param string $activityId
      * @param array $refundData
      * @return bool
      */
-    public function sendRequest($customerEmail, $activityId, $refundData)
+    public function sendRequest($order,$activityId, $refundData)
     {
         $params = [
-            "member_id" => $this->helper->getMemberIdentifierValueById(null, $customerEmail),
+            "member_id" => $this->helper->getMemberIdentifierValueById($order->getCustomerId(), $order->getCustomerEmail()),
             "activity_id" => $activityId,
             "data" => $refundData
         ];

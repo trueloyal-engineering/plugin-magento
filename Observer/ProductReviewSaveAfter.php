@@ -64,7 +64,7 @@ class ProductReviewSaveAfter implements ObserverInterface
             try {
                 $trueloyalReview->setData('submitted_to_trueloyal', 1)->setReviewId($reviewId)->save();
             } catch (CouldNotSaveException $e) {
-                $this->helper->addErrorLog($e->getMessage());
+                $this->helper->logger->addErrorLog($e->getMessage());
             }
         }
         return true;

@@ -2,6 +2,7 @@
 
 namespace TrueLoyal\LoyaltyRewards\Helper;
 
+use Exception;
 use Magento\Customer\Api\Data\CustomerInterface;
 
 class Data extends Config

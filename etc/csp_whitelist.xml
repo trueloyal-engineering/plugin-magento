@@ -7,6 +7,13 @@
                 <value id="uniqueId" type="host">https://app.trueloyal.com</value>
                 <value id="apptrueloyal" type="host">app.trueloyal.com</value>
                 <value id="trueloyal" type="host">https://cdn.trueloyal.com/js/all.js</value>
+                <!-- Loaded by the widget SDK; checkout enforces CSP, so without it the widget breaks there -->
+                <value id="trueloyalWidgetScripts" type="host">https://d395yjvh5spyzw.cloudfront.net</value>
+            </values>
+        </policy>
+        <policy id="img-src">
+            <values>
+                <value id="trueloyalWidgetImages" type="host">https://dgjcoqnzn763b.cloudfront.net</value>
             </values>
         </policy>
     </policies>

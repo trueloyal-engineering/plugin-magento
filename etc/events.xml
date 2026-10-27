@@ -10,6 +10,13 @@
         <observer name="lockFreeProductQtyTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\LockFreeProductQty"/>
     </event>
     <!-- After Customer save our code will run to send customer create/update api to TrueLoyal -->
+    <!-- order_create: once per order, from any area (MarkPlacedOrder flags it, CreateOrderAfter sends it) -->
+    <event name="sales_order_place_after">
+        <observer name="markPlacedOrderTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\MarkPlacedOrder" />
+    </event>
+    <event name="sales_order_save_commit_after">
+        <observer name="orderCreateAfterTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\CreateOrderAfter" />
+    </event>
     <event name="customer_save_commit_after">
         <observer name="customerSaveAfterTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\CustomerSaveAfter" />
     </event>

@@ -238,8 +238,8 @@ class Data extends Config
                     if ($rewardData['rule'] == 'percentage_discount') {
                         $discountAmount = $item->getDiscountAmount() + (($item->getPrice() * $item->getQtyOrdered()) * $discountValue / 100);
                         $baseDiscountAmount = $item->getBaseDiscountAmount() + (($item->getBasePrice() * $item->getQtyOrdered()) * $discountValue / 100);
-                        $discountAmountFormattedNumber = number_format($discountAmount, 2);
-                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2);
+                        $discountAmountFormattedNumber = number_format($discountAmount, 2, '.', '');
+                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2, '.', '');
                         $item->setDiscountAmount($discountAmountFormattedNumber);
                         $item->setBaseDiscountAmount($baseDiscountAmountFormattedNumber);
                         $item->save();
@@ -255,8 +255,8 @@ class Data extends Config
                         $totalBasePercentage = ($item->getBasePrice() * $item->getQtyOrdered()) / $OrderBaseTotal;
                         $discountAmount =  $item->getDiscountAmount() + ($totalPercentage * $discountValue);
                         $baseDiscountAmount = $item->getBaseDiscountAmount() + ($totalBasePercentage * $discountValue);
-                        $discountAmountFormattedNumber = number_format($discountAmount, 2);
-                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2);
+                        $discountAmountFormattedNumber = number_format($discountAmount, 2, '.', '');
+                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2, '.', '');
                         $item->setDiscountAmount($discountAmountFormattedNumber);
                         $item->setBaseDiscountAmount($baseDiscountAmountFormattedNumber);
                         $item->save();

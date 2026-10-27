@@ -3,7 +3,9 @@
 namespace TrueLoyal\LoyaltyRewards\CustomerData;
 
 use Magento\Customer\CustomerData\SectionSourceInterface;
+use Magento\Framework\Stdlib\CookieManagerInterface;
 use TrueLoyal\LoyaltyRewards\Model\MemberJwt;
+use TrueLoyal\LoyaltyRewards\Observer\Customer\ProfileChangedObserver;
 
 /**
  * "trueloyal" customer-data section: the widget JWT, loaded per visitor through customer/section/load
@@ -17,14 +19,22 @@ class TrueLoyal implements SectionSourceInterface
     private $memberJwt;
 
     /**
+     * @var CookieManagerInterface
+     */
+    private $cookieManager;
+
+    /**
      * TrueLoyal section constructor.
      *
      * @param MemberJwt $memberJwt
+     * @param CookieManagerInterface $cookieManager
      */
     public function __construct(
-        MemberJwt $memberJwt
+        MemberJwt $memberJwt,
+        CookieManagerInterface $cookieManager
     ) {
         $this->memberJwt = $memberJwt;
+        $this->cookieManager = $cookieManager;
     }
 
     /**
@@ -35,7 +45,9 @@ class TrueLoyal implements SectionSourceInterface
         $expiresAt = time() + MemberJwt::LIFETIME;
         return [
             'jwt_token' => $this->memberJwt->create($expiresAt),
-            'expires_at' => $expiresAt
+            'expires_at' => $expiresAt,
+            /* js/widget.js reloads the section when the profile cookie no longer matches this */
+            'profile_version' => (string)$this->cookieManager->getCookie(ProfileChangedObserver::COOKIE_NAME, '')
         ];
     }
 }

@@ -1,30 +1,16 @@
 <?php
-$isEnabled = $block->isModuleEnabled();
-if (!$isEnabled) {
-    return;
-}
-$partnerId = $block->getPartnerId();
-$jwtToken = $block->getJwtToken();
-if (!$jwtToken) {
+/** @var \TrueLoyal\LoyaltyRewards\Block\Dashboard $block */
+if (!$block->isModuleActive()) {
     return;
 }
 ?>
-<script>
-    require.config({
-        map: {
-            '*': {
-                'trueloyal': 'https://cdn.trueloyal.com/js/all.js'
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "TrueLoyal_LoyaltyRewards/js/widget": {
+                "partnerId": "<?= $block->escapeJs($block->getPartnerId()) ?>",
+                "server": "https://app.trueloyal.com"
             }
         }
-    });
-
-    require(['trueloyal'], function () {
-        let init_data = {
-            "partner_id": "<?= /* @noEscape */ $partnerId ?>",
-            "jwt_token": "<?= $block->escapeJs($jwtToken) ?>",
-            "version": "v2",
-            "server": "https://app.trueloyal.com"
-        };
-        _zrl.push(['init', init_data]);
-    });
+    }
 </script>

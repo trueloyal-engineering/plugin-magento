@@ -77,7 +77,8 @@ class CustomerSaveAfter implements ObserverInterface
         $customerSave = $this->registry->registry('customer_save_event');
         $customerSaveAddress = $this->registry->registry('customer_address_save_event');
         if ($observer->getEvent()->getName() == "customer_save_commit_after" && !$customerSaveAddress) {
-            if (!$observer->getCustomer()) {
+            /* Sign-up saves the customer twice in one request: handle the first save only */
+            if ($customerSave || !$observer->getCustomer()) {
                 return;
             }
             $customerData = $observer->getCustomer()->getData();

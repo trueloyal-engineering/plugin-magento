@@ -3,4 +3,14 @@
      <event name="sales_order_save_commit_after">
         <observer name="orderCreateAfterApiTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\CreateOrderAfter" />
     </event>
+    <!-- Checkout can save the customer's address: reload the widget JWT (see ProfileChangedObserver) -->
+    <event name="customer_save_commit_after">
+        <observer name="profileChangedTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\Customer\ProfileChangedObserver" />
+    </event>
+    <event name="customer_address_save_commit_after">
+        <observer name="profileChangedTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\Customer\ProfileChangedObserver" />
+    </event>
+    <event name="customer_address_delete_commit_after">
+        <observer name="profileChangedTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\Customer\ProfileChangedObserver" />
+    </event>
 </config>

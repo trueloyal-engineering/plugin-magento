@@ -6,7 +6,6 @@ use Firebase\JWT\JWT;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\SessionFactory;
-use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -49,11 +48,6 @@ class MemberJwt
     private $sessionFactory;
 
     /**
-     * @var CountryFactory
-     */
-    private $countryFactory;
-
-    /**
      * @var Resolver
      */
     private $store;
@@ -76,7 +70,6 @@ class MemberJwt
      * @param CustomerFactory $customerFactory
      * @param CustomerRepositoryInterface $customerRepository
      * @param SessionFactory $sessionFactory
-     * @param CountryFactory $countryFactory
      * @param Resolver $store
      * @param SerializerInterface $serializer
      * @param StoreManagerInterface $storeManager
@@ -87,7 +80,6 @@ class MemberJwt
         CustomerFactory $customerFactory,
         CustomerRepositoryInterface $customerRepository,
         SessionFactory $sessionFactory,
-        CountryFactory $countryFactory,
         Resolver $store,
         SerializerInterface $serializer,
         StoreManagerInterface $storeManager
@@ -97,7 +89,6 @@ class MemberJwt
         $this->customerFactory = $customerFactory;
         $this->customerRepository = $customerRepository;
         $this->sessionFactory = $sessionFactory;
-        $this->countryFactory = $countryFactory;
         $this->store = $store;
         $this->serializer = $serializer;
         $this->storeManager = $storeManager;
@@ -122,12 +113,7 @@ class MemberJwt
         $customerFirstName = "";
         $customerLastName = "";
         $customerBirthDate = "";
-        $street = [];
-        $city = "";
-        $region = "";
-        $postcode = "";
-        $country = "";
-        $telephone = "";
+        $address = null;
         $lang = "";
         $memberIdentifierValue = "";
 
@@ -158,9 +144,7 @@ class MemberJwt
 
         $customer = $this->customerFactory->create()->load($customerId);
         if ($customer->getEntityId()) {
-            $billingAddress = $customer->getDefaultBillingAddress()
-                ? $customer->getDefaultBillingAddress()->getData()
-                : [];
+            $address = $customer->getDefaultShippingAddress() ?: $customer->getDefaultBillingAddress();
             $customerEmail = $customer->getEmail();
             $customerFirstName = $customer->getFirstname();
             $customerLastName = $customer->getLastname();
@@ -169,14 +153,6 @@ class MemberJwt
             if ($customerBirthDate && preg_match($pattern, $customerBirthDate)) {
                 $customerBirthDate = preg_replace($pattern, '$2/$3/$1', $customerBirthDate);
             }
-            $telephone = $billingAddress['telephone'] ?? "";
-            $city = $billingAddress['city'] ?? "";
-            $region = $billingAddress['region'] ?? "";
-            $postcode = $billingAddress['postcode'] ?? "";
-            $street = isset($billingAddress['street']) ? explode("\n", $billingAddress['street']) : [];
-            $country = isset($billingAddress['country_id'])
-                ? $this->getCountryName($billingAddress['country_id'])
-                : "";
             $memberIdentifierValue = $this->config->getMemberIdentifierValue();
         }
 
@@ -200,34 +176,32 @@ class MemberJwt
             'email_address'      => $customerEmail,
             'first_name'         => $customerFirstName,
             'last_name'          => $customerLastName,
-            'phone_number'       => $telephone
-                ? (preg_match('/^\+[0-9]{2}-[0-9]{10}+$/', $telephone) ? $telephone : "")
-                : "",
-            'birthdate'          => $customerBirthDate,
             'preferred_language' => $lang,
-            'address'            => [
-                'line1'       => $street[0] ?? "",
-                'line2'       => $street[1] ?? ($street[0] ?? ""),
-                'city'        => $city,
-                'state'       => $region,
-                'country'     => $country,
-                'postal_code' => $postcode,
-            ],
             'custom_attributes'  => $customAttributes,
             'exp'                => $expiresAt,
         ];
 
-        return $this->jwt->encode($payload, $key, 'HS256');
-    }
+        /* The widget login writes these to the member, so they match the TrueLoyal customer sync (webhook) and are
+           left out when empty instead of blanking what the sync stored. */
+        if ($customerBirthDate) {
+            $payload['birthdate'] = $customerBirthDate;
+        }
+        if ($address) {
+            $street = (array)$address->getStreet();
+            $payload['address'] = [
+                'line1'       => (string)($street[0] ?? ""),
+                'line2'       => implode(', ', array_slice($street, 1)),
+                'city'        => (string)$address->getCity(),
+                'state'       => (string)$address->getRegion(),
+                'country'     => (string)$address->getCountryId(),
+                'postal_code' => (string)$address->getPostcode(),
+            ];
+            $telephone = trim((string)$address->getTelephone());
+            if (preg_match('/^\+[0-9]{1,3}-[0-9]+$/', $telephone)) {
+                $payload['phone_number'] = $telephone;
+            }
+        }
 
-    /**
-     * Get Country Name
-     *
-     * @param string $countryCode
-     * @return string
-     */
-    private function getCountryName(string $countryCode): string
-    {
-        return $this->countryFactory->create()->loadByCode($countryCode)->getName();
+        return $this->jwt->encode($payload, $key, 'HS256');
     }
 }

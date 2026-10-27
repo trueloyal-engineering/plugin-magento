@@ -125,7 +125,7 @@ class OrderComplete implements ObserverInterface
             try {
                 $orderModel->save();
             } catch (CouldNotSaveException $e) {
-                $this->helper->addErrorLog($e->getMessage());
+                $this->helper->logger->addErrorLog($e->getMessage());
             }
             return true;
         }

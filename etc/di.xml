@@ -6,7 +6,6 @@
     <!--Update customer attribute from api-->
     <preference for="TrueLoyal\LoyaltyRewards\Api\CustomerAttributeUpdateInterface" type="TrueLoyal\LoyaltyRewards\Model\Api\CustomerAttributeUpdate"/>
 
-    <!--<preference for="Magento\Checkout\CustomerData\DefaultItem" type="TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData\DefaultItem"/>-->
     <type name="Magento\Checkout\CustomerData\DefaultItem">
         <plugin name="trueloyal_add" type="TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData\AroundPluginDefaultItem" disabled="false" sortOrder="10"/>
     </type>

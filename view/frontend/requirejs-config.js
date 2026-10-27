@@ -3,7 +3,8 @@ var config = {
         "*": {
             'Magento_Checkout/template/minicart/item/default.html': 'TrueLoyal_LoyaltyRewards/template/minicart/item/default.html',
             priceBox:'TrueLoyal_LoyaltyRewards/js/price-box-trueloyal',
-            cartPoints: 'TrueLoyal_LoyaltyRewards/js/cart-points'
+            cartPoints: 'TrueLoyal_LoyaltyRewards/js/cart-points',
+            trueloyal: 'https://cdn.trueloyal.com/js/all.js'
         }
     },
     config: {

@@ -12,8 +12,9 @@ define([
     'underscore',
     'mage/template',
     'priceUtils',
+    'TrueLoyal_LoyaltyRewards/js/sdk',
     'jquery/ui'
-], function ($, utils, _, mageTemplate, priceUtils) {
+], function ($, utils, _, mageTemplate, priceUtils, sdk) {
     'use strict';
 
     var globalOptions = {
@@ -145,24 +146,26 @@ define([
             if (this.cache.displayPrices) {
                 window.customFinalPrice = this.cache.displayPrices.finalPrice.amount;
                 if (this.cache.displayPrices.finalPrice) {
-                    zrl_mi.price_identifier = function () {
-                        const product    = {};
-                        const price      = window.customFinalPrice;
-                        const category   = '';
-                        const product_id = productId;
-                        if (price) {
-                            product.price = price;
-                        }
-                        if (product_id) {
-                            product.product_id = product_id;
-                        }
-                        if (category) {
-                            product.category = category;
-                        }
-                        return product;
-                    };
-                    zrl_mi.price_identifier();
-                    zrl_mi.replace_product_page_potential();
+                    sdk.done(function () {
+                        zrl_mi.price_identifier = function () {
+                            const product    = {};
+                            const price      = window.customFinalPrice;
+                            const category   = '';
+                            const product_id = productId;
+                            if (price) {
+                                product.price = price;
+                            }
+                            if (product_id) {
+                                product.product_id = product_id;
+                            }
+                            if (category) {
+                                product.category = category;
+                            }
+                            return product;
+                        };
+                        zrl_mi.price_identifier();
+                        zrl_mi.replace_product_page_potential();
+                    });
                 }
             }
             _.each(this.cache.displayPrices, function (price, priceCode) {
@@ -258,11 +261,13 @@ define([
              }]);
         }
 
-        reloadPrice(1);
+        sdk.done(function () {
+            reloadPrice(1);
 
-        $('#qty').on('change', function () {
-            var qty = $(this).val();
-            reloadPrice(qty);
+            $('#qty').on('change', function () {
+                var qty = $(this).val();
+                reloadPrice(qty);
+            });
         });
     });
 

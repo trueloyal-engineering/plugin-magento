@@ -99,7 +99,7 @@ class CustomerAttributeUpdate
                 $websiteID = $this->storeManager->getStore()->getWebsiteId();
                 $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($attribute['customer_email']);
                 $eavAttribute = $this->helper->getTrueLoyalAttributeByAttributeId($attributeValues->getAttributeId());
-                if ($eavAttribute->getIsTrueLoyalAttribute() && $customer->getData()) {
+                if ($eavAttribute->getData('is_trueloyal_attribute') && $customer->getData()) {
                     $customerData = $customer->getDataModel();
                     $customerData->setCustomAttribute($attribute['attribute_code'], $attribute['value']);
                     $customer->updateData($customerData);

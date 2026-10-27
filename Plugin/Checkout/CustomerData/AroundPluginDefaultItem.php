@@ -51,7 +51,7 @@ class AroundPluginDefaultItem
         $productId = $this->helperData->getFreeProduct();
         if ($productId) {
             $trueloyalQuoteItem = $this->helperData->getTrueLoyalQuoteItemByItemId($item->getId());
-            if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct() == 1) {
+            if ($trueloyalQuoteItem->getData('is_trueloyal_free_product') == 1) {
                 return 0;
             }
         }

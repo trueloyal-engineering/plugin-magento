@@ -64,7 +64,7 @@ class CreateOrderAfter implements ObserverInterface
         $order = $this->orderRepository->get($orderId);
         $trueloyalOrder = $this->helper->getTrueLoyalOrderByOrderId($orderId);
         $replacedOrderId = $order->getIncrementId();
-        if (!$trueloyalOrder->getTrueLoyalReward()) {
+        if (!$trueloyalOrder->getData('trueloyal_reward')) {
             if ($order->getQuoteId() !== null) {
                 $quote = $this->quoteRepository->get($order->getQuoteId());
                 $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($order->getQuoteId());
@@ -74,9 +74,9 @@ class CreateOrderAfter implements ObserverInterface
                 $rewardData = $this->helper->getRewardRulesData($quote, $redeemReward);
                 $url = $this->helper->getLiveWebHookUrl() . "transactions/" . $rewardData['id'] . "/approve";
                 $this->helper->request($url, "", "post", "live_api");
-                $trueloyalOrder->setTrueLoyalReward($this->serializer->serialize($rewardData))->setOrderId($orderId);
+                $trueloyalOrder->setData('trueloyal_reward', $this->serializer->serialize($rewardData))->setOrderId($orderId);
             } else {
-                $trueloyalOrder->setTrueLoyalReward("{}")->setOrderId($orderId);
+                $trueloyalOrder->setData('trueloyal_reward', "{}")->setOrderId($orderId);
             }
             try {
                 $trueloyalOrder->save();

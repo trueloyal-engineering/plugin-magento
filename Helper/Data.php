@@ -20,7 +20,7 @@ class Data extends Config
         We have passed false when it needed else this condition will not true and order will not nested save*/
         if (!$isset) {
             $trueloyalOrder = $this->getTrueLoyalOrderByOrderId($orderId);
-            $trueloyalOrder->setTrueLoyalReward("{}")->setOrderId($orderId);
+            $trueloyalOrder->setData('trueloyal_reward', "{}")->setOrderId($orderId);
             $trueloyalOrder->save();
         }
         return $order->getIncrementId();
@@ -149,9 +149,8 @@ class Data extends Config
                 $items = $quote->getAllItems();
                 foreach ($items as $item) {
                     $trueloyalQuoteItem = $this->getTrueLoyalQuoteItemByItemId($item->getId());
-                    if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
+                    if ($trueloyalQuoteItem->getData('is_trueloyal_free_product')) {
                         $item->delete();
-                        $item->save();
                         break;
                     }
                 }

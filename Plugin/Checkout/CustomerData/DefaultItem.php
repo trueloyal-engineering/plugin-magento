@@ -76,7 +76,7 @@ class DefaultItem extends MainDefaultItem
     {
         $productId = $this->helper->getFreeProduct();
         if ($productId) {
-            if ($item->getIsTrueLoyalFreeProduct() == 1) {
+            if ($item->getData('is_trueloyal_free_product') == 1) {
                 return 0;
             }
         }

@@ -11,7 +11,7 @@ use Magento\Wishlist\Block\Cart\Item\Renderer\Actions\MoveToWishlist;
 $trueloyalHelper = $this->helper(TrueLoyal\LoyaltyRewards\Helper\Config ::class);
 $trueloyalQuoteItem = $trueloyalHelper->getTrueLoyalQuoteItemByItemId($block->getItem()->getId());
 ?>
-<?php if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
+<?php if ($trueloyalQuoteItem->getData('is_trueloyal_free_product')) {
     return;
 } else { ?>
     <?php if ($block->isAllowInCart() && $block->isProductVisibleInSiteVisibility()): ?>

@@ -117,7 +117,7 @@ class CustomerAttribute
                     /*Set attribute as TrueLoyal*/
                     $attributeId = $this->helper->getCustomerAttributeId($customerAttribute['attribute_code']);
                     $eavAttribute = $this->helper->getTrueLoyalAttributeByAttributeId($attributeId);
-                    $eavAttribute->setAttributeId($attributeId)->setIsTrueLoyalAttribute(1)->save();
+                    $eavAttribute->setAttributeId($attributeId)->setData('is_trueloyal_attribute', 1)->save();
                     /*End*/
                     $response[] = [
                         'status' => true,

@@ -110,7 +110,7 @@ class RewardPoint implements DataPatchInterface
             /*Set attribute as TrueLoyal*/
             $attributeId = $this->helper->getCustomerAttributeId($attributeCode);
             $eavAttribute = $this->helper->getTrueLoyalAttributeByAttributeId($attributeId);
-            $eavAttribute->setAttributeId($attributeId)->setIsTrueLoyalAttribute(1)->save();
+            $eavAttribute->setAttributeId($attributeId)->setData('is_trueloyal_attribute', 1)->save();
         }
         $this->moduleDataSetup->getConnection()->endSetup();
     }

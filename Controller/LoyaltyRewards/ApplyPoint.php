@@ -132,7 +132,14 @@ class ApplyPoint implements HttpPostActionInterface
         $this->cart->setUpdatedAt()->save();
         if ($redeemReward == 'cancel') {
             $rewardData = $this->helper->getRewardRulesData($quote);
-            $this->helper->sendRejectRewardRequest($quote);
+            if ($this->helper->sendRejectRewardRequest($quote)) {
+                /* Recollect totals without the removed free product (addresses cache their items per request) */
+                foreach ($quote->getAllAddresses() as $address) {
+                    $address->unsetData('cached_items_all');
+                }
+                $quote->setTotalsCollectedFlag(false);
+                $this->cart->save();
+            }
             $this->messageManager->addNotice(
                 __('The redeemed %1 is canceled successfully.', $rewardData['reward_name'])
             );
@@ -319,7 +326,7 @@ class ApplyPoint implements HttpPostActionInterface
             foreach ($quoteItemCollection as $item) {
                 if($item->getProductId() == $productId && $item->getPrice() == 0) {
                     $trueloyalQuoteItem = $this->helper->getTrueLoyalQuoteItemByItemId($item->getId());
-                    $trueloyalQuoteItem->setIsTrueLoyalFreeProduct(1)->setQuoteItemId($item->getId())->save();
+                    $trueloyalQuoteItem->setData('is_trueloyal_free_product', 1)->setQuoteItemId($item->getId())->save();
                     break;
                 }
             }

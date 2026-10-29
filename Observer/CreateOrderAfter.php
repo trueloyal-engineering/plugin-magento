@@ -51,7 +51,7 @@ class CreateOrderAfter implements ObserverInterface
     }
 
     /**
-     * Order Create event to trueloyal
+     * Order Create event to trueloyal, once per order: on the first save after it was placed (MarkPlacedOrder)
      *
      * @param Observer $observer
      * @return void
@@ -59,12 +59,16 @@ class CreateOrderAfter implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $event = $this->helper->getRewardEvents();
-        $orderId = $observer->getEvent()->getOrder()->getId();
+        $placedOrder = $observer->getEvent()->getOrder();
+        if (!$placedOrder->getData(MarkPlacedOrder::FLAG)) {
+            return;
+        }
+        $placedOrder->unsetData(MarkPlacedOrder::FLAG);
+        $orderId = $placedOrder->getId();
         $order = $this->orderRepository->get($orderId);
         $trueloyalOrder = $this->helper->getTrueLoyalOrderByOrderId($orderId);
         $replacedOrderId = $order->getIncrementId();
-        if (!$trueloyalOrder->getTrueLoyalReward()) {
+        if (!$trueloyalOrder->getData('trueloyal_reward')) {
             if ($order->getQuoteId() !== null) {
                 $quote = $this->quoteRepository->get($order->getQuoteId());
                 $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($order->getQuoteId());
@@ -74,14 +78,14 @@ class CreateOrderAfter implements ObserverInterface
                 $rewardData = $this->helper->getRewardRulesData($quote, $redeemReward);
                 $url = $this->helper->getLiveWebHookUrl() . "transactions/" . $rewardData['id'] . "/approve";
                 $this->helper->request($url, "", "post", "live_api");
-                $trueloyalOrder->setTrueLoyalReward($this->serializer->serialize($rewardData))->setOrderId($orderId);
+                $trueloyalOrder->setData('trueloyal_reward', $this->serializer->serialize($rewardData))->setOrderId($orderId);
             } else {
-                $trueloyalOrder->setTrueLoyalReward("{}")->setOrderId($orderId);
+                $trueloyalOrder->setData('trueloyal_reward', "{}")->setOrderId($orderId);
             }
             try {
                 $trueloyalOrder->save();
             } catch (CouldNotSaveException $e) {
-                $this->helper->addErrorLog($e->getMessage());
+                $this->helper->logger->addErrorLog($e->getMessage());
             }
         }
         $this->helper->createTrueLoyalOrder($orderId, $replacedOrderId);

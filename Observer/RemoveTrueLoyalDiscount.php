@@ -55,7 +55,7 @@ class RemoveTrueLoyalDiscount implements ObserverInterface
         } elseif ($cart->getItemsCount() === 1 && $trueloyalQuote->getRedeemRewardDiscount()) {
             foreach ($quote->getAllItems() as $item) {
                 $trueloyalQuoteItem = $this->helper->getTrueLoyalQuoteItemByItemId($item->getId());
-                if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
+                if ($trueloyalQuoteItem->getData('is_trueloyal_free_product')) {
                     $this->helper->sendRejectRewardRequest($quote);
                     $quote->delete();
                     return true;

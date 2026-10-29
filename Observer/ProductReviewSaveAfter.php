@@ -58,13 +58,13 @@ class ProductReviewSaveAfter implements ObserverInterface
             $this->sendRequest($reviewData, $productId, $customerId, "review_approved");
         } elseif ($statusId == Review::STATUS_PENDING &&
             in_array('review_submitted', $event, true) &&
-            !$trueloyalReview->getSubmittedToTrueLoyal()
+            !$trueloyalReview->getData('submitted_to_trueloyal')
         ) {
             $this->sendRequest($reviewData, $productId, $customerId, "review_submitted");
             try {
-                $trueloyalReview->setSubmittedToTrueLoyal(1)->setReviewId($reviewId)->save();
+                $trueloyalReview->setData('submitted_to_trueloyal', 1)->setReviewId($reviewId)->save();
             } catch (CouldNotSaveException $e) {
-                $this->helper->addErrorLog($e->getMessage());
+                $this->helper->logger->addErrorLog($e->getMessage());
             }
         }
         return true;

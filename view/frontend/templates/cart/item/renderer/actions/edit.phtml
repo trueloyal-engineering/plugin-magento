@@ -1,7 +1,7 @@
 <?php
 $trueloyalHelper = $this->helper(TrueLoyal\LoyaltyRewards\Helper\Config ::class);
 $trueloyalQuoteItem = $trueloyalHelper->getTrueLoyalQuoteItemByItemId($block->getItem()->getId());
-if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) { ?>
+if ($trueloyalQuoteItem->getData('is_trueloyal_free_product')) { ?>
     <?php if ($block->isProductVisibleInSiteVisibility()):?>
     <?php endif ?>
 <?php } else {

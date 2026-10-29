@@ -1125,6 +1125,24 @@ class Config extends AbstractHelper
     }
 
     /**
+     * Get the IDs of the given quote items that are redeemed free products
+     *
+     * @param int[] $itemIds
+     * @return int[]
+     */
+    public function getTrueLoyalFreeProductItemIds(array $itemIds)
+    {
+        if (empty($itemIds)) {
+            return [];
+        }
+        return $this->trueloyalQuoteItemFactory->create()
+            ->getCollection()
+            ->addFieldToFilter('quote_item_id', ['in' => $itemIds])
+            ->addFieldToFilter('is_trueloyal_free_product', 1)
+            ->getColumnValues('quote_item_id');
+    }
+
+    /**
      * Set trueloyal abandoned cart sent status
      *
      * @param int $quoteId

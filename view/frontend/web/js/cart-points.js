@@ -2,8 +2,9 @@ define([
     'jquery',
     'Magento_Checkout/js/model/quote',
     'Magento_Catalog/js/price-utils',
-    'Magento_Customer/js/customer-data'
-], function ($, quote, priceUtils, customerData) {
+    'Magento_Customer/js/customer-data',
+    'TrueLoyal_LoyaltyRewards/js/sdk'
+], function ($, quote, priceUtils, customerData, sdk) {
     'use strict';
 
     function runTrueLoyal() {
@@ -33,7 +34,7 @@ define([
     }
 
     return function () {
-        $(document).ready(function () {
+        sdk.done(function () {
             runTrueLoyal();
             const cart = customerData.get('cart');
             cart.subscribe(function () {

@@ -45,7 +45,7 @@ class DisableQty
         $items = $quote->getAllItems();
         foreach ($items as $item) {
             $trueloyalQuoteItem = $this->trueloyalHelper->getTrueLoyalQuoteItemByItemId($item->getId());
-            if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
+            if ($trueloyalQuoteItem->getData('is_trueloyal_free_product')) {
                 $isFreeProduct = true;
             }
         }

@@ -106,7 +106,7 @@ $canApplyMsrp = $helper->isShowBeforeOrderConfirm($product) && $helper->isMinima
             <div class="control qty">
                 <label for="cart-<?= $block->escapeHtmlAttr($_item->getId()) ?>-qty">
                     <span class="label"><?= $block->escapeHtml(__('Qty')) ?></span>
-                    <?php if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {?>
+                    <?php if ($trueloyalQuoteItem->getData('is_trueloyal_free_product')) {?>
                         <input readonly="readonly" type="text" name="qty" id="qty" maxlength="12"
                                value="<?= $block->escapeHtmlAttr($block->getQty()) ?>"
                                title="<?= $block->escapeHtmlAttr(__('Qty')) ?>" disabled class="input-text qty disable"/>

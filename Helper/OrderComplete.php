@@ -138,7 +138,7 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
                 $trueloyalOrder->setCompleteRequestSent(1);
                 $trueloyalOrder->save();
             } catch (CouldNotSaveException $e) {
-                $this->helper->addErrorLog($e->getMessage());
+                $this->helper->logger->addErrorLog($e->getMessage());
             }
             return true;
         }

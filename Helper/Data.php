@@ -2,6 +2,7 @@
 
 namespace TrueLoyal\LoyaltyRewards\Helper;
 
+use Exception;
 use Magento\Customer\Api\Data\CustomerInterface;
 
 class Data extends Config
@@ -20,7 +21,7 @@ class Data extends Config
         We have passed false when it needed else this condition will not true and order will not nested save*/
         if (!$isset) {
             $trueloyalOrder = $this->getTrueLoyalOrderByOrderId($orderId);
-            $trueloyalOrder->setTrueLoyalReward("{}")->setOrderId($orderId);
+            $trueloyalOrder->setData('trueloyal_reward', "{}")->setOrderId($orderId);
             $trueloyalOrder->save();
         }
         return $order->getIncrementId();
@@ -149,9 +150,8 @@ class Data extends Config
                 $items = $quote->getAllItems();
                 foreach ($items as $item) {
                     $trueloyalQuoteItem = $this->getTrueLoyalQuoteItemByItemId($item->getId());
-                    if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
+                    if ($trueloyalQuoteItem->getData('is_trueloyal_free_product')) {
                         $item->delete();
-                        $item->save();
                         break;
                     }
                 }
@@ -239,8 +239,8 @@ class Data extends Config
                     if ($rewardData['rule'] == 'percentage_discount') {
                         $discountAmount = $item->getDiscountAmount() + (($item->getPrice() * $item->getQtyOrdered()) * $discountValue / 100);
                         $baseDiscountAmount = $item->getBaseDiscountAmount() + (($item->getBasePrice() * $item->getQtyOrdered()) * $discountValue / 100);
-                        $discountAmountFormattedNumber = number_format($discountAmount, 2);
-                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2);
+                        $discountAmountFormattedNumber = number_format($discountAmount, 2, '.', '');
+                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2, '.', '');
                         $item->setDiscountAmount($discountAmountFormattedNumber);
                         $item->setBaseDiscountAmount($baseDiscountAmountFormattedNumber);
                         $item->save();
@@ -256,8 +256,8 @@ class Data extends Config
                         $totalBasePercentage = ($item->getBasePrice() * $item->getQtyOrdered()) / $OrderBaseTotal;
                         $discountAmount =  $item->getDiscountAmount() + ($totalPercentage * $discountValue);
                         $baseDiscountAmount = $item->getBaseDiscountAmount() + ($totalBasePercentage * $discountValue);
-                        $discountAmountFormattedNumber = number_format($discountAmount, 2);
-                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2);
+                        $discountAmountFormattedNumber = number_format($discountAmount, 2, '.', '');
+                        $baseDiscountAmountFormattedNumber = number_format($baseDiscountAmount, 2, '.', '');
                         $item->setDiscountAmount($discountAmountFormattedNumber);
                         $item->setBaseDiscountAmount($baseDiscountAmountFormattedNumber);
                         $item->save();

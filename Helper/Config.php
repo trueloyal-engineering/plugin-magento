@@ -93,6 +93,13 @@ class Config extends AbstractHelper
     public const HTTP_INTEGRATION_TIMEOUT = 30;
 
     /**
+     * Available points per member, fetched once per request (the cart page needs them several times)
+     *
+     * @var array
+     */
+    private $rewardPointsByMember = [];
+
+    /**
      * @var Json
      */
     public $json;
@@ -1057,8 +1064,22 @@ class Config extends AbstractHelper
      */
     public function getRewardPoints()
     {
+        $memberId = $this->getMemberIdentifierValue();
+        if (!array_key_exists($memberId, $this->rewardPointsByMember)) {
+            $this->rewardPointsByMember[$memberId] = $this->fetchRewardPoints($memberId);
+        }
+        return $this->rewardPointsByMember[$memberId];
+    }
+
+    /**
+     * Get available reward points from TrueLoyal
+     *
+     * @param string $memberId
+     * @return mixed
+     */
+    private function fetchRewardPoints(string $memberId)
+    {
         try {
-            $memberId = $this->getMemberIdentifierValue();
             $url = $this->getLiveWebHookUrl() . "members/" . $memberId;
             $url = $this->getIdParam($url);
             $response = $this->request($url, "", "get", "live_api");

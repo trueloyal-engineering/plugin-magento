@@ -33,25 +33,31 @@ class ConfigSaveObserver implements ObserverInterface
 
     public function execute(Observer $observer)
     {
-        $existingWebhookUrl =  $this->helper->getWebHookUrl();
+        $existingWebhookUrl = $this->helper->getWebHookUrl();
+        $webhookIntegrationID = $this->helper->getWebHookIntegrationID();
         $this->logger->info('Existing Webhook URL: ' . $existingWebhookUrl);
+        if (!empty($existingWebhookUrl) && empty($webhookIntegrationID)) {
+            return;
+        }
+        $url = $this->helper->getWebHookIntegrationURL();
         if (empty($existingWebhookUrl)) {
-            $url = $this->helper->getWebHookIntegrationURL();
-            $WebhookData = $this->helper->createOrUpdateZIFIntegration($url);
-            $WebhookUrl = $WebhookData['data']['config']['zif_config']['workflow_url'];
-            $WebhookIntegrationID = $WebhookData['data']['id'];
-            $this->logger->info('New Webhook URL: ' . $WebhookUrl);
-            if ($WebhookUrl) {
-                $this->helper->saveWebHookUrl($WebhookUrl);
-                $this->helper->saveWebHookIntegrationID($WebhookIntegrationID);
+            $integration = $this->helper->createOrUpdateZIFIntegration($url);
+        } else {
+            $integration = $this->helper->createOrUpdateZIFIntegration($url . "/" . $webhookIntegrationID);
+            // Integrations created by older builds run on the v1 connector. Creating a new one moves
+            // the store to the v2 connector, and TrueLoyal deactivates the old one.
+            if (($integration['integration_type'] ?? '') !== Data::INTEGRATION_TYPE) {
+                $integration = $this->helper->createOrUpdateZIFIntegration($url);
             }
         }
-        else{
-            $webhookIntegrationID =  $this->helper->getWebHookIntegrationID();
-            if (!empty($webhookIntegrationID)){
-                $url = $this->helper->getWebHookIntegrationURL() . "/" . $webhookIntegrationID;
-                $newWebhookData = $this->helper->createOrUpdateZIFIntegration($url);
-            }
+        // Saved on updates too: TrueLoyal may move the integration to a new workflow URL
+        $webhookUrl = $integration['config']['zif_config']['workflow_url'];
+        if ($webhookUrl !== $existingWebhookUrl) {
+            $this->logger->info('New Webhook URL: ' . $webhookUrl);
+            $this->helper->saveWebHookUrl($webhookUrl);
+        }
+        if ($integration['id'] !== $webhookIntegrationID) {
+            $this->helper->saveWebHookIntegrationID($integration['id']);
         }
     }
 }

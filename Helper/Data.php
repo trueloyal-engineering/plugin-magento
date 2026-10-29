@@ -384,18 +384,16 @@ class Data extends Config
     {
         $storeId = $this->storeManager->getStore()->getId();
         $prodCatIds = $this->productCategory->getCategoryIds($productId);
-        $categoryName = [];
+        $categoryNames = [];
         $categoryIds = [];
-        if ($prodCatIds) {
-            foreach ($prodCatIds as $catId) {
-                $categoryInstance = $this->categoryRepository->get($catId, $storeId);
-                $categoryName['name'][] = $categoryInstance->getName();
-                $categoryIds['ids'][] = $categoryInstance->getId();
-            }
+        foreach ($prodCatIds ?: [] as $catId) {
+            $categoryInstance = $this->categoryRepository->get($catId, $storeId);
+            $categoryNames[] = $categoryInstance->getName();
+            $categoryIds[] = $categoryInstance->getId();
         }
         return [
-            'name' => implode(',', array_unique(array_unique($categoryName['name']))),
-            'ids' => implode(',', array_unique(array_unique($categoryIds['ids'])))
+            'name' => implode(',', array_unique($categoryNames)),
+            'ids' => implode(',', array_unique($categoryIds))
         ];
     }
 

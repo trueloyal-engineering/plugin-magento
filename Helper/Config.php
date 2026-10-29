@@ -12,6 +12,7 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\SessionFactory;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute;
 use Magento\Customer\Model\Customer as CustomerModel;
+use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -119,6 +120,10 @@ class Config extends AbstractHelper
      * @var WriterInterface $writeConfig
      */
     protected $writeConfig;
+    /**
+     * @var ReinitableConfigInterface
+     */
+    private $reinitableConfig;
     /**
      * @var Session
      */
@@ -248,6 +253,7 @@ class Config extends AbstractHelper
      * @param TrueLoyalReviewFactory $trueloyalReviewFactory
      * @param TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory
      * @param Attribute $eavAttribute
+     * @param ReinitableConfigInterface $reinitableConfig
      */
     public function __construct(
         Context $context,
@@ -279,7 +285,8 @@ class Config extends AbstractHelper
         TrueLoyalQuoteItemFactory $trueloyalQuoteItemFactory,
         TrueLoyalReviewFactory $trueloyalReviewFactory,
         TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory,
-        Attribute $eavAttribute
+        Attribute $eavAttribute,
+        ReinitableConfigInterface $reinitableConfig
     ) {
         $this->curl = $curl;
         $this->escaper = $escaper;
@@ -310,6 +317,7 @@ class Config extends AbstractHelper
         $this->trueloyalSalesOrderFactory = $trueloyalSalesOrderFactory;
         $this->quoteRepository = $quoteRepository;
         $this->eavAttribute = $eavAttribute;
+        $this->reinitableConfig = $reinitableConfig;
         parent::__construct($context);
     }
 
@@ -347,14 +355,19 @@ class Config extends AbstractHelper
     /**
      * Save Config
      *
-     * @return mixed
+     * @param string $config_path
+     * @param mixed $config_value
+     * @return void
      */
     public function saveConfig($config_path, $config_value)
     {
-        return $this->writeConfig->save(
+        $this->writeConfig->save(
             $config_path,
             $config_value
         );
+        /*The admin config save rebuilds the config cache before its observers run: clean it, or the store keeps
+        posting to the old webhook URL until the next cache clean*/
+        $this->reinitableConfig->reinit();
     }
     
     /**

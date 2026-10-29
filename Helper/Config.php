@@ -51,6 +51,8 @@ class Config extends AbstractHelper
     public const XML_PATH_WEB_HOOK_URL = "trueloyal_loyaltyRewards/settings/web_hook_url";
     public const XML_PATH_WEBHOOK_INTEGRATION_ID = 'trueloyal_loyaltyRewards/settings/webhook_integration_id';
     public const XML_PATH_WEBHOOK_INTEGRATION_URL = 'trueloyal_loyaltyRewards/settings/webhook_integration_url';
+    /* Integration on the "Magento v2 -> TrueLoyal" ZIF connector; older builds created magento_to_zinrelo (v1) */
+    public const INTEGRATION_TYPE = 'magento_to_trueloyal';
     public const XML_PATH_LIVE_WEB_HOOK_URL = "trueloyal_loyaltyRewards/settings/live_web_hook_url";
     public const XML_PATH_ABANDONED_CART_TIME = "trueloyal_loyaltyRewards/settings/abandoned_cart_time";
     public const XML_PATH_PARTNER_ID = "trueloyal_loyaltyRewards/settings/partner_id";
@@ -364,9 +366,11 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Create ZIF Integration
+     * Create or update the TrueLoyal integration (the ZIF workflow that receives the events)
      *
-     * @return mixed
+     * @param string $url
+     * @return array the integration: id, integration_type, status, config.zif_config.workflow_url
+     * @throws Exception when TrueLoyal refuses the request
      */
     public function createOrUpdateZIFIntegration($url)
     {
@@ -384,7 +388,7 @@ class Config extends AbstractHelper
         }
 
         $body = [
-            "integration_type" => "magento_to_zinrelo",
+            "integration_type" => self::INTEGRATION_TYPE,
             "config" => [
                 "secret_key" => $this->getApiKey(),
                 "events" => array_values($events)
@@ -403,15 +407,23 @@ class Config extends AbstractHelper
         $this->logger->info("Headers: " . json_encode($headers));
         $this->logger->info("Response: " . $response);
         $this->logger->info("==============End===============");
-        if ($responseCode === 200) {
-            return $data;
+        if ($responseCode === 200 && !empty($data['success'])
+            && !empty($data['data']['config']['zif_config']['workflow_url'])) {
+            return $data['data'];
         }
-        else{
-            $error = 'Failed to create a Webhook URL. Please check the configuration details and try again.';
-            $this->saveWebHookUrl(NULL);
-            $this->saveWebHookIntegrationID(NULL);
-            throw new Exception($error);
+        $this->saveWebHookUrl(NULL);
+        $this->saveWebHookIntegrationID(NULL);
+        $error = 'Failed to create a Webhook URL: '
+            . rtrim($data['reason'] ?? $data['message'] ?? ('HTTP ' . $responseCode), '.');
+        $errorCode = $data['error_code'] ?? '';
+        if ($errorCode) {
+            $error .= ' (' . $errorCode . ')';
         }
+        if (in_array($responseCode, [401, 403]) || stripos($errorCode, 'UNAUTHORIZED') !== false) {
+            $error .= '. Check that the Partner ID and the API Key are correct, and that the API Key'
+                . ' isn\'t swapped with the API Key Identifier';
+        }
+        throw new Exception($error . '.');
     }
 
 

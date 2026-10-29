@@ -152,7 +152,7 @@
                        showInWebsite="1" showInStore="0">
                     <label>Reward Events</label>
                     <source_model>TrueLoyal\LoyaltyRewards\Model\System\Config\EventsSelection</source_model>
-                    <comment>Only selected events will be sent to TrueLoyal</comment>
+                    <comment>Only selected events will be sent to TrueLoyal. An order earns points only once, on the first order event TrueLoyal receives, so select just one of Order Create, Order Paid, Order Shipped and Order Complete.</comment>
                     <depends>
                         <field id="loyalty_rewards_active">1</field>
                     </depends>

@@ -76,14 +76,21 @@ if (($isEnabled && !empty($memberIdentifierValue) && $points != "error" && !empt
         require([
             'jquery',
             'Magento_Checkout/js/model/shipping-rate-service',
+            'Magento_Customer/js/customer-data',
             'jquery/ui',
             'mage/cookies'
-        ], function ($, shippingrateservice) {
+        ], function ($, shippingrateservice, customerData) {
             <?php if (empty($rewardData)) : ?>
                 if ($.mage.cookies.get('trueloyal_shipping_selected')) {
                     $.mage.cookies.clear('trueloyal_shipping_selected');
                 }
             <?php endif; ?>
+
+            // The reward adds or removes cart lines and changes totals: refresh the minicart too
+            function reloadCart() {
+                customerData.invalidate(['cart']);
+                window.location.reload();
+            }
 
             function applyFlexiReward() {
                 var redeemRewardSelector = $(".redeem-reward-selector").val();
@@ -102,7 +109,7 @@ if (($isEnabled && !empty($memberIdentifierValue) && $points != "error" && !empt
                         redeem_points: inputPoints
                     },
                     success: function (data) {
-                        window.location.reload();
+                        reloadCart();
                     }
                 });
             }
@@ -157,8 +164,7 @@ if (($isEnabled && !empty($memberIdentifierValue) && $points != "error" && !empt
                         global:false,
                         showLoader: false,
                         success: function (data) {
-                            let result = data;
-                            window.location.reload();
+                            reloadCart();
                         }
                     });
                 } else {
@@ -182,8 +188,7 @@ if (($isEnabled && !empty($memberIdentifierValue) && $points != "error" && !empt
                     global:false,
                     showLoader: false,
                     success: function (data) {
-                        let result = data;
-                        window.location.reload();
+                        reloadCart();
                     }
                 });
             });

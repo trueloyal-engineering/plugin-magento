@@ -493,7 +493,7 @@ class Config extends AbstractHelper
     public function jsonUnSerialize($data)
     {
         try {
-            return $this->json->serialize($data);
+            return $this->json->unserialize($data);
         } catch (Exception $e) {
             $this->logger->critical($e->getMessage());
         }

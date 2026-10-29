@@ -86,10 +86,10 @@ class OrderShipped implements ObserverInterface
                             if ($item->getParentItemId()) {
                                 continue;
                             }
-                            $discAmount[$item->getSku()] = (int)$item->getDiscountAmount();
+                            $discAmount[$item->getSku()] = (float)$item->getDiscountAmount();
                             $totalDiscountAmount += $discAmount[$item->getSku()];
 
-                            $discBaseAmount[$item->getSku()] = (int)$item->getBaseDiscountAmount();
+                            $discBaseAmount[$item->getSku()] = (float)$item->getBaseDiscountAmount();
                             $totalBaseDiscountAmount += $discBaseAmount[$item->getSku()];
                         }
 
@@ -110,6 +110,7 @@ class OrderShipped implements ObserverInterface
                             $shipmentItemData['product_url'] = $productInfo['product_url'];
                             $shipmentItemData['product_image_url'] = $productInfo['product_image_url'];
                             $shipmentItemData['category_name'] = $this->helper->getCategoryName($productId);
+                            $shipmentItemData['category_ids'] = $this->helper->getCategoryData($productId)['ids'];
                             $shipmentItems["items"][$key]['items'][] = $shipmentItemData;
                         }
                         foreach ($shipmentData->getTracks() as $track) {

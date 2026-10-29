@@ -77,10 +77,10 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
                 if ($item->getParentItemId()) {
                     continue;
                 }
-                $discAmount[$item->getSku()] = (int)$item->getDiscountAmount();
+                $discAmount[$item->getSku()] = (float)$item->getDiscountAmount();
                 $totalDiscountAmount += $discAmount[$item->getSku()];
-            
-                $discBaseAmount[$item->getSku()] = (int)$item->getBaseDiscountAmount();
+
+                $discBaseAmount[$item->getSku()] = (float)$item->getBaseDiscountAmount();
                 $totalBaseDiscountAmount += $discBaseAmount[$item->getSku()];
             }
             foreach ($order->getItems() as $item) {
@@ -111,6 +111,7 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
                 $orderItemData['product_url'] = $productInfo['product_url'];
                 $orderItemData['product_image_url'] = $productInfo['product_image_url'];
                 $orderItemData['category_name'] = $this->helper->getCategoryName($productId);
+                $orderItemData['category_ids'] = $this->helper->getCategoryData($productId)['ids'];
                 $orderData['items'][] = $orderItemData;
             }
             $addressesData = $orderData["addresses"] ?? [];

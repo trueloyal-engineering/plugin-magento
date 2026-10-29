@@ -136,6 +136,7 @@ class OrderRefund implements ObserverInterface
                 $refundItemData['product_url'] = $productInfo['product_url'];
                 $refundItemData['product_image_url'] = $productInfo['product_image_url'];
                 $refundItemData['category_name'] = $this->helper->getCategoryName($productId);
+                $refundItemData['category_ids'] = $this->helper->getCategoryData($productId)['ids'];
                 $refundsItems["items"][$key]['items'][] = $refundItemData;
             }
         }
@@ -161,6 +162,7 @@ class OrderRefund implements ObserverInterface
                 $item['product_url'] = $productInfo['product_url'];
                 $item['product_image_url'] = $productInfo['product_image_url'];
                 $item["category_name"] = $this->helper->getCategoryName($productId);
+                $item["category_ids"] = $this->helper->getCategoryData($productId)['ids'];
                 $refundData["items"][0]["items"][] = $item;
             }
         }

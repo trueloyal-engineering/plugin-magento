@@ -125,6 +125,7 @@ class OrderFullInvoicePaid implements ObserverInterface
                     $invoiceItemData['product_url'] = $productInfo['product_url'];
                     $invoiceItemData['product_image_url'] = $productInfo['product_image_url'];
                     $invoiceItemData['category_name'] = $this->helper->getCategoryName($productId);
+                    $invoiceItemData['category_ids'] = $this->helper->getCategoryData($productId)['ids'];
                     $invoicesItems["items"][$key]['items'][] = $invoiceItemData;
                 }
             }

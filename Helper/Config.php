@@ -85,6 +85,12 @@ class Config extends AbstractHelper
      * Name of Cookie that holds private content version
      */
     public const COOKIE_NAME = 'trueloyal';
+    /**
+     * Outbound call limits in seconds (Magento's Curl default is 300 s, which would hang a checkout or cart page)
+     */
+    public const HTTP_CONNECT_TIMEOUT = 5;
+    public const HTTP_TIMEOUT = 10;
+    public const HTTP_INTEGRATION_TIMEOUT = 30;
 
     /**
      * @var Json
@@ -396,6 +402,7 @@ class Config extends AbstractHelper
             "status" => "active"
         ];
         $jsonBody = json_encode($body);
+        $this->setHttpTimeouts(self::HTTP_INTEGRATION_TIMEOUT);
         $this->curl->setHeaders($headers);
         $this->curl->post($url, $jsonBody);
         $response = $this->curl->getBody();
@@ -953,6 +960,7 @@ class Config extends AbstractHelper
                     "partner-id" => $this->getPartnerId()
                 ];
             }
+            $this->setHttpTimeouts(self::HTTP_TIMEOUT);
             $this->curl->setHeaders($headers);
             if ($requestType == "post") {
                 $this->curl->post($url, $params);
@@ -969,6 +977,18 @@ class Config extends AbstractHelper
         } catch (Exception $e) {
             $this->logger->addErrorLog($e->getMessage());
         }
+    }
+
+    /**
+     * Set connect and total timeouts for the next outbound call
+     *
+     * @param int $timeout
+     * @return void
+     */
+    private function setHttpTimeouts(int $timeout): void
+    {
+        $this->curl->setOption(CURLOPT_CONNECTTIMEOUT, self::HTTP_CONNECT_TIMEOUT);
+        $this->curl->setTimeout($timeout);
     }
 
     /**

@@ -728,6 +728,17 @@ class Config extends AbstractHelper
                     continue;
                 }
                 if (in_array($rule["reward_sub_type"], array_values($rewardTypes), true)) {
+                    $maximumRedemption = !empty($rule["extra_parameters"]["maximum_redemption_limit"])
+                        ? $rule["extra_parameters"]["maximum_redemption_limit"] : $availablePoint;
+                    $minimumRedemption = !empty($rule["extra_parameters"]["minimum_redemption_limit"])
+                        ? $rule["extra_parameters"]["minimum_redemption_limit"] : "";
+                    /*A member can't redeem more points than their balance*/
+                    if (is_numeric($availablePoint)) {
+                        $maximumRedemption = min($maximumRedemption, $availablePoint);
+                        if ($minimumRedemption !== "" && $minimumRedemption > $maximumRedemption) {
+                            continue;
+                        }
+                    }
                     foreach ($rewardTypes as $key => $value) {
                         if ($rule["reward_sub_type"] == $value) {
                             $rewardRules[$rule["reward_id"]] = [
@@ -736,10 +747,8 @@ class Config extends AbstractHelper
                                 "id" => '',
                                 "reward_name" => $rule["reward_name"],
                                 "reward_value" => !empty($rule["reward_value"]) ? $rule["reward_value"] : "",
-                                "maximum_redemption_limit" => !empty($rule["extra_parameters"]["maximum_redemption_limit"])
-                                    ? $rule["extra_parameters"]["maximum_redemption_limit"] : $availablePoint,
-                                "minimum_redemption_limit" => !empty($rule["extra_parameters"]["minimum_redemption_limit"])
-                                    ? $rule["extra_parameters"]["minimum_redemption_limit"] : "",
+                                "maximum_redemption_limit" => $maximumRedemption,
+                                "minimum_redemption_limit" => $minimumRedemption,
                                 "conversion_rate" => !empty($rule["extra_parameters"]["conversion_rate"])
                                     ? $rule["extra_parameters"]["conversion_rate"] : "",
                                 "product_id" => isset($rule["product_id"]) ? $rule["product_id"] : ""

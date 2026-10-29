@@ -195,6 +195,7 @@ if (($isEnabled && !empty($memberIdentifierValue) && $points != "error" && !empt
                 var maxRedemption = parseInt(selectedOption.data("max-redemption")) || 0;
 
                 var inputPoints = parseInt($(this).val(), 10) || 0;
+                var discountPoints;
                 if (inputPoints < minRedemption) {
                     discountPoints = 0;
                 } else {

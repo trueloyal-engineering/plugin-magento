@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Controller\LoyaltyRewards;
+namespace TrueLoyal\LoyaltyRewards\Controller\LoyaltyRewards;
 
 use Exception;
 use Magento\Customer\Model\Session;
@@ -14,14 +14,14 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Quote\Model\Quote;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Data\Form\FormKey;
 use Magento\Checkout\Model\Cart;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
-use Zinrelo\LoyaltyRewards\Logger\Logger;
-use Zinrelo\LoyaltyRewards\Model\ZinreloQuote;
+use TrueLoyal\LoyaltyRewards\Logger\Logger;
+use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuote;
 
 class ApplyPoint implements HttpPostActionInterface
 {
@@ -124,9 +124,9 @@ class ApplyPoint implements HttpPostActionInterface
     {
         $redeemReward = $this->request->getPost('redeem_reward');
         $quote = $this->checkoutSession->getQuote();
-        /*Managed Set zinrelo quote related to Data to custom table*/
+        /*Managed Set trueloyal quote related to Data to custom table*/
         $this->helper->setAbandonedCartSent($quote->getId(), 2);
-        $zinreloQuote = $this->helper->getZinreloQuoteByQuoteId($quote->getId());
+        $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($quote->getId());
         /*End*/
         $resultJson = $this->jsonFactory->create();
         $this->cart->setUpdatedAt()->save();
@@ -143,8 +143,8 @@ class ApplyPoint implements HttpPostActionInterface
         $rewardRules = $this->helper->getRedeemRules();
         if (!empty($rewardRules)) {
             try {
-                $zinreloQuote->setRewardRulesData($this->helper->jsonSerialize($rewardRules));
-                $zinreloQuote->save();
+                $trueloyalQuote->setRewardRulesData($this->helper->jsonSerialize($rewardRules));
+                $trueloyalQuote->save();
             } catch (Exception $e) {
                 $this->logger->critical($e->getMessage());
             }
@@ -154,7 +154,7 @@ class ApplyPoint implements HttpPostActionInterface
             $productId = $rewardData["product_id"];
             $product = $this->product->load($productId);
             if (!$product->getEntityId() || $product->getStatus() != Status::STATUS_ENABLED) {
-                $this->unsetRewardRules($zinreloQuote);
+                $this->unsetRewardRules($trueloyalQuote);
                 $this->messageManager->addError(__("Product that you are trying to add is not available."));
                 return $resultJson->setData([
                     'success' => false
@@ -170,7 +170,7 @@ class ApplyPoint implements HttpPostActionInterface
                 $redeemPoints = min($subTotal*$conversion_rate, max($rewardData['minimum_redemption_limit'], min($redeemPoints, $rewardData['maximum_redemption_limit'])));
             }
             else {
-                $this->unsetRewardRules($zinreloQuote);
+                $this->unsetRewardRules($trueloyalQuote);
                 $this->messageManager->addError(__("Please enter the correct number of points to be redeemed."));
                 return $resultJson->setData([
                     'success' => false
@@ -178,21 +178,21 @@ class ApplyPoint implements HttpPostActionInterface
             }
             $rewardData["points_to_be_redeemed"] = $redeemPoints;
             $rewardRules[$redeemReward]['points_to_be_redeemed'] = $redeemPoints;
-            $zinreloQuote->setRewardRulesData($this->helper->jsonSerialize($rewardRules));
-            $zinreloQuote->save();
+            $trueloyalQuote->setRewardRulesData($this->helper->jsonSerialize($rewardRules));
+            $trueloyalQuote->save();
         }
         $response = $this->getApiResponse($rewardData);
 
         if ($response["success"] && !empty($response["result"]["data"])) {
             $responseData = $response["result"]["data"];
             if ($responseData["status"] === "pending") {
-                $this->saveQuoteData($zinreloQuote, $responseData, $redeemReward, $rewardData);
+                $this->saveQuoteData($trueloyalQuote, $responseData, $redeemReward, $rewardData);
                 $this->messageManager->addSuccess(__('You have redeemed %1 successfully.', $rewardData['reward_name']));
                 return $resultJson->setData([
                     'success' => true
                 ]);
             } else {
-                $this->unsetRewardRules($zinreloQuote);
+                $this->unsetRewardRules($trueloyalQuote);
                 $this->messageManager->addError(
                     __("This reward rule can not be redeemed, try with another reward rule")
                 );
@@ -201,7 +201,7 @@ class ApplyPoint implements HttpPostActionInterface
                 ]);
             }
         } else {
-            $this->unsetRewardRules($zinreloQuote);
+            $this->unsetRewardRules($trueloyalQuote);
             $this->messageManager->addError(__("This reward rule can not be redeemed, try with another reward rule"));
             return $resultJson->setData([
                 'success' => false
@@ -212,13 +212,13 @@ class ApplyPoint implements HttpPostActionInterface
     /**
      * Delete reward relus from quote when getting error from response
      *
-     * @param ZinreloQuote $zinreloQuote
+     * @param TrueLoyalQuote $trueloyalQuote
      */
-    public function unsetRewardRules($zinreloQuote)
+    public function unsetRewardRules($trueloyalQuote)
     {
         try {
-            $zinreloQuote->setRewardRulesData('');
-            $zinreloQuote->save();
+            $trueloyalQuote->setRewardRulesData('');
+            $trueloyalQuote->save();
         } catch (Exception $e) {
             $this->logger->critical($e->getMessage());
         }
@@ -246,9 +246,8 @@ class ApplyPoint implements HttpPostActionInterface
      */
     public function getParamsData($rewardData)
     {
-        $customerEmail = $this->customerSession->getCustomer()->getEmail();
         $params = [
-            "member_id" => $customerEmail,
+            "member_id" => $this->helper->getMemberIdentifierValue(),
             "reward_id" => $rewardData["reward_id"],
             "transaction_attributes" => [
                 "reason" => "redeem",
@@ -270,23 +269,23 @@ class ApplyPoint implements HttpPostActionInterface
     /**
      * Save Quote Data
      *
-     * @param ZinreloQuote $zinreloQuote
+     * @param TrueLoyalQuote $trueloyalQuote
      * @param mixed $responseData
      * @param mixed $redeemReward
      * @param mixed $rewardData
      */
-    public function saveQuoteData($zinreloQuote, $responseData, $redeemReward, $rewardData)
+    public function saveQuoteData($trueloyalQuote, $responseData, $redeemReward, $rewardData)
     {
         try {
             if ($rewardData["rule"] === "product_redemption" && !empty($rewardData["product_id"])) {
                 $this->addToCartProductWithNewPrice($rewardData);
             }
-            $allRewardRules = $this->helper->json->unserialize($zinreloQuote->getRewardRulesData());
+            $allRewardRules = $this->helper->json->unserialize($trueloyalQuote->getRewardRulesData());
             $allRewardRules[$responseData["reward_info"]["reward_id"]]["id"] = $responseData["id"];
             $encodedRule = $this->helper->json->serialize($allRewardRules);
-            $zinreloQuote->setRewardRulesData($encodedRule);
-            $zinreloQuote->setRedeemRewardDiscount($redeemReward);
-            $zinreloQuote->save();
+            $trueloyalQuote->setRewardRulesData($encodedRule);
+            $trueloyalQuote->setRedeemRewardDiscount($redeemReward);
+            $trueloyalQuote->save();
         } catch (Exception $e) {
             $this->logger->critical($e->getMessage());
         }
@@ -315,12 +314,12 @@ class ApplyPoint implements HttpPostActionInterface
             $product->addCustomOption('additional_options', $this->serializer->serialize($additionalOptions));
             $this->cart->addProduct($product, $params);
             $this->cart->save();
-            /*Set free product to Zinrelo quote item*/
+            /*Set free product to TrueLoyal quote item*/
             $quoteItemCollection = $this->cart->getItems();
             foreach ($quoteItemCollection as $item) {
                 if($item->getProductId() == $productId && $item->getPrice() == 0) {
-                    $zinreloQuoteItem = $this->helper->getZinreloQuoteItemByItemId($item->getId());
-                    $zinreloQuoteItem->setIsZinreloFreeProduct(1)->setQuoteItemId($item->getId())->save();
+                    $trueloyalQuoteItem = $this->helper->getTrueLoyalQuoteItemByItemId($item->getId());
+                    $trueloyalQuoteItem->setIsTrueLoyalFreeProduct(1)->setQuoteItemId($item->getId())->save();
                     break;
                 }
             }

@@ -1,8 +1,8 @@
 <?php
-namespace Zinrelo\LoyaltyRewards\ViewModel;
+namespace TrueLoyal\LoyaltyRewards\ViewModel;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class ProductView implements ArgumentInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -9,7 +9,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class CreateOrderAfter implements ObserverInterface
 {
@@ -51,7 +51,7 @@ class CreateOrderAfter implements ObserverInterface
     }
 
     /**
-     * Order Create event to zinrelo
+     * Order Create event to trueloyal
      *
      * @param Observer $observer
      * @return void
@@ -62,28 +62,28 @@ class CreateOrderAfter implements ObserverInterface
         $event = $this->helper->getRewardEvents();
         $orderId = $observer->getEvent()->getOrder()->getId();
         $order = $this->orderRepository->get($orderId);
-        $zinreloOrder = $this->helper->getZinreloOrderByOrderId($orderId);
+        $trueloyalOrder = $this->helper->getTrueLoyalOrderByOrderId($orderId);
         $replacedOrderId = $order->getIncrementId();
-        if (!$zinreloOrder->getZinreloReward()) {
+        if (!$trueloyalOrder->getTrueLoyalReward()) {
             if ($order->getQuoteId() !== null) {
                 $quote = $this->quoteRepository->get($order->getQuoteId());
-                $zinreloQuote = $this->helper->getZinreloQuoteByQuoteId($order->getQuoteId());
+                $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($order->getQuoteId());
             }
-            if ($order->getQuoteId() !== null && $zinreloQuote->getRedeemRewardDiscount()) {
-                $redeemReward = $zinreloQuote->getRedeemRewardDiscount();
+            if ($order->getQuoteId() !== null && $trueloyalQuote->getRedeemRewardDiscount()) {
+                $redeemReward = $trueloyalQuote->getRedeemRewardDiscount();
                 $rewardData = $this->helper->getRewardRulesData($quote, $redeemReward);
                 $url = $this->helper->getLiveWebHookUrl() . "transactions/" . $rewardData['id'] . "/approve";
                 $this->helper->request($url, "", "post", "live_api");
-                $zinreloOrder->setZinreloReward($this->serializer->serialize($rewardData))->setOrderId($orderId);
+                $trueloyalOrder->setTrueLoyalReward($this->serializer->serialize($rewardData))->setOrderId($orderId);
             } else {
-                $zinreloOrder->setZinreloReward("{}")->setOrderId($orderId);
+                $trueloyalOrder->setTrueLoyalReward("{}")->setOrderId($orderId);
             }
             try {
-                $zinreloOrder->save();
+                $trueloyalOrder->save();
             } catch (CouldNotSaveException $e) {
                 $this->helper->addErrorLog($e->getMessage());
             }
         }
-        $this->helper->createZinreloOrder($orderId, $replacedOrderId);
+        $this->helper->createTrueLoyalOrder($orderId, $replacedOrderId);
     }
 }

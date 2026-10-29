@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Helper;
+namespace TrueLoyal\LoyaltyRewards\Helper;
 
 use Exception;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
@@ -37,37 +37,43 @@ use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
 use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\Session\SessionManagerInterface;
-use Zinrelo\LoyaltyRewards\Logger\Logger as ZinreloLogger;
-use Zinrelo\LoyaltyRewards\Model\ZinreloEavAttributeFactory;
-use Zinrelo\LoyaltyRewards\Model\ZinreloQuoteFactory;
-use Zinrelo\LoyaltyRewards\Model\ZinreloQuoteItemFactory;
-use Zinrelo\LoyaltyRewards\Model\ZinreloReviewFactory;
-use Zinrelo\LoyaltyRewards\Model\ZinreloSalesOrderFactory;
+use TrueLoyal\LoyaltyRewards\Logger\Logger as TrueLoyalLogger;
+use TrueLoyal\LoyaltyRewards\Model\TrueLoyalEavAttributeFactory;
+use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuoteFactory;
+use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuoteItemFactory;
+use TrueLoyal\LoyaltyRewards\Model\TrueLoyalReviewFactory;
+use TrueLoyal\LoyaltyRewards\Model\TrueLoyalSalesOrderFactory;
 
 class Config extends AbstractHelper
 {
-    public const XML_PATH_LOYALTY_REWARDS_ACTIVE = "zinrelo_loyaltyRewards/settings/loyalty_rewards_active";
-    public const XML_PATH_DASHBOARD_HIDDEN_FOR_GUESTS = "zinrelo_loyaltyRewards/settings/hide_for_guests";
-    public const XML_PATH_WEB_HOOK_URL = "zinrelo_loyaltyRewards/settings/web_hook_url";
-    public const XML_PATH_WEBHOOK_INTEGRATION_ID = 'zinrelo_loyaltyRewards/settings/webhook_integration_id';
-    public const XML_PATH_WEBHOOK_INTEGRATION_URL = 'zinrelo_loyaltyRewards/settings/webhook_integration_url';
-    public const XML_PATH_LIVE_WEB_HOOK_URL = "zinrelo_loyaltyRewards/settings/live_web_hook_url";
-    public const XML_PATH_ABANDONED_CART_TIME = "zinrelo_loyaltyRewards/settings/abandoned_cart_time";
-    public const XML_PATH_PARTNER_ID = "zinrelo_loyaltyRewards/settings/partner_id";
-    public const XML_PATH_API_KEY = "zinrelo_loyaltyRewards/settings/api_key";
-    public const XML_PATH_API_KEY_IDENTIFIER = "zinrelo_loyaltyRewards/settings/api_key_identifier";
-    public const XML_PATH_REWARD_EVENTS = "zinrelo_loyaltyRewards/settings/reward_events";
-    public const XML_PATH_REWARDS_DROPDOWN_ACTIVE = "zinrelo_loyaltyRewards/settings/rewards_event_drop_down_active";
-    public const XML_PATH_REWARDS_POINTS_AT_PDP = "zinrelo_loyaltyRewards/settings/product_page_rewards_point_enable";
-    public const XML_PATH_FREE_SHIPPING_LABEL = "zinrelo_loyaltyRewards/settings/free_shipping_label";
-    public const XML_PATH_PRODUCT_PAGE_REWARD_LABEL = "zinrelo_loyaltyRewards/settings/product_page_reward_label";
-    public const XML_PATH_PDP_CART_PAGE = "zinrelo_loyaltyRewards/settings/cart_page_rewards_point_enable";
-    public const XML_PATH_PDP_CART_PAGE_REWARD_LABEL = "zinrelo_loyaltyRewards/settings/cart_page_reward_label";
+    public const XML_PATH_LOYALTY_REWARDS_ACTIVE = "trueloyal_loyaltyRewards/settings/loyalty_rewards_active";
+    public const XML_PATH_DASHBOARD_HIDDEN_FOR_GUESTS = "trueloyal_loyaltyRewards/settings/hide_for_guests";
+    public const XML_PATH_WEB_HOOK_URL = "trueloyal_loyaltyRewards/settings/web_hook_url";
+    public const XML_PATH_WEBHOOK_INTEGRATION_ID = 'trueloyal_loyaltyRewards/settings/webhook_integration_id';
+    public const XML_PATH_WEBHOOK_INTEGRATION_URL = 'trueloyal_loyaltyRewards/settings/webhook_integration_url';
+    public const XML_PATH_LIVE_WEB_HOOK_URL = "trueloyal_loyaltyRewards/settings/live_web_hook_url";
+    public const XML_PATH_ABANDONED_CART_TIME = "trueloyal_loyaltyRewards/settings/abandoned_cart_time";
+    public const XML_PATH_PARTNER_ID = "trueloyal_loyaltyRewards/settings/partner_id";
+    public const XML_PATH_API_KEY = "trueloyal_loyaltyRewards/settings/api_key";
+    public const XML_PATH_API_KEY_IDENTIFIER = "trueloyal_loyaltyRewards/settings/api_key_identifier";
+    public const XML_PATH_REWARD_EVENTS = "trueloyal_loyaltyRewards/settings/reward_events";
+    public const XML_PATH_REWARDS_DROPDOWN_ACTIVE = "trueloyal_loyaltyRewards/settings/rewards_event_drop_down_active";
+    public const XML_PATH_REWARDS_POINTS_AT_PDP = "trueloyal_loyaltyRewards/settings/product_page_rewards_point_enable";
+    public const XML_PATH_FREE_SHIPPING_LABEL = "trueloyal_loyaltyRewards/settings/free_shipping_label";
+    public const XML_PATH_PRODUCT_PAGE_REWARD_LABEL = "trueloyal_loyaltyRewards/settings/product_page_reward_label";
+    public const XML_PATH_PDP_CART_PAGE = "trueloyal_loyaltyRewards/settings/cart_page_rewards_point_enable";
+    public const XML_PATH_PDP_CART_PAGE_REWARD_LABEL = "trueloyal_loyaltyRewards/settings/cart_page_reward_label";
     public const XML_PATH_CART_PAGE_REWARD_DROPDOWN_LABEL =
-        "zinrelo_loyaltyRewards/settings/cart_page_reward_dropdown_label";
-    public const XML_PATH_LANGUAGES = 'zinrelo_loyaltyRewards/settings/languages_mapping';
-    public const XML_PATH_AUTO_ENROLLMENT = 'zinrelo_loyaltyRewards/settings/auto_enrollment';
-    public const XML_PATH_OPT_IN_FIELD_NAME = 'zinrelo_loyaltyRewards/settings/opt_in_field_name';
+        "trueloyal_loyaltyRewards/settings/cart_page_reward_dropdown_label";
+    public const XML_PATH_LANGUAGES = 'trueloyal_loyaltyRewards/settings/languages_mapping';
+    public const XML_PATH_AUTO_ENROLLMENT = 'trueloyal_loyaltyRewards/settings/auto_enrollment';
+    public const XML_PATH_OPT_IN_FIELD_NAME = 'trueloyal_loyaltyRewards/settings/opt_in_field_name';
+    public const XML_PATH_MEMBER_IDENTIFIER_PREFIX = 'trueloyal_loyaltyRewards/settings/member_identifier_prefix';
+    public const XML_PATH_MEMBER_IDENTIFIER = 'trueloyal_loyaltyRewards/settings/member_identifier';
+    public const XML_PATH_CUSTOM_MEMBER_STORE_CODE = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_code';
+    public const XML_PATH_CUSTOM_MEMBER_STORE_ID = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_id';
+    public const XML_PATH_CUSTOM_MEMBER_STORE_CURRENCY = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_currency';
+    public const XML_PATH_PREFERRED_LANGUAGE = 'trueloyal_loyaltyRewards/settings/preferred_language';
 
     /**
      * Cookie life time
@@ -76,14 +82,14 @@ class Config extends AbstractHelper
     /**
      * Name of Cookie that holds private content version
      */
-    public const COOKIE_NAME = 'zinrelo';
+    public const COOKIE_NAME = 'trueloyal';
 
     /**
      * @var Json
      */
     public $json;
     /**
-     * @var ZinreloLogger
+     * @var TrueLoyalLogger
      */
     public $logger;
     /**
@@ -171,25 +177,25 @@ class Config extends AbstractHelper
      */
     private $sessionManager;
     /**
-     * @var ZinreloEavAttributeFactory
+     * @var TrueLoyalEavAttributeFactory
      */
-    public $zinreloEavAttributeFactory;
+    public $trueloyalEavAttributeFactory;
     /**
-     * @var ZinreloQuoteFactory
+     * @var TrueLoyalQuoteFactory
      */
-    public $zinreloQuoteFactory;
+    public $trueloyalQuoteFactory;
     /**
-     * @var ZinreloQuoteItemFactory
+     * @var TrueLoyalQuoteItemFactory
      */
-    public $zinreloQuoteItemFactory;
+    public $trueloyalQuoteItemFactory;
     /**
-     * @var ZinreloReviewFactory
+     * @var TrueLoyalReviewFactory
      */
-    public $zinreloReviewFactory;
+    public $trueloyalReviewFactory;
     /**
-     * @var ZinreloSalesOrderFactory
+     * @var TrueLoyalSalesOrderFactory
      */
-    public $zinreloSalesOrderFactory;
+    public $trueloyalSalesOrderFactory;
     /**
      * @var Attribute
      */
@@ -199,7 +205,7 @@ class Config extends AbstractHelper
      * Data constructor.
      *
      * @param Context $context
-     * @param ZinreloLogger $logger
+     * @param TrueLoyalLogger $logger
      * @param Curl $curl
      * @param RequestInterface $request
      * @param ProductCategoryList $productCategory
@@ -221,16 +227,16 @@ class Config extends AbstractHelper
      * @param CookieManagerInterface $cookieManager
      * @param CookieMetadataFactory $cookieMetadataFactory
      * @param SessionManagerInterface $sessionManager
-     * @param ZinreloEavAttributeFactory $zinreloEavAttributeFactory
-     * @param ZinreloQuoteFactory $zinreloQuoteFactory
-     * @param ZinreloQuoteItemFactory $zinreloQuoteItemFactory
-     * @param ZinreloReviewFactory $zinreloReviewFactory
-     * @param ZinreloSalesOrderFactory $zinreloSalesOrderFactory
+     * @param TrueLoyalEavAttributeFactory $trueloyalEavAttributeFactory
+     * @param TrueLoyalQuoteFactory $trueloyalQuoteFactory
+     * @param TrueLoyalQuoteItemFactory $trueloyalQuoteItemFactory
+     * @param TrueLoyalReviewFactory $trueloyalReviewFactory
+     * @param TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory
      * @param Attribute $eavAttribute
      */
     public function __construct(
         Context $context,
-        ZinreloLogger $logger,
+        TrueLoyalLogger $logger,
         Curl $curl,
         RequestInterface $request,
         ProductCategoryList $productCategory,
@@ -253,11 +259,11 @@ class Config extends AbstractHelper
         CookieMetadataFactory $cookieMetadataFactory,
         SessionManagerInterface $sessionManager,
         CartRepositoryInterface $quoteRepository,
-        ZinreloEavAttributeFactory $zinreloEavAttributeFactory,
-        ZinreloQuoteFactory $zinreloQuoteFactory,
-        ZinreloQuoteItemFactory $zinreloQuoteItemFactory,
-        ZinreloReviewFactory $zinreloReviewFactory,
-        ZinreloSalesOrderFactory $zinreloSalesOrderFactory,
+        TrueLoyalEavAttributeFactory $trueloyalEavAttributeFactory,
+        TrueLoyalQuoteFactory $trueloyalQuoteFactory,
+        TrueLoyalQuoteItemFactory $trueloyalQuoteItemFactory,
+        TrueLoyalReviewFactory $trueloyalReviewFactory,
+        TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory,
         Attribute $eavAttribute
     ) {
         $this->curl = $curl;
@@ -282,11 +288,11 @@ class Config extends AbstractHelper
         $this->cookieManager = $cookieManager;
         $this->cookieMetadataFactory = $cookieMetadataFactory;
         $this->sessionManager = $sessionManager;
-        $this->zinreloEavAttributeFactory = $zinreloEavAttributeFactory;
-        $this->zinreloQuoteFactory = $zinreloQuoteFactory;
-        $this->zinreloQuoteItemFactory = $zinreloQuoteItemFactory;
-        $this->zinreloReviewFactory = $zinreloReviewFactory;
-        $this->zinreloSalesOrderFactory = $zinreloSalesOrderFactory;
+        $this->trueloyalEavAttributeFactory = $trueloyalEavAttributeFactory;
+        $this->trueloyalQuoteFactory = $trueloyalQuoteFactory;
+        $this->trueloyalQuoteItemFactory = $trueloyalQuoteItemFactory;
+        $this->trueloyalReviewFactory = $trueloyalReviewFactory;
+        $this->trueloyalSalesOrderFactory = $trueloyalSalesOrderFactory;
         $this->quoteRepository = $quoteRepository;
         $this->eavAttribute = $eavAttribute;
         parent::__construct($context);
@@ -300,6 +306,11 @@ class Config extends AbstractHelper
     public function getConfigLanguage()
     {
         return $this->getConfig(self::XML_PATH_LANGUAGES);
+    }
+
+    public function getPreferredLanguage(): string
+    {
+        return $this->getConfig(self::XML_PATH_PREFERRED_LANGUAGE) ?? '';
     }
 
     /**
@@ -332,7 +343,7 @@ class Config extends AbstractHelper
     }
     
     /**
-     * Web Hook Url, which is received from Zinrelo to sent API resquest
+     * Web Hook Url, which is received from TrueLoyal to sent API resquest
      *
      * @return mixed
      */
@@ -499,8 +510,8 @@ class Config extends AbstractHelper
             if(!$this->isAutoEnrollmentEnabled()) {
                 $customerId = $this->customerSession->create()->getCustomerId();
                 if ($customerId) {
-                    $zinreloOptedIn = $this->getOptInCustomAttributeValue($customerId);
-                    if (!$zinreloOptedIn) {
+                    $trueloyalOptedIn = $this->getOptInCustomAttributeValue($customerId);
+                    if (!$trueloyalOptedIn) {
                         return false;
                     }
                 }
@@ -550,8 +561,8 @@ class Config extends AbstractHelper
         $isModuleEnable = $this->isModuleEnabled();
         $isRewardPointAtPdpEnabled = $this->getConfig(self::XML_PATH_REWARDS_POINTS_AT_PDP) ?? false;
         $isDashboardHiddenForGuests = $this->isDashboardHiddenForGuests();
-        if($isDashboardHiddenForGuests && !$this->getCustomerEmailBySession()) { 
-            return false; 
+        if($isDashboardHiddenForGuests && !$this->getMemberIdentifierValue()) {
+            return false;
         }
         return ($isRewardPointAtPdpEnabled && $isModuleEnable) ?? false;
     }
@@ -576,7 +587,7 @@ class Config extends AbstractHelper
         $isModuleEnable = $this->isModuleEnabled();
         $isRewardPointAtCartEnabled = $this->getConfig(self::XML_PATH_PDP_CART_PAGE) ?? false;
         $isDashboardHiddenForGuests = $this->isDashboardHiddenForGuests();
-        if($isDashboardHiddenForGuests && !$this->getCustomerEmailBySession()) {
+        if($isDashboardHiddenForGuests && !$this->getMemberIdentifierValue()) {
             return false;
         }
         return ($isRewardPointAtCartEnabled && $isModuleEnable) ?? false;
@@ -666,14 +677,14 @@ class Config extends AbstractHelper
      */
     public function getRewardRulesData($quote, $ruleId = "")
     {
-        $zinreloQuote = $this->getZinreloQuoteByQuoteId($quote->getId());
-        if ($ruleId == "" && $zinreloQuote) {
-            $ruleId = !$zinreloQuote->isEmpty() ? $zinreloQuote->getRedeemRewardDiscount() : '';
+        $trueloyalQuote = $this->getTrueLoyalQuoteByQuoteId($quote->getId());
+        if ($ruleId == "" && $trueloyalQuote) {
+            $ruleId = !$trueloyalQuote->isEmpty() ? $trueloyalQuote->getRedeemRewardDiscount() : '';
         }
 
-        if (!$zinreloQuote->isEmpty()) {
-            if ($zinreloQuote->getRewardRulesData()) {
-                $rewardRules = $this->json->unserialize($zinreloQuote->getRewardRulesData());
+        if (!$trueloyalQuote->isEmpty()) {
+            if ($trueloyalQuote->getRewardRulesData()) {
+                $rewardRules = $this->json->unserialize($trueloyalQuote->getRewardRulesData());
                 return $rewardRules[$ruleId] ?? [];
             }
         }
@@ -687,8 +698,8 @@ class Config extends AbstractHelper
      */
     public function getRedeemRules()
     {
-        $customerEmail = $this->getCustomerEmailBySession();
-        $url = $this->getLiveWebHookUrl() . "members/" . $customerEmail . "/rewards";
+        $memberId = $this->getMemberIdentifierValue();
+        $url = $this->getLiveWebHookUrl() . "members/" . $memberId . "/rewards";
         $url = $this->getIdParam($url);
         $response = $this->request($url, "", "get", "live_api");
         $rewardRules = [];
@@ -740,6 +751,97 @@ class Config extends AbstractHelper
     }
 
     /**
+     * Get configured member identifier prefix
+     *
+     * @return string
+     */
+    public function getMemberIdentifierPrefix(): string
+    {
+        return $this->getConfig(self::XML_PATH_MEMBER_IDENTIFIER_PREFIX) ?? '';
+    }
+        
+    /**
+     * Get configured member identifier type ('member_id' or 'member_email')
+     *
+     * @return string
+     */
+    public function getMemberIdentifier(): string
+    {
+        return $this->getConfig(self::XML_PATH_MEMBER_IDENTIFIER) ?? 'member_email';
+    }
+
+    /**
+     * Get Custom Member Attribute: Store ID
+     *
+     * @return string
+     */
+    public function getCustomMemberStoreCode(): string
+    {
+        return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_CODE) ?? '';
+    }
+
+    public function getCustomMemberStoreId(): string
+    {
+        return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_ID) ?? '';
+    }
+
+    /**
+     * Get Custom Member Attribute: Store Currency
+     *
+     * @return string
+     */
+    public function getCustomMemberStoreCurrency(): string
+    {
+        return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_CURRENCY) ?? '';
+    }
+
+    /**
+     * Get current store currency code
+     *
+     * @return string
+     */
+    public function getStoreCurrencyCode(): string
+    {
+        return $this->storeManager->getStore()->getCurrentCurrencyCode() ?? '';
+    }
+
+    /**
+     * Get the member identifier value based on the configured type.
+     * Returns str_pad formatted customer ID for member_id, or customer email for member_email.
+     *
+     * @return string
+     */
+    public function getMemberIdentifierValue(): string
+    {
+        $prefix = $this->getMemberIdentifierPrefix();
+        if ($this->getMemberIdentifier() === 'member_id') {
+            $value = $this->getFormattedMemberId($prefix);
+            return $value ?? '';
+        }
+        $value = $this->getCustomerEmailBySession();
+        return $value ? $prefix . $value : '';
+    }
+
+    /**
+     * Get Formatted Member ID (ID as string with leading zeros)
+     *
+     * @return string
+     */
+    public function getFormattedMemberId($prefix = '')
+    {
+        $customerId = $this->customerSession->create()->getCustomerId();
+        if (!$customerId) {
+            return '';
+        }
+        $customerIdStr = (string)$customerId;
+        if (strlen($prefix) + strlen($customerIdStr) < 3) {
+            $padLength = max(0, 3 - strlen($prefix));
+            return $prefix . str_pad($customerIdStr, $padLength, "0", STR_PAD_LEFT);
+        }
+        return $prefix . $customerIdStr;
+    }
+
+    /**
      * Get Customer Custom Attribute Value
      *
      * @return mixed
@@ -748,9 +850,9 @@ class Config extends AbstractHelper
     {
         $customerData = $this->customerRepository->getById($customerId);
         $opt_in_attribute = $this->getOptInAttributeCode();
-        $zinreloOptedIn = $customerData->getCustomAttribute($opt_in_attribute);
-        if ($zinreloOptedIn) {
-            return $zinreloOptedIn->getValue();
+        $trueloyalOptedIn = $customerData->getCustomAttribute($opt_in_attribute);
+        if ($trueloyalOptedIn) {
+            return $trueloyalOptedIn->getValue();
         }
         return null;
     }
@@ -797,7 +899,7 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Request to zinrelo for specific event URL
+     * Request to trueloyal for specific event URL
      *
      * @param mixed $url
      * @param mixed $params
@@ -915,8 +1017,8 @@ class Config extends AbstractHelper
     public function getRewardPoints()
     {
         try {
-            $customerEmail = $this->getCustomerEmailBySession();
-            $url = $this->getLiveWebHookUrl() . "members/" . $customerEmail;
+            $memberId = $this->getMemberIdentifierValue();
+            $url = $this->getLiveWebHookUrl() . "members/" . $memberId;
             $url = $this->getIdParam($url);
             $response = $this->request($url, "", "get", "live_api");
             if ($response) {
@@ -994,86 +1096,86 @@ class Config extends AbstractHelper
         );
     }
 
-    /*Managed to set zinrelo quote, quoteItem, review, sales related data to custom table*/
+    /*Managed to set trueloyal quote, quoteItem, review, sales related data to custom table*/
 
     /**
-     * Get Zinrelo quote specific Data using QuoteId
+     * Get TrueLoyal quote specific Data using QuoteId
      *
      * @param int $quoteId
      */
-    public function getZinreloQuoteByQuoteId($quoteId)
+    public function getTrueLoyalQuoteByQuoteId($quoteId)
     {
-        return $this->zinreloQuoteFactory->create()
+        return $this->trueloyalQuoteFactory->create()
             ->getCollection()
             ->addFieldToFilter('quote_id', $quoteId)
             ->getFirstItem();
     }
 
     /**
-     * Get Zinrelo quote item specific Data using itemId
+     * Get TrueLoyal quote item specific Data using itemId
      *
      * @param int $itemId
      */
-    public function getZinreloQuoteItemByItemId($itemId)
+    public function getTrueLoyalQuoteItemByItemId($itemId)
     {
-        return $this->zinreloQuoteItemFactory->create()
+        return $this->trueloyalQuoteItemFactory->create()
             ->getCollection()
             ->addFieldToFilter('quote_item_id', $itemId)
             ->getFirstItem();
     }
 
     /**
-     * Set zinrelo abandoned cart sent status
+     * Set trueloyal abandoned cart sent status
      *
      * @param int $quoteId
      * @param int $value
      */
     public function setAbandonedCartSent($quoteId, $value)
     {
-        $zinreloQuote = $this->getZinreloQuoteByQuoteId($quoteId);
-        if (!$zinreloQuote->isEmpty()) {
-            $zinreloQuote->setIsAbandonedCartSent($value)->save();
+        $trueloyalQuote = $this->getTrueLoyalQuoteByQuoteId($quoteId);
+        if (!$trueloyalQuote->isEmpty()) {
+            $trueloyalQuote->setIsAbandonedCartSent($value)->save();
         } else {
-            $zinreloQuote->setIsAbandonedCartSent($value);
-            $zinreloQuote->setQuoteId($quoteId);
-            $zinreloQuote->save();
+            $trueloyalQuote->setIsAbandonedCartSent($value);
+            $trueloyalQuote->setQuoteId($quoteId);
+            $trueloyalQuote->save();
         }
     }
 
     /**
-     * Get Zinrelo Order item specific Data using orderID
+     * Get TrueLoyal Order item specific Data using orderID
      *
      * @param int $orderId
      */
-    public function getZinreloOrderByOrderId($orderId)
+    public function getTrueLoyalOrderByOrderId($orderId)
     {
-        return $this->zinreloSalesOrderFactory->create()
+        return $this->trueloyalSalesOrderFactory->create()
             ->getCollection()
             ->addFieldToFilter('order_id', $orderId)
             ->getFirstItem();
     }
 
     /**
-     * Get Zinrelo product review using reviewId
+     * Get TrueLoyal product review using reviewId
      *
      * @param int $reviewId
      */
-    public function getZinreloReviewByReviewId($reviewId)
+    public function getTrueLoyalReviewByReviewId($reviewId)
     {
-        return $this->zinreloReviewFactory->create()
+        return $this->trueloyalReviewFactory->create()
             ->getCollection()
             ->addFieldToFilter('review_id', $reviewId)
             ->getFirstItem();
     }
 
     /**
-     * Get Zinrelo attribute related data using attribute Id
+     * Get TrueLoyal attribute related data using attribute Id
      *
      * @param int $attributeId
      */
-    public function getZinreloAttributeByAttributeId($attributeId)
+    public function getTrueLoyalAttributeByAttributeId($attributeId)
     {
-        return $this->zinreloEavAttributeFactory->create()
+        return $this->trueloyalEavAttributeFactory->create()
             ->getCollection()
             ->addFieldToFilter('attribute_id', $attributeId)
             ->getFirstItem();

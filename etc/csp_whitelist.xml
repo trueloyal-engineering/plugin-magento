@@ -4,9 +4,9 @@
     <policies>
         <policy id="script-src">
             <values>
-                <value id="uniqueId" type="host">https://app.zinrelo.com</value>
-                <value id="appzinrelo" type="host">app.zinrelo.com</value>
-                <value id="zinrelo" type="host">https://cdn.zinrelo.com/js/all.js</value>
+                <value id="uniqueId" type="host">https://app.trueloyal.com</value>
+                <value id="apptrueloyal" type="host">app.trueloyal.com</value>
+                <value id="trueloyal" type="host">https://cdn.trueloyal.com/js/all.js</value>
             </values>
         </policy>
     </policies>

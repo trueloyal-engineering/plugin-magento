@@ -1,11 +1,11 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
-use Zinrelo\LoyaltyRewards\Logger\Logger as ZinreloLogger;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Logger\Logger as TrueLoyalLogger;
 
 class ConfigSaveObserver implements ObserverInterface
 {
@@ -14,18 +14,18 @@ class ConfigSaveObserver implements ObserverInterface
      */
     private $helper;
     /**
-     * @var ZinreloLogger
+     * @var TrueLoyalLogger
      */
     private $logger;
     /**
      * Data constructor.
      *
      * @param Data $helper
-     * @param ZinreloLogger $logger
+     * @param TrueLoyalLogger $logger
      */
     public function __construct(
         Data $helper,
-        ZinreloLogger $logger,
+        TrueLoyalLogger $logger,
     ) {
         $this->helper = $helper;
         $this->logger = $logger;

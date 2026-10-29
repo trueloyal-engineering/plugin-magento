@@ -13,20 +13,20 @@ define([
         var config = window.checkoutConfig;
 
         /**
-         * Select zinrelo shipping method when free shipping rule Applied
+         * Select trueloyal shipping method when free shipping rule Applied
          */
         var resolveShippingRates = wrapper.wrap(
             checkoutDataResolver.resolveShippingRates,
             function (originalResolveShippingRates, ratesData) {
                 let method = this.getMethod('shipping', ratesData);
                 if (!_.isUndefined(method)) {
-                    let isZinreloShippingSelected = ($.mage.cookies.get('zinrelo_shipping_selected'));
-                    if (!isZinreloShippingSelected) {
-                        /*get zinrelo free shipping cart-data rates and make default selected */
+                    let isTrueLoyalShippingSelected = ($.mage.cookies.get('trueloyal_shipping_selected'));
+                    if (!isTrueLoyalShippingSelected) {
+                        /*get trueloyal free shipping cart-data rates and make default selected */
                         cartCache.clear('cart-data');
                         selectShippingMethodAction(method);
-                        checkoutData.setSelectedShippingRate('zinrelorate_zinrelorate');
-                        $.mage.cookies.set('zinrelo_shipping_selected', true, {lifetime: 86400});
+                        checkoutData.setSelectedShippingRate('trueloyalrate_trueloyalrate');
+                        $.mage.cookies.set('trueloyal_shipping_selected', true, {lifetime: 86400});
                     }
                 }
                 return originalResolveShippingRates(ratesData);
@@ -47,7 +47,7 @@ define([
                 self = this;
                 var matchedMethod;
                 matchedMethod = availableMethods.find(function (method) {
-                    return self.getMethodCode(method, type) === 'zinrelorate_zinrelorate';
+                    return self.getMethodCode(method, type) === 'trueloyalrate_trueloyalrate';
                 });
 
                 return matchedMethod;

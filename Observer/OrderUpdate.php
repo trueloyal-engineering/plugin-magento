@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Event\Observer;
@@ -8,7 +8,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class OrderUpdate implements ObserverInterface
 {
@@ -50,7 +50,7 @@ class OrderUpdate implements ObserverInterface
     }
 
     /**
-     * Send order update event to zinrelo
+     * Send order update event to trueloyal
      *
      * @param Observer $observer
      * @return bool|void
@@ -61,7 +61,7 @@ class OrderUpdate implements ObserverInterface
         if (isset($this->request->getParam('history')['comment'])) {
             $id = $this->request->getParam('order_id') ?? $this->restRequest->getParam('id');
             $event = $this->helper->getRewardEvents();
-            /*Check the order_update event is enabled, if enabled then will send order_update event to Zinrelo*/
+            /*Check the order_update event is enabled, if enabled then will send order_update event to TrueLoyal*/
             if (in_array('order_update', $event)) {
                 $order = $this->orderRepository->get($id);
                 $order->getPayment()->setMethodInstance();
@@ -118,7 +118,7 @@ class OrderUpdate implements ObserverInterface
                 }
                 $orderData['total_qty_ordered'] = (int) $orderData['total_qty_ordered'];
                 $params = [
-                    "member_id" => $order->getCustomerEmail(),
+                    "member_id" => $this->helper->getMemberIdentifierValueById($order->getCustomerId(), $order->getCustomerEmail()),
                     "activity_id" => "order_update",
                     "data" => $orderData
                 ];

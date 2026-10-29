@@ -1,13 +1,13 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Exception;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Api\CreditmemoRepositoryInterface;
 
@@ -58,7 +58,7 @@ class OrderRefund implements ObserverInterface
     }
 
     /**
-     * Send order refund  event to zinrelo
+     * Send order refund  event to trueloyal
      *
      * @param Observer $observer
      * @return bool
@@ -67,7 +67,7 @@ class OrderRefund implements ObserverInterface
     {
         $version = $this->productMetadata->getVersion();
         $event = $this->helper->getRewardEvents();
-        /*Check the order_refund event is enabled, if enabled then will send order_refund event to Zinrelo*/
+        /*Check the order_refund event is enabled, if enabled then will send order_refund event to TrueLoyal*/
         if (in_array('order_refund', $event)) {
             try {
                 /*This event should call only for Magento version 2.3.0*/
@@ -169,7 +169,7 @@ class OrderRefund implements ObserverInterface
     }
 
     /**
-     * Send request to zinrelo when refund generated
+     * Send request to trueloyal when refund generated
      *
      * @param string $customerEmail
      * @param string $activityId
@@ -179,7 +179,7 @@ class OrderRefund implements ObserverInterface
     public function sendRequest($customerEmail, $activityId, $refundData)
     {
         $params = [
-            "member_id" => $customerEmail,
+            "member_id" => $this->helper->getMemberIdentifierValueById(null, $customerEmail),
             "activity_id" => $activityId,
             "data" => $refundData
         ];

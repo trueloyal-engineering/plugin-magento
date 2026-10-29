@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Cron;
+namespace TrueLoyal\LoyaltyRewards\Cron;
 
 use Exception;
 use Magento\Framework\Data\Collection\AbstractDb;
@@ -9,8 +9,8 @@ use Magento\Quote\Model\QuoteFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
-use Zinrelo\LoyaltyRewards\Logger\Logger;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Logger\Logger;
 
 class RejectRedeemReward
 {
@@ -33,7 +33,7 @@ class RejectRedeemReward
     /**
      * @var Logger
      */
-    private $zinreloLogger;
+    private $trueloyalLogger;
     /**
      * @var AbandonedCartTime
      */
@@ -45,22 +45,22 @@ class RejectRedeemReward
      * @param QuoteFactory $quoteFactory
      * @param Data $helper
      * @param TimezoneInterface $timezoneInterface
-     * @param Logger $zinreloLogger
+     * @param Logger $trueloyalLogger
      */
     public function __construct(
         QuoteFactory $quoteFactory,
         Data $helper,
         TimezoneInterface $timezoneInterface,
-        Logger $zinreloLogger
+        Logger $trueloyalLogger
     ) {
         $this->quoteFactory = $quoteFactory;
         $this->helper = $helper;
         $this->timezoneInterface = $timezoneInterface;
-        $this->zinreloLogger = $zinreloLogger;
+        $this->trueloyalLogger = $trueloyalLogger;
     }
 
     /**
-     * Send abandoned cart request to Zinrelo and Reject redeemed point
+     * Send abandoned cart request to TrueLoyal and Reject redeemed point
      *
      * @return void
      */
@@ -84,8 +84,8 @@ class RejectRedeemReward
                     if (strtotime($currentTime) >= strtotime($rewardAppliedTime) && $item->getItemsCount()) {
                         /* Send reject reward request to Live API
                         We have to request event customer Quote wise so need to send an API one by one.*/
-                        $zinreloQuote = $this->helper->getZinreloQuoteByQuoteId($item->getId());
-                        if ($zinreloQuote->getRedeemRewardDiscount()) {
+                        $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($item->getId());
+                        if ($trueloyalQuote->getRedeemRewardDiscount()) {
                             $this->helper->sendRejectRewardRequest($item);
                         }
                         /*Send Cart abandonment request custom event API*/
@@ -110,12 +110,15 @@ class RejectRedeemReward
                             $qItem = $this->helper->setFormatedPrice($qItem);
                             $quoteData["items"][] = $qItem;
                         }
-                        $memberId = $item->getCustomer() ? $item->getCustomer()->getEmail() : "";
-                        $this->sendToZinrelo($memberId, $quoteData, $url, $quoteObj);
+                        $memberId = $this->helper->getMemberIdentifierValueById(
+                            $item->getCustomerId(),
+                            $item->getCustomer() ? $item->getCustomer()->getEmail() : ""
+                        );
+                        $this->sendToTrueLoyal($memberId, $quoteData, $url, $quoteObj);
                     }
                 }
             } catch (Exception $e) {
-                $this->zinreloLogger->addErrorLog($e->getMessage());
+                $this->trueloyalLogger->addErrorLog($e->getMessage());
             }
         }
     }
@@ -128,12 +131,12 @@ class RejectRedeemReward
     public function getQuoteCollections()
     {
         try {
-            $zinreloQuote = $this->helper->zinreloQuoteFactory->create()
+            $trueloyalQuote = $this->helper->trueloyalQuoteFactory->create()
                 ->getCollection()
                 ->addFieldToSelect(['quote_id'])
                 ->addFieldToFilter('is_abandoned_cart_sent', ['eq' => '2']);
             $quoteIds = [];
-            foreach ($zinreloQuote as $quote) {
+            foreach ($trueloyalQuote as $quote) {
                 $quoteIds[] = $quote->getQuoteId();
             }
             $quote = $this->quoteFactory->create()
@@ -148,7 +151,7 @@ class RejectRedeemReward
             $quote->getSelect()->limit(self::COLLECTION_LIMIT);
             return $quote;
         } catch (Exception $e) {
-            $this->zinreloLogger->addErrorLog($e->getMessage());
+            $this->trueloyalLogger->addErrorLog($e->getMessage());
         }
     }
 
@@ -168,14 +171,14 @@ class RejectRedeemReward
     }
 
     /**
-     * Send To Zinrelo
+     * Send To TrueLoyal
      *
      * @param mixed $memberId
      * @param mixed $quoteData
      * @param mixed $url
      * @param mixed $object
      */
-    public function sendToZinrelo($memberId, $quoteData, $url, $object)
+    public function sendToTrueLoyal($memberId, $quoteData, $url, $object)
     {
         try {
             $params = [
@@ -186,11 +189,11 @@ class RejectRedeemReward
             $params = $this->helper->json->serialize($params);
             /*We have to request event customer Quote wise so need to send an API one by one.*/
             $this->helper->request($url, $params, "post");
-            $zinreloQuote = $this->helper->getZinreloQuoteByQuoteId($object->getId());
-            $zinreloQuote->setIsAbandonedCartSent(1);
-            $zinreloQuote->save();
+            $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($object->getId());
+            $trueloyalQuote->setIsAbandonedCartSent(1);
+            $trueloyalQuote->save();
         } catch (Exception $e) {
-            $this->zinreloLogger->addErrorLog($e->getMessage());
+            $this->trueloyalLogger->addErrorLog($e->getMessage());
         }
     }
 }

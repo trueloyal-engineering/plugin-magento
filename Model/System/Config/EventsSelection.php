@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Model\System\Config;
+namespace TrueLoyal\LoyaltyRewards\Model\System\Config;
 
 use Magento\Framework\Data\OptionSourceInterface;
 

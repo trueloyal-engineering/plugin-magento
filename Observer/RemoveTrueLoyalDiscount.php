@@ -1,15 +1,15 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
-class RemoveZinreloDiscount implements ObserverInterface
+class RemoveTrueLoyalDiscount implements ObserverInterface
 {
     /**
      * @var CheckoutSession
@@ -21,7 +21,7 @@ class RemoveZinreloDiscount implements ObserverInterface
     private $helper;
 
     /**
-     * Remove Zinrelo Discount constructor.
+     * Remove TrueLoyal Discount constructor.
      *
      * @param CheckoutSession $checkoutSession
      * @param Data $helper
@@ -44,24 +44,24 @@ class RemoveZinreloDiscount implements ObserverInterface
     public function execute(Observer $observer)
     {
         $quote = $this->checkoutSession->getQuote();
-        $zinreloQuote = $this->helper->getZinreloQuoteByQuoteId($quote->getId());
-        if ($zinreloQuote->getIsAbandonedCartSent() || $zinreloQuote->getIsAbandonedCartSent() === null) {
+        $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($quote->getId());
+        if ($trueloyalQuote->getIsAbandonedCartSent() || $trueloyalQuote->getIsAbandonedCartSent() === null) {
             $this->helper->setAbandonedCartSent($quote->getId(), 2);
         }
 
         $cart = $observer->getEvent()->getCart();
         if ($cart->getItemsCount() > 1) {
             return true;
-        } elseif ($cart->getItemsCount() === 1 && $zinreloQuote->getRedeemRewardDiscount()) {
+        } elseif ($cart->getItemsCount() === 1 && $trueloyalQuote->getRedeemRewardDiscount()) {
             foreach ($quote->getAllItems() as $item) {
-                $zinreloQuoteItem = $this->helper->getZinreloQuoteItemByItemId($item->getId());
-                if ($zinreloQuoteItem->getIsZinreloFreeProduct()) {
+                $trueloyalQuoteItem = $this->helper->getTrueLoyalQuoteItemByItemId($item->getId());
+                if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
                     $this->helper->sendRejectRewardRequest($quote);
                     $quote->delete();
                     return true;
                 }
             }
-        } elseif ($cart->getItemsCount() === 0 && $zinreloQuote->getRedeemRewardDiscount()) {
+        } elseif ($cart->getItemsCount() === 0 && $trueloyalQuote->getRedeemRewardDiscount()) {
             $this->helper->sendRejectRewardRequest($quote);
             return true;
         }

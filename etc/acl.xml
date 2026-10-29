@@ -7,7 +7,7 @@
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
-                            <resource id="Zinrelo_LoyaltyRewards::config" title="Loyalty Rewards" translate="title" sortOrder="5"/>
+                            <resource id="TrueLoyal_LoyaltyRewards::config" title="Loyalty Rewards" translate="title" sortOrder="5"/>
                         </resource>
                     </resource>
                 </resource>

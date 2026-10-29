@@ -2,30 +2,30 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
-        <zinrelo_loyaltyRewards>
+        <trueloyal_loyaltyRewards>
             <settings>
-                <live_web_hook_url>https://api.zinrelo.com/v2/loyalty/</live_web_hook_url>
-                <webhook_integration_url>https://api.zinrelo.com/v2/loyalty/integrations</webhook_integration_url>
+                <live_web_hook_url>https://api.trueloyal.com/v2/loyalty/</live_web_hook_url>
+                <webhook_integration_url>https://api.trueloyal.com/v2/loyalty/integrations</webhook_integration_url>
                 <abandoned_cart_time>30</abandoned_cart_time>
                 <product_page_reward_label>Earn {{EARN_POINTS}} points by ordering this product.</product_page_reward_label>
                 <cart_page_reward_label>Earn {{EARN_POINTS}} points by ordering this product.</cart_page_reward_label>
                 <cart_page_reward_dropdown_label>You have {{AVAILABLE_POINTS}} points. Select your reward to redeem.</cart_page_reward_dropdown_label>
                 <free_shipping_label>Reward</free_shipping_label>
             </settings>
-        </zinrelo_loyaltyRewards>
+        </trueloyal_loyaltyRewards>
         <carriers>
-            <zinrelorate>
+            <trueloyalrate>
                 <active>1</active>
-                <model>Zinrelo\LoyaltyRewards\Model\Carrier\ZinreloShipping</model>
+                <model>TrueLoyal\LoyaltyRewards\Model\Carrier\TrueLoyalShipping</model>
                 <name>Free Shipping</name>
                 <price>00.00</price>
                 <title>Free Shipping</title>
-            </zinrelorate>
+            </trueloyalrate>
         </carriers>
-        <zinrelo_loyaltyRewards>
+        <trueloyal_loyaltyRewards>
             <settings>
                 <auto_enrollment>1</auto_enrollment>
             </settings>
-        </zinrelo_loyaltyRewards>
+        </trueloyal_loyaltyRewards>
     </default>
 </config>

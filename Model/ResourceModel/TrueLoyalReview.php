@@ -1,15 +1,15 @@
 <?php
 /**
- * Copyright © Zinrelo. All rights reserved.
+ * Copyright © TrueLoyal. All rights reserved.
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
 
-namespace Zinrelo\LoyaltyRewards\Model\ResourceModel;
+namespace TrueLoyal\LoyaltyRewards\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
-class ZinreloSalesOrder extends AbstractDb
+class TrueLoyalReview extends AbstractDb
 {
 
     /**
@@ -17,7 +17,7 @@ class ZinreloSalesOrder extends AbstractDb
      */
     protected function _construct()
     {
-        $this->_init('zinrelo_sales_order', 'id');
+        $this->_init('trueloyal_review', 'id');
     }
 }
 

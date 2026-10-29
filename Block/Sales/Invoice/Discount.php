@@ -1,11 +1,11 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Block\Sales\Invoice;
+namespace TrueLoyal\LoyaltyRewards\Block\Sales\Invoice;
 
 use Magento\Framework\DataObject;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class Discount extends Template
 {
@@ -103,7 +103,7 @@ class Discount extends Template
             $this->getParentBlock()->addTotal(
                 new DataObject(
                     [
-                        'code' => 'zinrelo_discount',
+                        'code' => 'trueloyal_discount',
                         'strong' => $this->getStrong(),
                         'value' => $totalAmount["value"],
                         'base_value' => $totalAmount["value"],

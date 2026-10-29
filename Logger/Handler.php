@@ -1,5 +1,5 @@
 <?php
-namespace Zinrelo\LoyaltyRewards\Logger;
+namespace TrueLoyal\LoyaltyRewards\Logger;
 
 use Monolog\Logger;
 
@@ -17,5 +17,5 @@ class Handler extends \Magento\Framework\Logger\Handler\Base
      *
      * @var string
      */
-    protected $fileName = '/var/log/zinrelo.log';
+    protected $fileName = '/var/log/trueloyal.log';
 }

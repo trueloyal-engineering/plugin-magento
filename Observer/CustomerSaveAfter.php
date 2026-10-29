@@ -1,5 +1,5 @@
 <?php
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -9,7 +9,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Registry;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class CustomerSaveAfter implements ObserverInterface
 {
@@ -61,7 +61,7 @@ class CustomerSaveAfter implements ObserverInterface
     }
 
     /**
-     * Create customer event to zinrelo
+     * Create customer event to trueloyal
      *
      * @param Observer $observer
      * @throws LocalizedException
@@ -121,7 +121,7 @@ class CustomerSaveAfter implements ObserverInterface
     }
 
     /**
-     * Prepare payload and Send customer create-update request Zinrelo
+     * Prepare payload and Send customer create-update request TrueLoyal
      *
      * @param Observer $observer
      * @param int|mixed $customerId
@@ -149,7 +149,7 @@ class CustomerSaveAfter implements ObserverInterface
             }
         }
         $params = [
-            "member_id" => $customer->getEmail(),
+            "member_id" => $this->helper->getMemberIdentifierValueById($customerId, $customer->getEmail()),
             "activity_id" => $activity_id,
             "data" => $customerData
         ];

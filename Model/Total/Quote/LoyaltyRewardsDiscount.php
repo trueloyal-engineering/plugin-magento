@@ -1,12 +1,12 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Model\Total\Quote;
+namespace TrueLoyal\LoyaltyRewards\Model\Total\Quote;
 
 use Magento\Quote\Api\Data\ShippingAssignmentInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Total;
 use Magento\Quote\Model\Quote\Address\Total\AbstractTotal;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class LoyaltyRewardsDiscount extends AbstractTotal
 {
@@ -56,8 +56,8 @@ class LoyaltyRewardsDiscount extends AbstractTotal
             else {
                 $totalAmount = -($totalAmount * $rewardData['reward_value'] / 100);
             }
-            $total->addTotalAmount('zinrelo_discount', $totalAmount);
-            $total->addBaseTotalAmount('zinrelo_discount', $totalAmount);
+            $total->addTotalAmount('trueloyal_discount', $totalAmount);
+            $total->addBaseTotalAmount('trueloyal_discount', $totalAmount);
             $quote->setCustomDiscount($totalAmount);
             return $this;
         }
@@ -93,7 +93,7 @@ class LoyaltyRewardsDiscount extends AbstractTotal
                 $totalAmount = -($rewardData['points_to_be_redeemed'] / $rewardData['conversion_rate']);
             }
             return [
-                'code' => 'zinrelo_discount',
+                'code' => 'trueloyal_discount',
                 'title' => __($this->helper->getRewardAppliedRuleLabel($quote)),
                 'value' => $totalAmount
             ];

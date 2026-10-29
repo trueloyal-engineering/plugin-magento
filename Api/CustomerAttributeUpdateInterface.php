@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Api;
+namespace TrueLoyal\LoyaltyRewards\Api;
 
 interface CustomerAttributeUpdateInterface
 {

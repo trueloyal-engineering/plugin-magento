@@ -1,5 +1,5 @@
 <?php
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -8,7 +8,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Review\Model\Review;
 use Magento\Review\Model\ReviewFactory;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class ProductReviewSaveAfter implements ObserverInterface
 {
@@ -36,7 +36,7 @@ class ProductReviewSaveAfter implements ObserverInterface
     }
 
     /**
-     * Product review create/approve event to Zinrelo
+     * Product review create/approve event to TrueLoyal
      *
      * @param Observer $observer
      * @throws NoSuchEntityException
@@ -53,16 +53,16 @@ class ProductReviewSaveAfter implements ObserverInterface
         $statusId = $review["status_id"];
         $review = $this->reviewFactory->create()->load($reviewId);
         $reviewData = $review->toArray();
-        $zinreloReview = $this->helper->getZinreloReviewByReviewId($reviewId);
+        $trueloyalReview = $this->helper->getTrueLoyalReviewByReviewId($reviewId);
         if ($statusId == Review::STATUS_APPROVED && in_array('review_approved', $event, true)) {
             $this->sendRequest($reviewData, $productId, $customerId, "review_approved");
         } elseif ($statusId == Review::STATUS_PENDING &&
             in_array('review_submitted', $event, true) &&
-            !$zinreloReview->getSubmittedToZinrelo()
+            !$trueloyalReview->getSubmittedToTrueLoyal()
         ) {
             $this->sendRequest($reviewData, $productId, $customerId, "review_submitted");
             try {
-                $zinreloReview->setSubmittedToZinrelo(1)->setReviewId($reviewId)->save();
+                $trueloyalReview->setSubmittedToTrueLoyal(1)->setReviewId($reviewId)->save();
             } catch (CouldNotSaveException $e) {
                 $this->helper->addErrorLog($e->getMessage());
             }
@@ -71,7 +71,7 @@ class ProductReviewSaveAfter implements ObserverInterface
     }
 
     /**
-     * Send review created - approved event to Zinrelo
+     * Send review created - approved event to TrueLoyal
      *
      * @param array $reviewData
      * @param int $productId
@@ -89,7 +89,7 @@ class ProductReviewSaveAfter implements ObserverInterface
         $reviewData['product_image_url'] = $productInfo['product_image_url'];
         $reviewData['category_name'] = $this->helper->getCategoryName($productId);
         $params = [
-            "member_id" => $this->helper->getCustomerEmailById($customerId),
+            "member_id" => $this->helper->getMemberIdentifierValueById($customerId),
             "activity_id" => $activityId,
             "data" => $reviewData
         ];

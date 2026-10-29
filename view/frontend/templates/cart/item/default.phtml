@@ -10,10 +10,10 @@ use Magento\Msrp\Helper\Data;
 
 /** @var $block Renderer */
 
-$zinreloHelper = $this->helper(Zinrelo\LoyaltyRewards\Helper\Data ::class);
+$trueloyalHelper = $this->helper(TrueLoyal\LoyaltyRewards\Helper\Data ::class);
 
 $_item = $block->getItem();
-$zinreloQuoteItem = $zinreloHelper->getZinreloQuoteItemByItemId($_item->getId());
+$trueloyalQuoteItem = $trueloyalHelper->getTrueLoyalQuoteItemByItemId($_item->getId());
 $product = $_item->getProduct();
 $isVisibleProduct = $product->isVisibleInSiteVisibility();
 /** @var Data $helper */
@@ -106,7 +106,7 @@ $canApplyMsrp = $helper->isShowBeforeOrderConfirm($product) && $helper->isMinima
             <div class="control qty">
                 <label for="cart-<?= $block->escapeHtmlAttr($_item->getId()) ?>-qty">
                     <span class="label"><?= $block->escapeHtml(__('Qty')) ?></span>
-                    <?php if ($zinreloQuoteItem->getIsZinreloFreeProduct()) {?>
+                    <?php if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {?>
                         <input readonly="readonly" type="text" name="qty" id="qty" maxlength="12"
                                value="<?= $block->escapeHtmlAttr($block->getQty()) ?>"
                                title="<?= $block->escapeHtmlAttr(__('Qty')) ?>" disabled class="input-text qty disable"/>

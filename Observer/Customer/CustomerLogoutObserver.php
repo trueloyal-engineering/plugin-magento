@@ -1,9 +1,9 @@
 <?php
-namespace Zinrelo\LoyaltyRewards\Observer\Customer;
+namespace TrueLoyal\LoyaltyRewards\Observer\Customer;
 
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class CustomerLogoutObserver implements ObserverInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Helper;
+namespace TrueLoyal\LoyaltyRewards\Helper;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -8,7 +8,7 @@ use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\OrderFactory;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
 {
@@ -45,7 +45,7 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Order complete event to zinrelo
+     * Order complete event to trueloyal
      *
      * @param $order
      * @return bool
@@ -55,10 +55,10 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $event = $this->helper->getRewardEvents();
         $orderId = $order->getEntityId();
-        $zinreloOrder = $this->helper->getZinreloOrderByOrderId($orderId);
+        $trueloyalOrder = $this->helper->getTrueLoyalOrderByOrderId($orderId);
         if (in_array('order_complete', $event, true) &&
             $order->getState() == 'complete' &&
-            $zinreloOrder->getCompleteRequestSent() == 0
+            $trueloyalOrder->getCompleteRequestSent() == 0
         ) {
             $order = $this->orderRepository->get($orderId);
             $order->getPayment()->setMethodInstance();
@@ -126,7 +126,7 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
             $orderData['coupon_code'] = $couponCode;
             $orderData['total_qty_ordered'] = (int)$orderData['total_qty_ordered'];
             $params = [
-                "member_id" => $order->getCustomerEmail(),
+                "member_id" => $this->helper->getMemberIdentifierValueById($order->getCustomerId(), $order->getCustomerEmail()),
                 "activity_id" => "order_complete",
                 "data" => $orderData
             ];
@@ -134,9 +134,9 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
             $params = $this->helper->json->serialize($params);
             $this->helper->request($url, $params, "post");
             try {
-                /*Set complete request send to Zinrelo*/
-                $zinreloOrder->setCompleteRequestSent(1);
-                $zinreloOrder->save();
+                /*Set complete request send to TrueLoyal*/
+                $trueloyalOrder->setCompleteRequestSent(1);
+                $trueloyalOrder->save();
             } catch (CouldNotSaveException $e) {
                 $this->helper->addErrorLog($e->getMessage());
             }

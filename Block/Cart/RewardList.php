@@ -1,11 +1,11 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Block\Cart;
+namespace TrueLoyal\LoyaltyRewards\Block\Cart;
 
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\View\Element\Template;
-use Zinrelo\LoyaltyRewards\Helper\Reward;
-use Zinrelo\LoyaltyRewards\Logger\Logger as ZinreloLogger;
+use TrueLoyal\LoyaltyRewards\Helper\Reward;
+use TrueLoyal\LoyaltyRewards\Logger\Logger as TrueLoyalLogger;
 
 class RewardList extends Template
 {
@@ -15,7 +15,7 @@ class RewardList extends Template
     public $helper;
 
     /**
-     * @var ZinreloLogger
+     * @var TrueLoyalLogger
      */
     public $logger;
 
@@ -30,14 +30,14 @@ class RewardList extends Template
      * @param Template\Context $context
      * @param Reward $helper
      * @param CustomerSession $customerSession
-     * @param ZinreloLogger $logger
+     * @param TrueLoyalLogger $logger
      * @param array $data
      */
     public function __construct(
         Template\Context $context,
         Reward $helper,
         CustomerSession $customerSession,
-        ZinreloLogger $logger,
+        TrueLoyalLogger $logger,
         array $data = []
     ) {
         $this->logger = $logger;
@@ -67,8 +67,8 @@ class RewardList extends Template
     public function canCancelRedeem()
     {
         $quote = $this->helper->getQuote();
-        $zinreloQuote = $this->helper->getZinreloQuoteByQuoteId($quote->getId());
-        if (!empty($zinreloQuote->getRewardRulesData() && !empty($zinreloQuote->getRedeemRewardDiscount()))) {
+        $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($quote->getId());
+        if (!empty($trueloyalQuote->getRewardRulesData() && !empty($trueloyalQuote->getRedeemRewardDiscount()))) {
             return true;
         }
         return false;

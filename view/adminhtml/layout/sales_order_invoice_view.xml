@@ -2,7 +2,7 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="invoice_totals">
-            <!-- <block class="Zinrelo\LoyaltyRewards\Block\Adminhtml\Sales\Order\ZinreloInvoiceViewDiscount" name="invoice"/> -->
+            <!-- <block class="TrueLoyal\LoyaltyRewards\Block\Adminhtml\Sales\Order\TrueLoyalInvoiceViewDiscount" name="invoice"/> -->
         </referenceBlock>
     </body>
 </page>

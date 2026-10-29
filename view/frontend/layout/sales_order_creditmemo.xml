@@ -3,7 +3,7 @@
 
     <body>
         <referenceContainer name="creditmemo_totals">
-            <!-- <block class="Zinrelo\LoyaltyRewards\Block\Sales\CreditMemo\Discount" name="loyaltyRewards"/> -->
+            <!-- <block class="TrueLoyal\LoyaltyRewards\Block\Sales\CreditMemo\Discount" name="loyaltyRewards"/> -->
         </referenceContainer>
     </body>
 </page>

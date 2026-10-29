@@ -1,14 +1,14 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Block\Adminhtml\Sales\Order;
+namespace TrueLoyal\LoyaltyRewards\Block\Adminhtml\Sales\Order;
 
 use Magento\Framework\DataObject;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
-class ZinreloCreditMemoCreateDiscount extends Template
+class TrueLoyalCreditMemoCreateDiscount extends Template
 {
     /**
      * @var Data
@@ -20,7 +20,7 @@ class ZinreloCreditMemoCreateDiscount extends Template
     private $orderRepository;
 
     /**
-     * Zinrelo Credit MemoCreate Discount constructor.
+     * TrueLoyal Credit MemoCreate Discount constructor.
      *
      * @param Context $context
      * @param Data $helper
@@ -44,7 +44,7 @@ class ZinreloCreditMemoCreateDiscount extends Template
     /**
      * This function call initTotals
      *
-     * @return ZinreloCreditMemoCreateDiscount
+     * @return TrueLoyalCreditMemoCreateDiscount
      */
     public function initTotals()
     {
@@ -63,7 +63,7 @@ class ZinreloCreditMemoCreateDiscount extends Template
                 $this->getParentBlock()->addTotal(
                     new DataObject(
                         [
-                            'code' => 'zinrelo_discount',
+                            'code' => 'trueloyal_discount',
                             'strong' => $this->getStrong(),
                             'value' => $totalAmount["value"],
                             'base_value' => $totalAmount["value"],

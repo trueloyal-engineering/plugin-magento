@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Setup\Patch\Schema;
+namespace TrueLoyal\LoyaltyRewards\Setup\Patch\Schema;
 
 use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
@@ -71,32 +71,32 @@ class DefaultTabelUpdate implements SchemaPatchInterface
         $quoteItemColumn = [
             'type' => Table::TYPE_SMALLINT,
             ['unsigned' => true, 'nullable' => false, 'identity' => false, 'default' => "0"],
-            'comment' => 'Is Zinrelo Free Product',
+            'comment' => 'Is TrueLoyal Free Product',
         ];
-        $connection->addColumn($quoteItemTable, 'is_zinrelo_free_product', $quoteItemColumn);
+        $connection->addColumn($quoteItemTable, 'is_trueloyal_free_product', $quoteItemColumn);
 
         /*customer_eav_attribute*/
         $customerEavAttributeTable = $installer->getTable('customer_eav_attribute');
         $customerEavAttributeColumn = [
             'type' => Table::TYPE_SMALLINT,
             ['unsigned' => true, 'nullable' => false, 'identity' => false, 'default' => "0"],
-            'comment' => 'Is Zinrelo Attribute',
+            'comment' => 'Is TrueLoyal Attribute',
         ];
-        $connection->addColumn($customerEavAttributeTable, 'is_zinrelo_attribute', $customerEavAttributeColumn);
+        $connection->addColumn($customerEavAttributeTable, 'is_trueloyal_attribute', $customerEavAttributeColumn);
 
         /*eav_attribute*/
         $eavAttributeTable = $installer->getTable('eav_attribute');
         $eavAttributeColumn = [
             'type' => Table::TYPE_SMALLINT,
             ['unsigned' => true, 'nullable' => false, 'identity' => false, 'default' => "0"],
-            'comment' => 'Is Zinrelo Attribute',
+            'comment' => 'Is TrueLoyal Attribute',
         ];
-        $connection->addColumn($eavAttributeTable, 'is_zinrelo_attribute', $eavAttributeColumn);
+        $connection->addColumn($eavAttributeTable, 'is_trueloyal_attribute', $eavAttributeColumn);
 
         /*sales_order*/
         $salesOrderTable = $installer->getTable('sales_order');
         $salesOrderColumns = [
-            'zinrelo_reward' => [
+            'trueloyal_reward' => [
                 'type' => Table::TYPE_TEXT,
                 'nullable' => true,
                 'comment' => 'Add applied reward rule data',
@@ -104,7 +104,7 @@ class DefaultTabelUpdate implements SchemaPatchInterface
             'complete_request_sent' => [
                 'type' => Table::TYPE_SMALLINT,
                 ['unsigned' => true, 'nullable' => false, 'identity' => false, 'default' => "0"],
-                'comment' => 'Is order complete request sent to Zinrelo',
+                'comment' => 'Is order complete request sent to TrueLoyal',
             ]
         ];
         foreach ($salesOrderColumns as $name => $definition) {
@@ -116,9 +116,9 @@ class DefaultTabelUpdate implements SchemaPatchInterface
         $reviewColumn = [
             'type' => Table::TYPE_SMALLINT,
             ['unsigned' => true, 'nullable' => false, 'identity' => false, 'default' => "0"],
-            'comment' => 'Is product review submitted Zinrelo',
+            'comment' => 'Is product review submitted TrueLoyal',
         ];
-        $connection->addColumn($reviewTable, 'submitted_to_zinrelo', $reviewColumn);
+        $connection->addColumn($reviewTable, 'submitted_to_trueloyal', $reviewColumn);
 
         $installer->endSetup();
     }

@@ -1,7 +1,7 @@
 <?php
-$zinreloHelper = $this->helper('Zinrelo\LoyaltyRewards\Helper\Config');
-$zinreloQuoteItem = $zinreloHelper->getZinreloQuoteItemByItemId($block->getItem()->getId());
-if ($zinreloQuoteItem->getIsZinreloFreeProduct()) { ?>
+$trueloyalHelper = $this->helper('TrueLoyal\LoyaltyRewards\Helper\Config');
+$trueloyalQuoteItem = $trueloyalHelper->getTrueLoyalQuoteItemByItemId($block->getItem()->getId());
+if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) { ?>
 <?php } else { ?>
     <a href="#"
        title="<?= $block->escapeHtml(__('Remove item')) ?>"

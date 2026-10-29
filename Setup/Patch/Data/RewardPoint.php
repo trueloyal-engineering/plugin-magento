@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Setup\Patch\Data;
+namespace TrueLoyal\LoyaltyRewards\Setup\Patch\Data;
 
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\ResourceModel\Attribute;
@@ -10,7 +10,7 @@ use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class RewardPoint implements DataPatchInterface
 {
@@ -107,10 +107,10 @@ class RewardPoint implements DataPatchInterface
                 'adminhtml_customer'
             ]);
             $this->attributeResource->save($attribute);
-            /*Set attribute as Zinrelo*/
+            /*Set attribute as TrueLoyal*/
             $attributeId = $this->helper->getCustomerAttributeId($attributeCode);
-            $eavAttribute = $this->helper->getZinreloAttributeByAttributeId($attributeId);
-            $eavAttribute->setAttributeId($attributeId)->setIsZinreloAttribute(1)->save();
+            $eavAttribute = $this->helper->getTrueLoyalAttributeByAttributeId($attributeId);
+            $eavAttribute->setAttributeId($attributeId)->setIsTrueLoyalAttribute(1)->save();
         }
         $this->moduleDataSetup->getConnection()->endSetup();
     }

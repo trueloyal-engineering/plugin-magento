@@ -3,10 +3,10 @@ $viewModel = $block->getData('viewModel');
 if ($viewModel->isPdpPointEnabled()) {
     $rewardLabel = $viewModel->getRewardLabel();
     if (str_contains($rewardLabel, "{{EARN_POINTS}}")) {
-        $rewardLabel = str_replace("{{EARN_POINTS}}", "<div class='zinrelo-product-price' id='potential_product_points'data-zrl-product-points></div>", $rewardLabel);
+        $rewardLabel = str_replace("{{EARN_POINTS}}", "<div class='trueloyal-product-price' id='potential_product_points'data-zrl-product-points></div>", $rewardLabel);
     } else {
-        $rewardLabel = "<div class='zinrelo-product-price' id='potential_product_points' data-zrl-product-points></div>" . $rewardLabel;
+        $rewardLabel = "<div class='trueloyal-product-price' id='potential_product_points' data-zrl-product-points></div>" . $rewardLabel;
     }
     ?>
-    <div class="zinrelo-earn-product-points"> <?=  /* @noEscape */  $rewardLabel;?> </div>
+    <div class="trueloyal-earn-product-points"> <?=  /* @noEscape */  $rewardLabel;?> </div>
 <?php } ?>

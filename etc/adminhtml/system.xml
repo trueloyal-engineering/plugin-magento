@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <tab id="zinrelo_loyaltyRewards" sortOrder="999" translate="label">
-            <label>Zinrelo Loyalty Rewards</label>
+        <tab id="trueloyal_loyaltyRewards" sortOrder="999" translate="label">
+            <label>TrueLoyal Loyalty Rewards</label>
         </tab>
-        <section id="zinrelo_loyaltyRewards" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
-            <label>Zinrelo Settings</label>
-            <tab>zinrelo_loyaltyRewards</tab>
-            <resource>Zinrelo_LoyaltyRewards::config</resource>
+        <section id="trueloyal_loyaltyRewards" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+            <label>TrueLoyal Settings</label>
+            <tab>trueloyal_loyaltyRewards</tab>
+            <resource>TrueLoyal_LoyaltyRewards::config</resource>
             <group id="settings" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
                 <label>Settings</label>
                 <field id="loyalty_rewards_active" showInDefault="1" showInStore="0" showInWebsite="1" sortOrder="10" translate="label" type="select">
@@ -31,7 +31,7 @@
                     <label>Add Partner id</label>
                     <comment>
                         <![CDATA[
-                            To get <strong>Partner id</strong> refer to <a href="https://help.zinrelo.com/reference/authentication" target="_blank">URL</a>.
+                            To get <strong>Partner id</strong> refer to <a href="https://help.trueloyal.com/reference/authentication" target="_blank">URL</a>.
                         ]]>
                     </comment>
                     <depends>
@@ -43,7 +43,7 @@
                     <label>Add API Key</label>
                     <comment>
                         <![CDATA[
-                            To get <strong>API Key</strong> refer to <a href="https://help.zinrelo.com/reference/authentication" target="_blank">URL</a>.
+                            To get <strong>API Key</strong> refer to <a href="https://help.trueloyal.com/reference/authentication" target="_blank">URL</a>.
                         ]]>
                     </comment>
                     <depends>
@@ -55,7 +55,7 @@
                     <label>Add API Key Identifier</label>
                     <comment>
                         <![CDATA[
-                            To get <strong>API Key Identifier</strong> refer to <a href="https://help.zinrelo.com/reference/web-api-authentication#where-can-i-find-api-key-and-api-key-identifier" target="_blank">URL</a>.
+                            To get <strong>API Key Identifier</strong> refer to <a href="https://help.trueloyal.com/reference/web-api-authentication#where-can-i-find-api-key-and-api-key-identifier" target="_blank">URL</a>.
                         ]]>
                     </comment>
                     <depends>
@@ -79,7 +79,7 @@
                     </depends>
                     <comment>
                         <![CDATA[
-                            Please note that this will remove Zinrelo dashboard as well as points on product page for all guest users.
+                            Please note that this will remove TrueLoyal dashboard as well as points on product page for all guest users.
                         ]]>
                     </comment>
                 </field>
@@ -151,8 +151,8 @@
                 <field id="reward_events" translate="label" type="multiselect" sortOrder="60" showInDefault="1"
                        showInWebsite="1" showInStore="0">
                     <label>Reward Events</label>
-                    <source_model>Zinrelo\LoyaltyRewards\Model\System\Config\EventsSelection</source_model>
-                    <comment>Only selected events will be sent to Zinrelo</comment>
+                    <source_model>TrueLoyal\LoyaltyRewards\Model\System\Config\EventsSelection</source_model>
+                    <comment>Only selected events will be sent to TrueLoyal</comment>
                     <depends>
                         <field id="loyalty_rewards_active">1</field>
                     </depends>
@@ -175,6 +175,49 @@
                     <label>Languages(Locale)</label>
                     <comment>Value Pass Like : {"fr": "french", "es": "spanish", "hi": "custom language one"}</comment>
                 </field>
+
+                <field id="preferred_language" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="select">
+                    <label>Preferred Language</label>
+                    <comment>
+                        <![CDATA[
+                            Select the preferred language from the available ones in TrueLoyal. This language will be used in the customer's EUD.<br>
+                            Make sure the Rewards and Activities are translated into this language.<br>
+                            This field is optional. If not selected, the preferred language will be the default one in TrueLoyal.
+                        ]]>
+                    </comment>
+                    <source_model>TrueLoyal\LoyaltyRewards\Model\System\Config\PreferredLanguage</source_model>
+                </field>
+
+                <field id="member_identifier_prefix" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="74" translate="label" type="text">
+                    <label>Member Identifier Prefix</label>
+                    <comment>This field is optional.</comment>
+                </field>
+
+                <field id="member_identifier" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="75" translate="label" type="select">
+                    <label>Member Identifier</label>
+                    <comment>Choose whether to use Member ID or Member Email when sending requests to TrueLoyal.</comment>
+                    <source_model>TrueLoyal\LoyaltyRewards\Model\System\Config\MemberIdentifier</source_model>
+                </field>
+
+                <group id="custom_member_attributes" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="80" translate="label">
+                    <label>Custom Member Attributes</label>
+                    <comment>
+                        <![CDATA[
+                            This field is optional<br>
+                            Enter names of TrueLoyal Member Custom Attributes corresponding to Magento data fields below.<br>
+                            <strong>Note:</strong> These custom attributes must be created in TrueLoyal before typing them here.
+                        ]]>
+                    </comment>
+                    <field id="store_id" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="text">
+                        <label>Store ID</label>
+                    </field>
+                    <field id="store_code" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="text">
+                        <label>Store Code</label>
+                    </field>
+                    <field id="store_currency" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="text">
+                        <label>Store Currency</label>
+                    </field>
+                </group>
             </group>
         </section>
     </system>

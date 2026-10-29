@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Framework\HTTP\Client;
+namespace TrueLoyal\LoyaltyRewards\Framework\HTTP\Client;
 
 use Magento\Framework\HTTP\Client\Curl as MainCurl;
 

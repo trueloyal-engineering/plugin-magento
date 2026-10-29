@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Model\Api;
+namespace TrueLoyal\LoyaltyRewards\Model\Api;
 
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\CustomerFactory;
@@ -11,7 +11,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Store\Model\StoreManagerInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class CustomerAttributeUpdate
 {
@@ -82,8 +82,8 @@ class CustomerAttributeUpdate
         if (!$this->helper->isModuleEnabled()) {
             $response[] = [
                         'status' => false,
-                        'message' => __('Zinrelo LoyaltyRewards module is not enabled.') . " " .
-                        __('Enable module from: Stores → Configuration →Zinrelo Loyalty Rewards → Zinrelo Settings.')
+                        'message' => __('TrueLoyal LoyaltyRewards module is not enabled.') . " " .
+                        __('Enable module from: Stores → Configuration →TrueLoyal Loyalty Rewards → TrueLoyal Settings.')
                     ];
             return $response;
         /*Check header api-key and partner-id with configured auth key*/
@@ -98,8 +98,8 @@ class CustomerAttributeUpdate
                 $attributeValues = $this->eavConfig->getAttribute(Customer::ENTITY, $attribute['attribute_code']);
                 $websiteID = $this->storeManager->getStore()->getWebsiteId();
                 $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($attribute['customer_email']);
-                $eavAttribute = $this->helper->getZinreloAttributeByAttributeId($attributeValues->getAttributeId());
-                if ($eavAttribute->getIsZinreloAttribute() && $customer->getData()) {
+                $eavAttribute = $this->helper->getTrueLoyalAttributeByAttributeId($attributeValues->getAttributeId());
+                if ($eavAttribute->getIsTrueLoyalAttribute() && $customer->getData()) {
                     $customerData = $customer->getDataModel();
                     $customerData->setCustomAttribute($attribute['attribute_code'], $attribute['value']);
                     $customer->updateData($customerData);

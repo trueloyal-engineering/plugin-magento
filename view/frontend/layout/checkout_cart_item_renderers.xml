@@ -4,18 +4,18 @@
     <body>
         <referenceBlock name="checkout.cart.item.renderers.simple.actions.remove">
            <action method="setTemplate">
-                <argument name="template" xsi:type="string">Zinrelo_LoyaltyRewards::cart/item/renderer/actions/remove.phtml</argument>
+                <argument name="template" xsi:type="string">TrueLoyal_LoyaltyRewards::cart/item/renderer/actions/remove.phtml</argument>
             </action>
         </referenceBlock>
 
         <referenceBlock name="checkout.cart.item.renderers.simple.actions.edit">
             <action method="setTemplate">
-                <argument name="template" xsi:type="string">Zinrelo_LoyaltyRewards::cart/item/renderer/actions/edit.phtml</argument>
+                <argument name="template" xsi:type="string">TrueLoyal_LoyaltyRewards::cart/item/renderer/actions/edit.phtml</argument>
             </action>
         </referenceBlock>
         <referenceBlock name="checkout.cart.item.renderers.simple.actions.move_to_wishlist">
             <action method="setTemplate">
-                <argument name="template" xsi:type="string">Zinrelo_LoyaltyRewards::cart/item/renderer/actions/move_to_wishlist.phtml</argument>
+                <argument name="template" xsi:type="string">TrueLoyal_LoyaltyRewards::cart/item/renderer/actions/move_to_wishlist.phtml</argument>
             </action>
         </referenceBlock>
     </body>

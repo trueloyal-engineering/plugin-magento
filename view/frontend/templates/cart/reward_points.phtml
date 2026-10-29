@@ -9,9 +9,9 @@ $viewModel = $block->getData('viewModel');
 if ($viewModel->isPdpAtCartEnabled()) {
     $rewardLabel = $viewModel->getRewardLabelAtCartPage();
     if (str_contains($rewardLabel, "{{EARN_POINTS}}")) {
-        $rewardLabel = str_replace("{{EARN_POINTS}}", "<span class='zinrelo-product-price' id='zinrelo_cart_total_points' style='font-weight:bold;' data-zrl-cart-points></span>", $rewardLabel);
+        $rewardLabel = str_replace("{{EARN_POINTS}}", "<span class='trueloyal-product-price' id='trueloyal_cart_total_points' style='font-weight:bold;' data-zrl-cart-points></span>", $rewardLabel);
     } else {
-        $rewardLabel = "<span class='zinrelo-product-price' id='zinrelo_cart_total_points' data-zrl-cart-points></span>" . $rewardLabel;
+        $rewardLabel = "<span class='trueloyal-product-price' id='trueloyal_cart_total_points' data-zrl-cart-points></span>" . $rewardLabel;
     }
     ?>
     <div> <?=  /* @noEscape */  $rewardLabel;?> </div>

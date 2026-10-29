@@ -8,10 +8,10 @@ use Magento\Wishlist\Block\Cart\Item\Renderer\Actions\MoveToWishlist;
 
 /** @var MoveToWishlist $block */
 
-$zinreloHelper = $this->helper(Zinrelo\LoyaltyRewards\Helper\Config ::class);
-$zinreloQuoteItem = $zinreloHelper->getZinreloQuoteItemByItemId($block->getItem()->getId());
+$trueloyalHelper = $this->helper(TrueLoyal\LoyaltyRewards\Helper\Config ::class);
+$trueloyalQuoteItem = $trueloyalHelper->getTrueLoyalQuoteItemByItemId($block->getItem()->getId());
 ?>
-<?php if ($zinreloQuoteItem->getIsZinreloFreeProduct()) {
+<?php if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
     return;
 } else { ?>
     <?php if ($block->isAllowInCart() && $block->isProductVisibleInSiteVisibility()): ?>

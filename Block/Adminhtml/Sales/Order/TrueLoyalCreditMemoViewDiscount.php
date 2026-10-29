@@ -1,41 +1,40 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Block\Adminhtml\Sales\Order;
+namespace TrueLoyal\LoyaltyRewards\Block\Adminhtml\Sales\Order;
 
 use Magento\Framework\DataObject;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
-use Magento\Sales\Api\InvoiceRepositoryInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
+use Magento\Sales\Api\CreditmemoRepositoryInterface;
 
-class ZinreloInvoiceViewDiscount extends Template
+class TrueLoyalCreditMemoViewDiscount extends Template
 {
-
     /**
      * @var Data
      */
     private $helper;
     /**
-     * @var InvoiceRepositoryInterface
+     * @var CreditmemoRepositoryInterface
      */
-    private $invoiceRepository;
+    private $creditMemoRepository;
 
     /**
-     * Zinrelo Invoice View Discount constructor.
+     * TrueLoyal Credit Memo View Discount constructor.
      *
      * @param Context $context
      * @param Data $helper
-     * @param InvoiceRepositoryInterface $invoiceRepository
+     * @param CreditmemoRepositoryInterface $creditedRepository
      * @param array $data
      */
     public function __construct(
         Context $context,
         Data $helper,
-        InvoiceRepositoryInterface $invoiceRepository,
+        CreditmemoRepositoryInterface $creditedRepository,
         array $data = []
     ) {
         $this->helper = $helper;
-        $this->invoiceRepository = $invoiceRepository;
+        $this->creditMemoRepository = $creditedRepository;
         parent::__construct(
             $context,
             $data
@@ -45,19 +44,18 @@ class ZinreloInvoiceViewDiscount extends Template
     /**
      * This function call initTotals
      *
-     * @return ZinreloInvoiceViewDiscount
+     * @return TrueLoyalCreditMemoViewDiscount
      */
     public function initTotals()
     {
-        $invoiceId = $this->getRequest()->getParam('invoice_id');
-        $invoiceData = $this->invoiceRepository->get($invoiceId);
-        $orderId = $invoiceData->getOrderId();
-        $totalAmount = $this->helper->getRedeemRewardDiscountData($orderId);
+        $creditMemoId = $this->getRequest()->getParam('creditmemo_id');
+        $creditedData = $this->creditMemoRepository->get($creditMemoId);
+        $totalAmount = $this->helper->getRedeemRewardDiscountData($creditedData->getOrderId());
         if ($totalAmount["status"]) {
             $this->getParentBlock()->addTotal(
                 new DataObject(
                     [
-                        'code' => 'zinrelo_discount',
+                        'code' => 'trueloyal_discount',
                         'strong' => $this->getStrong(),
                         'value' => $totalAmount["value"],
                         'base_value' => $totalAmount["value"],

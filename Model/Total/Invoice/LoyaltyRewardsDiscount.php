@@ -1,10 +1,10 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Model\Total\Invoice;
+namespace TrueLoyal\LoyaltyRewards\Model\Total\Invoice;
 
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Invoice\Total\AbstractTotal;
-use Zinrelo\LoyaltyRewards\Helper\Reward;
+use TrueLoyal\LoyaltyRewards\Helper\Reward;
 
 class LoyaltyRewardsDiscount extends AbstractTotal
 {

@@ -3,7 +3,7 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="standard">
         <route frontName="loyaltyRewards" id="loyaltyRewards">
-            <module name="Zinrelo_LoyaltyRewards"/>
+            <module name="TrueLoyal_LoyaltyRewards"/>
         </route>
     </router>
 </config>

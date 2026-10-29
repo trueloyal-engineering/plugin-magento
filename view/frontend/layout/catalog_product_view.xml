@@ -3,10 +3,10 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="product.info.main">
-            <block class="Magento\Catalog\Block\Product\View" name="view.zinrelo.reward.earn.points"
-                   template="Zinrelo_LoyaltyRewards::catalog/reward_points.phtml" after="product.info.price">
+            <block class="Magento\Catalog\Block\Product\View" name="view.trueloyal.reward.earn.points"
+                   template="TrueLoyal_LoyaltyRewards::catalog/reward_points.phtml" after="product.info.price">
                 <arguments>
-                    <argument name="viewModel" xsi:type="object">Zinrelo\LoyaltyRewards\ViewModel\ProductView</argument>
+                    <argument name="viewModel" xsi:type="object">TrueLoyal\LoyaltyRewards\ViewModel\ProductView</argument>
                 </arguments>
             </block>
         </referenceContainer>

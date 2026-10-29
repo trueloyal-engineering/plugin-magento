@@ -1,6 +1,10 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Controller\LoyaltyRewards;
+/**
+ * This controller is used no more. The JWT token generation was moved to Block/Dashboard.php
+ */
+
+namespace TrueLoyal\LoyaltyRewards\Controller\LoyaltyRewards;
 
 use Firebase\JWT\JWT;
 use Magento\Customer\Model\CustomerFactory;
@@ -14,7 +18,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\View\Result\Layout;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class Index implements HttpPostActionInterface
 {
@@ -118,7 +122,10 @@ class Index implements HttpPostActionInterface
 
         $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON);
         $jsonConfigLanguage = $this->helper->getConfigLanguage();
-        if ($jsonConfigLanguage) {
+        $preferredLanguage = $this->helper->getPreferredLanguage();
+        if ($preferredLanguage) {
+            $lang = $preferredLanguage;
+        } elseif ($jsonConfigLanguage) {
             $lang = $this->store->getLocale() ?? "";
             $configLanguage = $this->serializer->unserialize($jsonConfigLanguage);
             $config = stristr($lang, "_", true);
@@ -132,8 +139,8 @@ class Index implements HttpPostActionInterface
         if ($customerId && !$this->helper->isAutoEnrollmentEnabled() ) {
             $customerData = $this->customerRepository->getById($customerId);
             $opt_in_attribute = $this->helper->getOptInAttributeCode();
-            $zinreloOptedIn = $customerData->getCustomAttribute($opt_in_attribute);
-            if (!$zinreloOptedIn || !$zinreloOptedIn->getValue()) {
+            $trueloyalOptedIn = $customerData->getCustomAttribute($opt_in_attribute);
+            if (!$trueloyalOptedIn || !$trueloyalOptedIn->getValue()) {
                 return $resultJson->setData([]);
             }
         }
@@ -152,10 +159,21 @@ class Index implements HttpPostActionInterface
             $postcode = $billingAddress['postcode'] ?? "";
             $street = isset($billingAddress['street']) ? explode("\n", $billingAddress['street']) : [];
             $country = isset($billingAddress['country_id']) ? $this->getCountryName($billingAddress['country_id']) : "";
+            $storeId = (string)$customer->getStoreId();
+            $storeCurrency = $this->helper->getStoreCurrencyCode();
+            $memberIdentifierValue = $this->helper->getMemberIdentifierValue();
         }
-
+        $customAttributes = [];
+        $customStoreIdKey = $this->helper->getCustomMemberStoreId();
+        $customStoreCurrencyKey = $this->helper->getCustomMemberStoreCurrency();
+        if ($customStoreIdKey) {
+            $customAttributes[$customStoreIdKey] = $storeId ?? '';
+        }
+        if ($customStoreCurrencyKey) {
+            $customAttributes[$customStoreCurrencyKey] = $storeCurrency ?? '';
+        }
         $payload = [
-            'member_id' => $customerEmail,
+            'member_id' => $memberIdentifierValue ?? '',
             'sub' => $apiKeyIdentifier,
             'email_address' => $customerEmail,
             'first_name' => $customerFirstName,
@@ -171,11 +189,12 @@ class Index implements HttpPostActionInterface
                 'country' => $country,
                 'postal_code' => $postcode,
             ],
+            'custom_attributes' => $customAttributes,
             'exp' => round(microtime(true) * 1000)
         ];
 
         $data = $this->jwt->encode($payload, $key, 'HS256');
-        if ($customerEmail) {
+        if ($memberIdentifierValue ?? false) {
             $this->helper->setCookie($data);
             $isSetCookies = true;
         }

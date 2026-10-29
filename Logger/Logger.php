@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Logger;
+namespace TrueLoyal\LoyaltyRewards\Logger;
 
 use Monolog\Logger as MonologLogger;
 

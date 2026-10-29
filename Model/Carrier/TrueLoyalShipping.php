@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Model\Carrier;
+namespace TrueLoyal\LoyaltyRewards\Model\Carrier;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -15,14 +15,14 @@ use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Magento\Shipping\Model\Rate\Result;
 use Magento\Shipping\Model\Rate\ResultFactory;
 use Psr\Log\LoggerInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
-class ZinreloShipping extends AbstractCarrier implements CarrierInterface
+class TrueLoyalShipping extends AbstractCarrier implements CarrierInterface
 {
     /**
      * @var string
      */
-    protected $_code = 'zinrelorate';
+    protected $_code = 'trueloyalrate';
     /**
      * @var bool
      */
@@ -45,7 +45,7 @@ class ZinreloShipping extends AbstractCarrier implements CarrierInterface
     private $helper;
 
     /**
-     * ZinreloShipping constructor.
+     * TrueLoyalShipping constructor.
      *
      * @param ScopeConfigInterface $scopeConfig
      * @param ErrorFactory $rateErrorFactory
@@ -80,11 +80,11 @@ class ZinreloShipping extends AbstractCarrier implements CarrierInterface
      */
     public function getAllowedMethods()
     {
-        return ['zinrelorate' => $this->getConfigData('name')];
+        return ['trueloyalrate' => $this->getConfigData('name')];
     }
 
     /**
-     * Zinrelo free shipping
+     * TrueLoyal free shipping
      *
      * @param RateRequest $request
      * @return bool|DataObject|Result|null
@@ -101,9 +101,9 @@ class ZinreloShipping extends AbstractCarrier implements CarrierInterface
             $title = $this->helper->getFreeShippingLabel() ?? $this->getConfigData('title');
             $amount = $this->getConfigData('price');
             $shippingPrice = $this->getFinalPriceWithHandlingFee($amount);
-            $method->setCarrier('zinrelorate');
+            $method->setCarrier('trueloyalrate');
             $method->setCarrierTitle($this->getConfigData('name'));
-            $method->setMethod('zinrelorate');
+            $method->setMethod('trueloyalrate');
             $method->setMethodTitle($title);
             $method->setCost($amount);
             $method->setPrice($shippingPrice);
@@ -111,7 +111,7 @@ class ZinreloShipping extends AbstractCarrier implements CarrierInterface
             return $result;
         } else {
             $error = $this->_rateErrorFactory->create();
-            $error->setCarrier('zinrelorate');
+            $error->setCarrier('trueloyalrate');
             $result->append($error);
             return $result;
         }

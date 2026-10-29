@@ -13,8 +13,8 @@
                                             <item name="children" xsi:type="array">
                                                 <item name="totals" xsi:type="array">
                                                     <item name="children" xsi:type="array">
-                                                        <item name="zinrelo_discount" xsi:type="array">
-                                                            <item name="component"  xsi:type="string">Zinrelo_LoyaltyRewards/js/view/checkout/summary/zinrelo-discount</item>
+                                                        <item name="trueloyal_discount" xsi:type="array">
+                                                            <item name="component"  xsi:type="string">TrueLoyal_LoyaltyRewards/js/view/checkout/summary/trueloyal-discount</item>
                                                             <item name="sortOrder" xsi:type="string">20</item>
                                                         </item>
                                                     </item>

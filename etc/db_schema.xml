@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
-    <table name="zinrelo_quote" resource="checkout" engine="innodb" comment="Zinrelo Quote related data">
+    <table name="trueloyal_quote" resource="checkout" engine="innodb" comment="TrueLoyal Quote related data">
         <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"
                 comment="ID"/>
         <column xsi:type="varchar" name="redeem_reward_discount" nullable="true" length="255" comment="Redeem Reward Discount"/>
@@ -9,61 +9,61 @@
         <column xsi:type="smallint" name="is_abandoned_cart_sent" unsigned="true" nullable="true" identity="false" comment="Is abandoned cart request sent"/>
         <column xsi:type="int" name="quote_id" unsigned="true" nullable="false" identity="false"
                 comment="Quote ID"/>
-        <constraint xsi:type="foreign" referenceId="ZINRELO_QUOTE_QUOTE_ID_QUOTE_ENTITY_ID" table="zinrelo_quote"
+        <constraint xsi:type="foreign" referenceId="TRUELOYAL_QUOTE_QUOTE_ID_QUOTE_ENTITY_ID" table="trueloyal_quote"
                     column="quote_id" referenceTable="quote" referenceColumn="entity_id" onDelete="CASCADE"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>
     </table>
-    <table name="zinrelo_quote_item" resource="checkout" engine="innodb" comment="Zinrelo Quote item related data">
+    <table name="trueloyal_quote_item" resource="checkout" engine="innodb" comment="TrueLoyal Quote item related data">
         <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"
                 comment="ID"/>
-        <column xsi:type="smallint" name="is_zinrelo_free_product" unsigned="true" nullable="false" identity="false" default="0" comment="Is Zinrelo Free Product"/>
+        <column xsi:type="smallint" name="is_trueloyal_free_product" unsigned="true" nullable="false" identity="false" default="0" comment="Is TrueLoyal Free Product"/>
         <column xsi:type="int" name="quote_item_id" unsigned="true" nullable="false" identity="false"
                 comment="Quote Item ID"/>
-        <constraint xsi:type="foreign" referenceId="ZINRELO_QUOTE_ITEM_QUOTE_ITEM_ID_QUOTE_ITEM_ITEM_ID"
-                    table="zinrelo_quote_item"
+        <constraint xsi:type="foreign" referenceId="TRUELOYAL_QUOTE_ITEM_QUOTE_ITEM_ID_QUOTE_ITEM_ITEM_ID"
+                    table="trueloyal_quote_item"
                     column="quote_item_id" referenceTable="quote_item" referenceColumn="item_id" onDelete="CASCADE"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>
     </table>
-    <table name="zinrelo_sales_order" resource="sales" engine="innodb" comment="Zinrelo Order related data">
+    <table name="trueloyal_sales_order" resource="sales" engine="innodb" comment="TrueLoyal Order related data">
         <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"
                 comment="ID"/>
-        <column xsi:type="text" name="zinrelo_reward" nullable="true" comment="Add applied reward rule data"/>
-        <column xsi:type="smallint" name="complete_request_sent" unsigned="true" nullable="false" identity="false" default="0" comment="Is order complete request sent to Zinrelo"/>
+        <column xsi:type="text" name="trueloyal_reward" nullable="true" comment="Add applied reward rule data"/>
+        <column xsi:type="smallint" name="complete_request_sent" unsigned="true" nullable="false" identity="false" default="0" comment="Is order complete request sent to TrueLoyal"/>
         <column xsi:type="int" name="order_id" unsigned="true" nullable="false" identity="false"
                 comment="Order ID"/>
-        <constraint xsi:type="foreign" referenceId="ZINRELO_SALES_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID"
-                    table="zinrelo_sales_order"
+        <constraint xsi:type="foreign" referenceId="TRUELOYAL_SALES_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID"
+                    table="trueloyal_sales_order"
                     column="order_id" referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>
     </table>
-    <table name="zinrelo_review" resource="default" engine="innodb" comment="Review base information">
+    <table name="trueloyal_review" resource="default" engine="innodb" comment="Review base information">
         <column xsi:type="bigint" name="id" unsigned="true" nullable="false" identity="true"
                 comment="ID"/>
-        <column xsi:type="smallint" name="submitted_to_zinrelo" unsigned="true" nullable="false" identity="false" default="0" comment="Is product review submitted Zinrelo"/>
+        <column xsi:type="smallint" name="submitted_to_trueloyal" unsigned="true" nullable="false" identity="false" default="0" comment="Is product review submitted TrueLoyal"/>
         <column xsi:type="bigint" name="review_id" unsigned="true" nullable="false" identity="false"
                 comment="Review ID"/>
-        <constraint xsi:type="foreign" referenceId="ZINRELO_REVIEW_REVIEW_ID_REVIEW_REVIEW_ID" table="zinrelo_review"
+        <constraint xsi:type="foreign" referenceId="TRUELOYAL_REVIEW_REVIEW_ID_REVIEW_REVIEW_ID" table="trueloyal_review"
                     column="review_id" referenceTable="review" referenceColumn="review_id" onDelete="CASCADE"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>
     </table>
-    <table name="zinrelo_eav_attribute" resource="default" engine="innodb" comment="Eav Attribute">
+    <table name="trueloyal_eav_attribute" resource="default" engine="innodb" comment="Eav Attribute">
         <column xsi:type="smallint" name="id" unsigned="true" nullable="false" identity="true"
                 comment="ID"/>
-        <column xsi:type="smallint" name="is_zinrelo_attribute" unsigned="true" nullable="false" identity="false"
-                default="0" comment="Is Zinrelo Attribute"/>
+        <column xsi:type="smallint" name="is_trueloyal_attribute" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Is TrueLoyal Attribute"/>
         <column xsi:type="smallint" name="attribute_id" unsigned="true" nullable="false" identity="false"
                 comment="Attribute ID"/>
         <constraint xsi:type="foreign"
-                    referenceId="ZINRELO_EAV_ATTRIBUTE_ATTRIBUTE_ID_EAV_ATTRIBUTE_ATTRIBUTE_ID"
-                    table="zinrelo_eav_attribute" column="attribute_id"
+                    referenceId="TRUELOYAL_EAV_ATTRIBUTE_ATTRIBUTE_ID_EAV_ATTRIBUTE_ATTRIBUTE_ID"
+                    table="trueloyal_eav_attribute" column="attribute_id"
                     referenceTable="eav_attribute" referenceColumn="attribute_id" onDelete="CASCADE"
         />
         <constraint xsi:type="primary" referenceId="PRIMARY">

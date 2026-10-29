@@ -1,5 +1,5 @@
 {
-    "zinrelo_quote": {
+    "trueloyal_quote": {
         "column": {
             "id": true,
             "redeem_reward_discount": true,
@@ -8,52 +8,52 @@
             "quote_id": true
         },
         "constraint": {
-            "ZINRELO_QUOTE_QUOTE_ID_QUOTE_ENTITY_ID": true,
+            "TRUELOYAL_QUOTE_QUOTE_ID_QUOTE_ENTITY_ID": true,
             "PRIMARY": true
         }
     },
-    "zinrelo_quote_item": {
+    "trueloyal_quote_item": {
         "column": {
             "id": true,
-            "is_zinrelo_free_product": true,
+            "is_trueloyal_free_product": true,
             "quote_item_id": true
         },
         "constraint": {
-            "ZINRELO_QUOTE_ITEM_QUOTE_ITEM_ID_QUOTE_ITEM_ITEM_ID": true,
+            "TRUELOYAL_QUOTE_ITEM_QUOTE_ITEM_ID_QUOTE_ITEM_ITEM_ID": true,
             "PRIMARY": true
         }
     },
-    "zinrelo_sales_order": {
+    "trueloyal_sales_order": {
         "column": {
             "id": true,
-            "zinrelo_reward": true,
+            "trueloyal_reward": true,
             "complete_request_sent": true,
             "order_id": true
         },
         "constraint": {
-            "ZINRELO_SALES_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID": true,
+            "TRUELOYAL_SALES_ORDER_ORDER_ID_SALES_ORDER_ENTITY_ID": true,
             "PRIMARY": true
         }
     },
-    "zinrelo_review": {
+    "trueloyal_review": {
         "column": {
             "id": true,
-            "submitted_to_zinrelo": true,
+            "submitted_to_trueloyal": true,
             "review_id": true
         },
         "constraint": {
-            "ZINRELO_REVIEW_REVIEW_ID_REVIEW_REVIEW_ID": true,
+            "TRUELOYAL_REVIEW_REVIEW_ID_REVIEW_REVIEW_ID": true,
             "PRIMARY": true
         }
     },
-    "zinrelo_eav_attribute": {
+    "trueloyal_eav_attribute": {
         "column": {
             "id": true,
-            "is_zinrelo_attribute": true,
+            "is_trueloyal_attribute": true,
             "attribute_id": true
         },
         "constraint": {
-            "ZINRELO_EAV_ATTRIBUTE_ATTRIBUTE_ID_EAV_ATTRIBUTE_ATTRIBUTE_ID": true,
+            "TRUELOYAL_EAV_ATTRIBUTE_ATTRIBUTE_ID_EAV_ATTRIBUTE_ATTRIBUTE_ID": true,
             "PRIMARY": true
         }
     }

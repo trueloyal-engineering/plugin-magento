@@ -10,25 +10,25 @@ define(
         "use strict";
         return Component.extend({
             defaults: {
-                template: 'Zinrelo_LoyaltyRewards/checkout/summary/zinrelo-discount'
+                template: 'TrueLoyal_LoyaltyRewards/checkout/summary/trueloyal-discount'
             },
             totals: quote.getTotals(),
-            isDisplayedZinrelodiscountTotal : function () {
-                if(totals.getSegment('zinrelo_discount')) {
+            isDisplayedTrueLoyaldiscountTotal : function () {
+                if(totals.getSegment('trueloyal_discount')) {
                     return true;
                 }else {
                     return false;
                 }
             },
-            getZinrelodiscountTotal : function () {
-                if(totals.getSegment('zinrelo_discount')){
-                    var price =  totals.getSegment('zinrelo_discount').value;
+            getTrueLoyaldiscountTotal : function () {
+                if(totals.getSegment('trueloyal_discount')){
+                    var price =  totals.getSegment('trueloyal_discount').value;
                     return this.getFormattedPrice(price);
                 }
             },
-            getZinrelodiscountLabel : function () {
-                if(totals.getSegment('zinrelo_discount')){
-                    return totals.getSegment('zinrelo_discount').title;
+            getTrueLoyaldiscountLabel : function () {
+                if(totals.getSegment('trueloyal_discount')){
+                    return totals.getSegment('trueloyal_discount').title;
                 }
             }
         });

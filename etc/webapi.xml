@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../app/code/Magento/Webapi/etc/webapi.xsd">
     <route method="POST" url="/V1/customer/attribute/create">
-        <service class="Zinrelo\LoyaltyRewards\Api\CustomerAttributeInterface" method="createCustomerAttribute"/>
+        <service class="TrueLoyal\LoyaltyRewards\Api\CustomerAttributeInterface" method="createCustomerAttribute"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
     </route>
 
     <route method="POST" url="/V1/customer/attribute/update">
-        <service class="Zinrelo\LoyaltyRewards\Api\CustomerAttributeUpdateInterface" method="updateCustomerAttributeValue"/>
+        <service class="TrueLoyal\LoyaltyRewards\Api\CustomerAttributeUpdateInterface" method="updateCustomerAttributeValue"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>

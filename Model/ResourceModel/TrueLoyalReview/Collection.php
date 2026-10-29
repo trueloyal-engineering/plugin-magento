@@ -1,15 +1,15 @@
 <?php
 /**
- * Copyright © Zinrelo. All rights reserved.
+ * Copyright © TrueLoyal. All rights reserved.
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
 
-namespace Zinrelo\LoyaltyRewards\Model\ResourceModel\ZinreloReview;
+namespace TrueLoyal\LoyaltyRewards\Model\ResourceModel\TrueLoyalReview;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
-use Zinrelo\LoyaltyRewards\Model\ZinreloReview as ZinreloReviewModel;
-use Zinrelo\LoyaltyRewards\Model\ResourceModel\ZinreloReview as ZinreloReviewResourceModel;
+use TrueLoyal\LoyaltyRewards\Model\TrueLoyalReview as TrueLoyalReviewModel;
+use TrueLoyal\LoyaltyRewards\Model\ResourceModel\TrueLoyalReview as TrueLoyalReviewResourceModel;
 
 class Collection extends AbstractCollection
 {
@@ -25,8 +25,8 @@ class Collection extends AbstractCollection
     protected function _construct()
     {
         $this->_init(
-            ZinreloReviewModel::class,
-            ZinreloReviewResourceModel::class
+            TrueLoyalReviewModel::class,
+            TrueLoyalReviewResourceModel::class
         );
     }
 }

@@ -1,13 +1,14 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Block\Adminhtml\Sales\Order;
+namespace TrueLoyal\LoyaltyRewards\Block\Adminhtml\Sales\Order;
 
 use Magento\Framework\DataObject;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
-class ZinreloDiscount extends Template
+class TrueLoyalInvoiceCreateDiscount extends Template
 {
     /**
      * @var Order
@@ -21,20 +22,27 @@ class ZinreloDiscount extends Template
      * @var Data
      */
     private $helper;
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private $orderRepository;
 
     /**
-     * Zinrelo Discount constructor.
+     * TrueLoyal Invoice Create Discount constructor.
      *
      * @param Context $context
      * @param Data $helper
+     * @param OrderRepositoryInterface $orderRepository
      * @param array $data
      */
     public function __construct(
         Context $context,
         Data $helper,
+        OrderRepositoryInterface $orderRepository,
         array $data = []
     ) {
         $this->helper = $helper;
+        $this->orderRepository = $orderRepository;
         parent::__construct($context, $data);
     }
 
@@ -91,25 +99,35 @@ class ZinreloDiscount extends Template
     /**
      * This function call initTotals
      *
-     * @return ZinreloDiscount
+     * @return TrueLoyalInvoiceCreateDiscount
      */
     public function initTotals()
     {
         $orderId = $this->getRequest()->getParam('order_id');
+        $order = $this->orderRepository->get($orderId);
+        $invoiceId = '';
+        foreach ($order->getInvoiceCollection() as $invoice) {
+            if ($invoice->getIncrementId()) {
+                $invoiceId = $invoice->getIncrementId();
+                break;
+            }
+        }
         $totalAmount = $this->helper->getRedeemRewardDiscountData($orderId);
-        if ($totalAmount["status"]) {
-            $this->getParentBlock()->addTotal(
-                new DataObject(
-                    [
-                        'code' => 'zinrelo_discount',
-                        'strong' => $this->getStrong(),
-                        'value' => $totalAmount["value"],
-                        'base_value' => $totalAmount["value"],
-                        'label' => __($totalAmount["label"]),
-                    ]
-                ),
-                $this->getAfter()
-            );
+        if (!$invoiceId) {
+            if ($totalAmount["status"]) {
+                $this->getParentBlock()->addTotal(
+                    new DataObject(
+                        [
+                            'code' => 'trueloyal_discount',
+                            'strong' => $this->getStrong(),
+                            'value' => $totalAmount["value"],
+                            'base_value' => $totalAmount["value"],
+                            'label' => __($totalAmount["label"]),
+                        ]
+                    ),
+                    $this->getAfter()
+                );
+            }
         }
         return $this;
     }

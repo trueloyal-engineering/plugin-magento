@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Model\Api;
+namespace TrueLoyal\LoyaltyRewards\Model\Api;
 
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\ResourceModel\Attribute;
@@ -10,7 +10,7 @@ use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Webapi\Rest\Request;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class CustomerAttribute
 {
@@ -75,8 +75,8 @@ class CustomerAttribute
         if (!$this->helper->isModuleEnabled()) {
             $response[] = [
                         'status' => false,
-                        'message' => __('Zinrelo LoyaltyRewards module is not enabled.') . " " .
-                        __('Enable module from: Stores → Configuration →Zinrelo Loyalty Rewards → Zinrelo Settings.')
+                        'message' => __('TrueLoyal LoyaltyRewards module is not enabled.') . " " .
+                        __('Enable module from: Stores → Configuration →TrueLoyal Loyalty Rewards → TrueLoyal Settings.')
                     ];
             return $response;
         /*Check header api-key and partner-id with configured auth key*/
@@ -114,10 +114,10 @@ class CustomerAttribute
                         'adminhtml_customer'
                     ]);
                     $this->attributeResource->save($attribute);
-                    /*Set attribute as Zinrelo*/
+                    /*Set attribute as TrueLoyal*/
                     $attributeId = $this->helper->getCustomerAttributeId($customerAttribute['attribute_code']);
-                    $eavAttribute = $this->helper->getZinreloAttributeByAttributeId($attributeId);
-                    $eavAttribute->setAttributeId($attributeId)->setIsZinreloAttribute(1)->save();
+                    $eavAttribute = $this->helper->getTrueLoyalAttributeByAttributeId($attributeId);
+                    $eavAttribute->setAttributeId($attributeId)->setIsTrueLoyalAttribute(1)->save();
                     /*End*/
                     $response[] = [
                         'status' => true,

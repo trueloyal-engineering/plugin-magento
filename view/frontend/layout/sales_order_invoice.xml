@@ -3,7 +3,7 @@
 
     <body>
         <referenceContainer name="invoice_totals">
-            <!-- <block class="Zinrelo\LoyaltyRewards\Block\Sales\Invoice\Discount" name="loyaltyRewards"/> -->
+            <!-- <block class="TrueLoyal\LoyaltyRewards\Block\Sales\Invoice\Discount" name="loyaltyRewards"/> -->
         </referenceContainer>
     </body>
 </page>

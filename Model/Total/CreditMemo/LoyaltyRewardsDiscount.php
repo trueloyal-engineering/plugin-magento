@@ -1,10 +1,10 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Model\Total\CreditMemo;
+namespace TrueLoyal\LoyaltyRewards\Model\Total\CreditMemo;
 
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Order\Creditmemo\Total\AbstractTotal;
-use Zinrelo\LoyaltyRewards\Helper\Reward;
+use TrueLoyal\LoyaltyRewards\Helper\Reward;
 
 class LoyaltyRewardsDiscount extends AbstractTotal
 {

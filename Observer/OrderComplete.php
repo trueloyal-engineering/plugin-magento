@@ -1,13 +1,13 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Observer;
+namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\OrderFactory;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class OrderComplete implements ObserverInterface
 {
@@ -44,7 +44,7 @@ class OrderComplete implements ObserverInterface
     }
 
     /**
-     * Order complete event to zinrelo
+     * Order complete event to trueloyal
      *
      * @param Observer $observer
      * @return bool
@@ -112,14 +112,14 @@ class OrderComplete implements ObserverInterface
             $orderData['coupon_code'] = $couponCode;
             $orderData['total_qty_ordered'] = (int)$orderData['total_qty_ordered'];
             $params = [
-                "member_id" => $order->getCustomerEmail(),
+                "member_id" => $this->helper->getMemberIdentifierValueById($order->getCustomerId(), $order->getCustomerEmail()),
                 "activity_id" => "order_complete",
                 "data" => $orderData
             ];
             $url = $this->helper->getWebHookUrl();
             $params = $this->helper->json->serialize($params);
             $this->helper->request($url, $params, "post");
-            /*Set complete request send to Zinrelo*/
+            /*Set complete request send to TrueLoyal*/
             $orderModel = $this->orderFactory->create()->load($orderId);
             $orderModel->setCompleteRequestSent(1);
             try {

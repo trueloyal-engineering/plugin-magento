@@ -1,13 +1,13 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Plugin\Checkout\CustomerData;
+namespace TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData;
 
 use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Helper\Product\ConfigurationPool;
 use Magento\Catalog\Model\Product\Configuration\Item\ItemResolverInterface;
 use Magento\Framework\Escaper;
 use Magento\Framework\UrlInterface;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 use Magento\Checkout\CustomerData\DefaultItem as MainDefaultItem;
 use Magento\Msrp\Helper\Data as MsrpData;
 use Magento\Checkout\Helper\Data as CheckoutData;
@@ -76,7 +76,7 @@ class DefaultItem extends MainDefaultItem
     {
         $productId = $this->helper->getFreeProduct();
         if ($productId) {
-            if ($item->getIsZinreloFreeProduct() == 1) {
+            if ($item->getIsTrueLoyalFreeProduct() == 1) {
                 return 0;
             }
         }

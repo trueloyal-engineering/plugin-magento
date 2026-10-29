@@ -1,34 +1,34 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!--Create customer attribute from api-->
-    <preference for="Zinrelo\LoyaltyRewards\Api\CustomerAttributeInterface" type="Zinrelo\LoyaltyRewards\Model\Api\CustomerAttribute"/>
+    <preference for="TrueLoyal\LoyaltyRewards\Api\CustomerAttributeInterface" type="TrueLoyal\LoyaltyRewards\Model\Api\CustomerAttribute"/>
 
     <!--Update customer attribute from api-->
-    <preference for="Zinrelo\LoyaltyRewards\Api\CustomerAttributeUpdateInterface" type="Zinrelo\LoyaltyRewards\Model\Api\CustomerAttributeUpdate"/>
+    <preference for="TrueLoyal\LoyaltyRewards\Api\CustomerAttributeUpdateInterface" type="TrueLoyal\LoyaltyRewards\Model\Api\CustomerAttributeUpdate"/>
 
-    <!--<preference for="Magento\Checkout\CustomerData\DefaultItem" type="Zinrelo\LoyaltyRewards\Plugin\Checkout\CustomerData\DefaultItem"/>-->
+    <!--<preference for="Magento\Checkout\CustomerData\DefaultItem" type="TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData\DefaultItem"/>-->
     <type name="Magento\Checkout\CustomerData\DefaultItem">
-        <plugin name="zinrelo_add" type="Zinrelo\LoyaltyRewards\Plugin\Checkout\CustomerData\AroundPluginDefaultItem" disabled="false" sortOrder="10"/>
+        <plugin name="trueloyal_add" type="TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData\AroundPluginDefaultItem" disabled="false" sortOrder="10"/>
     </type>
     <!-- We need to use prefrences due to backward compatibility of M230  otherwise not need. The parseHeaders function is a protected of its class.-->
-    <preference for="Magento\Framework\HTTP\Client\Curl" type="Zinrelo\LoyaltyRewards\Framework\HTTP\Client\Curl"/>
+    <preference for="Magento\Framework\HTTP\Client\Curl" type="TrueLoyal\LoyaltyRewards\Framework\HTTP\Client\Curl"/>
 
     <!--Disable quantity box on checkout/cart page-->
     <type name="Magento\Checkout\Block\Cart\AbstractCart">
-        <plugin name="item-disable-qty" type="Zinrelo\LoyaltyRewards\Plugin\Cart\DisableQty" sortOrder="1"/>
+        <plugin name="item-disable-qty" type="TrueLoyal\LoyaltyRewards\Plugin\Cart\DisableQty" sortOrder="1"/>
     </type>
 
-    <!-- Adding log file for Zinrelo log -->
-    <type name="Zinrelo\LoyaltyRewards\Logger\Handler">
+    <!-- Adding log file for TrueLoyal log -->
+    <type name="TrueLoyal\LoyaltyRewards\Logger\Handler">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
         </arguments>
     </type>
-    <type name="Zinrelo\LoyaltyRewards\Logger\Logger">
+    <type name="TrueLoyal\LoyaltyRewards\Logger\Logger">
         <arguments>
-            <argument name="name" xsi:type="string">zinreloLog</argument>
+            <argument name="name" xsi:type="string">trueloyalLog</argument>
             <argument name="handlers"  xsi:type="array">
-                <item name="system" xsi:type="object">Zinrelo\LoyaltyRewards\Logger\Handler</item>
+                <item name="system" xsi:type="object">TrueLoyal\LoyaltyRewards\Logger\Handler</item>
             </argument>
         </arguments>
     </type>

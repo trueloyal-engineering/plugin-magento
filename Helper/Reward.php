@@ -1,6 +1,6 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Helper;
+namespace TrueLoyal\LoyaltyRewards\Helper;
 
 class Reward extends Config
 {
@@ -17,8 +17,8 @@ class Reward extends Config
         $order = $this->orderRepository->get($orderId);
         $quoteID = $order->getQuoteId();
         $quote = $this->quoteFactory->create()->load($quoteID);
-        $zinreloQuote = $this->getZinreloQuoteByQuoteId($quote->getId());
-        $redeemReward = $zinreloQuote->getRedeemRewardDiscount();
+        $trueloyalQuote = $this->getTrueLoyalQuoteByQuoteId($quote->getId());
+        $redeemReward = $trueloyalQuote->getRedeemRewardDiscount();
         $rewardData = $this->getRewardRulesData($quote, $redeemReward);
         if (isset($rewardData['rule'])
             && ($rewardData['rule'] == 'fixed_amount_discount'

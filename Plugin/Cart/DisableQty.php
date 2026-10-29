@@ -1,10 +1,10 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Plugin\Cart;
+namespace TrueLoyal\LoyaltyRewards\Plugin\Cart;
 
 use Magento\Checkout\Block\Cart\AbstractCart;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Zinrelo\LoyaltyRewards\Helper\Config as ZinreloHelper;
+use TrueLoyal\LoyaltyRewards\Helper\Config as TrueLoyalHelper;
 
 class DisableQty
 {
@@ -13,22 +13,22 @@ class DisableQty
      */
     private $checkoutSession;
     /**
-     * @var ZinreloHelper
+     * @var TrueLoyalHelper
      */
-    private $zinreloHelper;
+    private $trueloyalHelper;
 
     /**
      * Disable Qty for Free product
      *
      * @param CheckoutSession $checkoutSession
-     * @param ZinreloHelper $zinreloHelper
+     * @param TrueLoyalHelper $trueloyalHelper
      */
     public function __construct(
         CheckoutSession $checkoutSession,
-        ZinreloHelper $zinreloHelper
+        TrueLoyalHelper $trueloyalHelper
     ) {
         $this->checkoutSession = $checkoutSession;
-        $this->zinreloHelper = $zinreloHelper;
+        $this->trueloyalHelper = $trueloyalHelper;
     }
 
     /**
@@ -44,13 +44,13 @@ class DisableQty
         $quote = $this->checkoutSession->getQuote();
         $items = $quote->getAllItems();
         foreach ($items as $item) {
-            $zinreloQuoteItem = $this->zinreloHelper->getZinreloQuoteItemByItemId($item->getId());
-            if ($zinreloQuoteItem->getIsZinreloFreeProduct()) {
+            $trueloyalQuoteItem = $this->trueloyalHelper->getTrueLoyalQuoteItemByItemId($item->getId());
+            if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct()) {
                 $isFreeProduct = true;
             }
         }
         if ($isFreeProduct) {
-            $result->setTemplate('Zinrelo_LoyaltyRewards::cart/item/default.phtml');
+            $result->setTemplate('TrueLoyal_LoyaltyRewards::cart/item/default.phtml');
         }
         return $result;
     }

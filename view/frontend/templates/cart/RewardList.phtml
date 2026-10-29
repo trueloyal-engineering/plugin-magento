@@ -1,15 +1,15 @@
 <?php
 $quote = $block->helper->getQuote();
-$zinreloQuote = $this->helper->getZinreloQuoteByQuoteId($quote->getId());
-$redeemReward = $zinreloQuote->getRedeemRewardDiscount();
+$trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($quote->getId());
+$redeemReward = $trueloyalQuote->getRedeemRewardDiscount();
 $rewardData = $block->helper->getRewardRulesData($quote, $redeemReward);
-$customerEmail = $block->getCustomerEmail();
+$memberIdentifierValue = $block->helper->getMemberIdentifierValue();
 $points = $block->getRewardPoints();
 $redeemUrl = $block->getFormAction();
 $redeemRules = $block->getRedeemRules();
 $isEnabled = $block->helper->isRewardDropDownEnable();
-if (($isEnabled && !empty($customerEmail) && $points != "error" && !empty($redeemRules)) ||
-    ($isEnabled && $zinreloQuote->getRewardRulesData() != "")
+if (($isEnabled && !empty($memberIdentifierValue) && $points != "error" && !empty($redeemRules)) ||
+    ($isEnabled && $trueloyalQuote->getRewardRulesData() != "")
 ) {
     $points = ($points == "error") ? 0 : $points;
     $message = $block->helper->getRewardLabelAtCartPage();
@@ -80,8 +80,8 @@ if (($isEnabled && !empty($customerEmail) && $points != "error" && !empty($redee
             'mage/cookies'
         ], function ($, shippingrateservice) {
             <?php if (empty($rewardData)) : ?>
-                if ($.mage.cookies.get('zinrelo_shipping_selected')) {
-                    $.mage.cookies.clear('zinrelo_shipping_selected');
+                if ($.mage.cookies.get('trueloyal_shipping_selected')) {
+                    $.mage.cookies.clear('trueloyal_shipping_selected');
                 }
             <?php endif; ?>
 

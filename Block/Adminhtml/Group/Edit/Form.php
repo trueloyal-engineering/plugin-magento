@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Zinrelo\LoyaltyRewards\Block\Adminhtml\Group\Edit;
+namespace TrueLoyal\LoyaltyRewards\Block\Adminhtml\Group\Edit;
 
 use Magento\Customer\Controller\RegistryConstants;
 

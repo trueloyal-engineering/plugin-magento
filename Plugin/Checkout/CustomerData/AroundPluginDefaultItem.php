@@ -1,10 +1,10 @@
 <?php
 
-namespace Zinrelo\LoyaltyRewards\Plugin\Checkout\CustomerData;
+namespace TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData;
 
 use Closure;
 use Magento\Quote\Model\Quote\Item;
-use Zinrelo\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 
 class AroundPluginDefaultItem
 {
@@ -50,8 +50,8 @@ class AroundPluginDefaultItem
     {
         $productId = $this->helperData->getFreeProduct();
         if ($productId) {
-            $zinreloQuoteItem = $this->helperData->getZinreloQuoteItemByItemId($item->getId());
-            if ($zinreloQuoteItem->getIsZinreloFreeProduct() == 1) {
+            $trueloyalQuoteItem = $this->helperData->getTrueLoyalQuoteItemByItemId($item->getId());
+            if ($trueloyalQuoteItem->getIsTrueLoyalFreeProduct() == 1) {
                 return 0;
             }
         }

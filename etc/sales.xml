@@ -4,16 +4,4 @@
             <item name="trueloyal_discount" instance="TrueLoyal\LoyaltyRewards\Model\Total\Quote\LoyaltyRewardsDiscount" sort_order="420"/>
         </group>
     </section>
-
-    <section name="order_invoice">
-        <group name="totals">
-            <item name="grand_total" instance="TrueLoyal\LoyaltyRewards\Model\Total\Invoice\LoyaltyRewardsDiscount" sort_order="160"/>
-        </group>
-    </section>
-
-    <section name="order_creditmemo">
-        <group name="totals">
-            <item name="grand_total" instance="TrueLoyal\LoyaltyRewards\Model\Total\CreditMemo\LoyaltyRewardsDiscount" sort_order="160"/>
-        </group>
-    </section>
 </config>

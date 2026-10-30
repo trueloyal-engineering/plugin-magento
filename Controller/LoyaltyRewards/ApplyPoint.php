@@ -133,12 +133,7 @@ class ApplyPoint implements HttpPostActionInterface
         if ($redeemReward == 'cancel') {
             $rewardData = $this->helper->getRewardRulesData($quote);
             if ($this->helper->sendRejectRewardRequest($quote)) {
-                /* Recollect totals without the removed free product (addresses cache their items per request) */
-                foreach ($quote->getAllAddresses() as $address) {
-                    $address->unsetData('cached_items_all');
-                }
-                $quote->setTotalsCollectedFlag(false);
-                $this->cart->save();
+                $this->saveCartWithNewTotals();
             }
             $this->messageManager->addNotice(
                 __('The redeemed %1 is canceled successfully.', $rewardData['reward_name'])
@@ -320,7 +315,7 @@ class ApplyPoint implements HttpPostActionInterface
             $product->setPrice(0);
             $product->addCustomOption('additional_options', $this->serializer->serialize($additionalOptions));
             $this->cart->addProduct($product, $params);
-            $this->cart->save();
+            $this->saveCartWithNewTotals();
             /*Set free product to TrueLoyal quote item*/
             $quoteItemCollection = $this->cart->getItems();
             foreach ($quoteItemCollection as $item) {
@@ -333,5 +328,21 @@ class ApplyPoint implements HttpPostActionInterface
         } catch (Exception $e) {
             $this->logger->critical($e->getMessage());
         }
+    }
+
+    /**
+     * Save the cart with recollected totals
+     *
+     * The cart was already saved earlier in this request, so the quote is flagged as collected and its
+     * addresses cache their items: a plain save would keep the old item count, qty and totals.
+     */
+    private function saveCartWithNewTotals(): void
+    {
+        $quote = $this->cart->getQuote();
+        foreach ($quote->getAllAddresses() as $address) {
+            $address->unsetData('cached_items_all');
+        }
+        $quote->setTotalsCollectedFlag(false);
+        $this->cart->save();
     }
 }

@@ -2,7 +2,7 @@
     "name": "trueloyal/extension",
     "description": "TrueLoyal Reward Point Integration Extension",
     "type": "magento2-module",
-    "version": "2.5.2",
+    "version": "2.5.3",
     "require": {
         "php": "~8.1.0||~8.2.0||~8.3.0||~8.4.0||~8.5.0",
         "firebase/php-jwt": "^6.0||^7.0"

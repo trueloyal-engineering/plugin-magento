@@ -4,12 +4,9 @@ namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Exception;
 use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\App\Request\Http;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Webapi\Rest\Request as RestRequest;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
-use Magento\Sales\Model\OrderFactory;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
 use TrueLoyal\LoyaltyRewards\Helper\OrderComplete;
 
@@ -28,18 +25,6 @@ class OrderFullInvoicePaid implements ObserverInterface
      */
     private $invoiceRepository;
     /**
-     * @var Http
-     */
-    private $request;
-    /**
-     * @var OrderFactory
-     */
-    private $orderFactory;
-    /**
-     * @var RestRequest
-     */
-    private $restRequest;
-    /**
      * @var OrderComplete
      */
     private $orderCompleteHelper;
@@ -49,27 +34,18 @@ class OrderFullInvoicePaid implements ObserverInterface
      *
      * @param Data $helper
      * @param OrderComplete $orderCompleteHelper
-     * @param Http $request
-     * @param OrderFactory $orderFactory
      * @param InvoiceRepositoryInterface $invoiceRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param RestRequest $restRequest
      */
     public function __construct(
         Data $helper,
         OrderComplete $orderCompleteHelper,
-        Http $request,
-        OrderFactory $orderFactory,
         InvoiceRepositoryInterface $invoiceRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        RestRequest $restRequest
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->helper = $helper;
-        $this->request = $request;
-        $this->orderFactory = $orderFactory;
         $this->invoiceRepository = $invoiceRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->restRequest = $restRequest;
         $this->orderCompleteHelper = $orderCompleteHelper;
     }
 
@@ -82,8 +58,9 @@ class OrderFullInvoicePaid implements ObserverInterface
     public function execute(Observer $observer)
     {
         $event = $this->helper->getRewardEvents();
-        $orderId = $this->request->getParam('order_id') ?? $this->restRequest->getParam('orderId');
-        $order = $this->orderFactory->create()->load($orderId);
+        /*Take the order from the saved invoice: request params are missing for online capture, cron or API invoices*/
+        $order = $observer->getEvent()->getInvoice()->getOrder();
+        $orderId = $order->getEntityId();
         if (in_array('order_paid', $event, true) && !$order->canInvoice()) {
             $this->orderFullInvoiceData($order, $orderId);
         }

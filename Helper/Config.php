@@ -12,6 +12,7 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\SessionFactory;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute;
 use Magento\Customer\Model\Customer as CustomerModel;
+use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -85,6 +86,19 @@ class Config extends AbstractHelper
      * Name of Cookie that holds private content version
      */
     public const COOKIE_NAME = 'trueloyal';
+    /**
+     * Outbound call limits in seconds (Magento's Curl default is 300 s, which would hang a checkout or cart page)
+     */
+    public const HTTP_CONNECT_TIMEOUT = 5;
+    public const HTTP_TIMEOUT = 10;
+    public const HTTP_INTEGRATION_TIMEOUT = 30;
+
+    /**
+     * Available points per member, fetched once per request (the cart page needs them several times)
+     *
+     * @var array
+     */
+    private $rewardPointsByMember = [];
 
     /**
      * @var Json
@@ -106,6 +120,10 @@ class Config extends AbstractHelper
      * @var WriterInterface $writeConfig
      */
     protected $writeConfig;
+    /**
+     * @var ReinitableConfigInterface
+     */
+    private $reinitableConfig;
     /**
      * @var Session
      */
@@ -235,6 +253,7 @@ class Config extends AbstractHelper
      * @param TrueLoyalReviewFactory $trueloyalReviewFactory
      * @param TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory
      * @param Attribute $eavAttribute
+     * @param ReinitableConfigInterface $reinitableConfig
      */
     public function __construct(
         Context $context,
@@ -266,7 +285,8 @@ class Config extends AbstractHelper
         TrueLoyalQuoteItemFactory $trueloyalQuoteItemFactory,
         TrueLoyalReviewFactory $trueloyalReviewFactory,
         TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory,
-        Attribute $eavAttribute
+        Attribute $eavAttribute,
+        ReinitableConfigInterface $reinitableConfig
     ) {
         $this->curl = $curl;
         $this->escaper = $escaper;
@@ -297,6 +317,7 @@ class Config extends AbstractHelper
         $this->trueloyalSalesOrderFactory = $trueloyalSalesOrderFactory;
         $this->quoteRepository = $quoteRepository;
         $this->eavAttribute = $eavAttribute;
+        $this->reinitableConfig = $reinitableConfig;
         parent::__construct($context);
     }
 
@@ -334,14 +355,19 @@ class Config extends AbstractHelper
     /**
      * Save Config
      *
-     * @return mixed
+     * @param string $config_path
+     * @param mixed $config_value
+     * @return void
      */
     public function saveConfig($config_path, $config_value)
     {
-        return $this->writeConfig->save(
+        $this->writeConfig->save(
             $config_path,
             $config_value
         );
+        /*The admin config save rebuilds the config cache before its observers run: clean it, or the store keeps
+        posting to the old webhook URL until the next cache clean*/
+        $this->reinitableConfig->reinit();
     }
     
     /**
@@ -396,6 +422,7 @@ class Config extends AbstractHelper
             "status" => "active"
         ];
         $jsonBody = json_encode($body);
+        $this->setHttpTimeouts(self::HTTP_INTEGRATION_TIMEOUT);
         $this->curl->setHeaders($headers);
         $this->curl->post($url, $jsonBody);
         $response = $this->curl->getBody();
@@ -493,7 +520,7 @@ class Config extends AbstractHelper
     public function jsonUnSerialize($data)
     {
         try {
-            return $this->json->serialize($data);
+            return $this->json->unserialize($data);
         } catch (Exception $e) {
             $this->logger->critical($e->getMessage());
         }
@@ -728,6 +755,17 @@ class Config extends AbstractHelper
                     continue;
                 }
                 if (in_array($rule["reward_sub_type"], array_values($rewardTypes), true)) {
+                    $maximumRedemption = !empty($rule["extra_parameters"]["maximum_redemption_limit"])
+                        ? $rule["extra_parameters"]["maximum_redemption_limit"] : $availablePoint;
+                    $minimumRedemption = !empty($rule["extra_parameters"]["minimum_redemption_limit"])
+                        ? $rule["extra_parameters"]["minimum_redemption_limit"] : "";
+                    /*A member can't redeem more points than their balance*/
+                    if (is_numeric($availablePoint)) {
+                        $maximumRedemption = min($maximumRedemption, $availablePoint);
+                        if ($minimumRedemption !== "" && $minimumRedemption > $maximumRedemption) {
+                            continue;
+                        }
+                    }
                     foreach ($rewardTypes as $key => $value) {
                         if ($rule["reward_sub_type"] == $value) {
                             $rewardRules[$rule["reward_id"]] = [
@@ -736,10 +774,8 @@ class Config extends AbstractHelper
                                 "id" => '',
                                 "reward_name" => $rule["reward_name"],
                                 "reward_value" => !empty($rule["reward_value"]) ? $rule["reward_value"] : "",
-                                "maximum_redemption_limit" => !empty($rule["extra_parameters"]["maximum_redemption_limit"])
-                                    ? $rule["extra_parameters"]["maximum_redemption_limit"] : $availablePoint,
-                                "minimum_redemption_limit" => !empty($rule["extra_parameters"]["minimum_redemption_limit"])
-                                    ? $rule["extra_parameters"]["minimum_redemption_limit"] : "",
+                                "maximum_redemption_limit" => $maximumRedemption,
+                                "minimum_redemption_limit" => $minimumRedemption,
                                 "conversion_rate" => !empty($rule["extra_parameters"]["conversion_rate"])
                                     ? $rule["extra_parameters"]["conversion_rate"] : "",
                                 "product_id" => isset($rule["product_id"]) ? $rule["product_id"] : ""
@@ -944,6 +980,7 @@ class Config extends AbstractHelper
                     "partner-id" => $this->getPartnerId()
                 ];
             }
+            $this->setHttpTimeouts(self::HTTP_TIMEOUT);
             $this->curl->setHeaders($headers);
             if ($requestType == "post") {
                 $this->curl->post($url, $params);
@@ -960,6 +997,18 @@ class Config extends AbstractHelper
         } catch (Exception $e) {
             $this->logger->addErrorLog($e->getMessage());
         }
+    }
+
+    /**
+     * Set connect and total timeouts for the next outbound call
+     *
+     * @param int $timeout
+     * @return void
+     */
+    private function setHttpTimeouts(int $timeout): void
+    {
+        $this->curl->setOption(CURLOPT_CONNECTTIMEOUT, self::HTTP_CONNECT_TIMEOUT);
+        $this->curl->setTimeout($timeout);
     }
 
     /**
@@ -1028,8 +1077,22 @@ class Config extends AbstractHelper
      */
     public function getRewardPoints()
     {
+        $memberId = $this->getMemberIdentifierValue();
+        if (!array_key_exists($memberId, $this->rewardPointsByMember)) {
+            $this->rewardPointsByMember[$memberId] = $this->fetchRewardPoints($memberId);
+        }
+        return $this->rewardPointsByMember[$memberId];
+    }
+
+    /**
+     * Get available reward points from TrueLoyal
+     *
+     * @param string $memberId
+     * @return mixed
+     */
+    private function fetchRewardPoints(string $memberId)
+    {
         try {
-            $memberId = $this->getMemberIdentifierValue();
             $url = $this->getLiveWebHookUrl() . "members/" . $memberId;
             $url = $this->getIdParam($url);
             $response = $this->request($url, "", "get", "live_api");

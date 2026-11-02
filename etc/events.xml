@@ -17,6 +17,9 @@
     <event name="sales_order_save_commit_after">
         <observer name="orderCreateAfterTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\CreateOrderAfter" />
     </event>
+    <event name="customer_save_before">
+        <observer name="customerSaveBeforeTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\CustomerSaveAfter" />
+    </event>
     <event name="customer_save_commit_after">
         <observer name="customerSaveAfterTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\CustomerSaveAfter" />
     </event>

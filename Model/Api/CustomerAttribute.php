@@ -107,7 +107,7 @@ class CustomerAttribute
                         __('Could not save %1', $customerAttribute['attribute_code']),
                         $exception
                     );
-                } catch (\NoSuchEntityException $noSuchEntityException) {
+                } catch (NoSuchEntityException $noSuchEntityException) {
                     throw new NoSuchEntityException(
                         __('Could not get %1 attribute.', $customerAttribute['attribute_code']),
                         $noSuchEntityException

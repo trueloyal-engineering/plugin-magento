@@ -67,12 +67,6 @@ parameters:
 			path: Logger/Logger.php
 
 		-
-			message: '#^Caught class NoSuchEntityException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: Model/Api/CustomerAttribute.php
-
-		-
 			message: '#^Constructor of class TrueLoyal\\LoyaltyRewards\\Model\\Api\\CustomerAttributeUpdate has an unused parameter \$context\.$#'
 			identifier: constructor.unusedParameter
 			count: 1

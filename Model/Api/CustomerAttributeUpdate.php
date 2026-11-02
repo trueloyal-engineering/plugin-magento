@@ -4,14 +4,15 @@ namespace TrueLoyal\LoyaltyRewards\Model\Api;
 
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
 use Magento\Eav\Model\Config;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Webapi\Rest\Request;
-use Magento\Store\Model\StoreManagerInterface;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Model\Event\Customer\CustomerSync;
 
 class CustomerAttributeUpdate
 {
@@ -26,17 +27,19 @@ class CustomerAttributeUpdate
      * @param Context $context
      * @param Request $request
      * @param Config $eavConfig
-     * @param StoreManagerInterface $storeManager
      * @param CustomerFactory $customer
      * @param Data $helper
+     * @param CustomerCollectionFactory $customerCollectionFactory
+     * @param CustomerSync $customerSync
      */
     public function __construct(
         Context $context,
         private readonly Request $request,
         private readonly Config $eavConfig,
-        private readonly StoreManagerInterface $storeManager,
         private readonly CustomerFactory $customer,
-        private readonly Data $helper
+        private readonly Data $helper,
+        private readonly CustomerCollectionFactory $customerCollectionFactory,
+        private readonly CustomerSync $customerSync
     ) {
     }
 
@@ -71,20 +74,26 @@ class CustomerAttributeUpdate
         } elseif (isset($attributes['customer_attributes'])) {
             foreach ($attributes['customer_attributes'] as $attribute) {
                 $attributeValues = $this->eavConfig->getAttribute(Customer::ENTITY, $attribute['attribute_code']);
-                $websiteID = $this->storeManager->getStore()->getWebsiteId();
-                $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($attribute['customer_email']);
                 $eavAttribute = $this->helper->getTrueLoyalAttributeByAttributeId($attributeValues->getAttributeId());
-                if ($eavAttribute->getData('is_trueloyal_attribute') && $customer->getData()) {
-                    $customerData = $customer->getDataModel();
-                    $customerData->setCustomAttribute($attribute['attribute_code'], $attribute['value']);
-                    $customer->updateData($customerData);
-                    try {
-                        $customer->save();
-                    } catch (\Exception $e) {
-                        throw new CouldNotSaveException(
-                            __('Could not save data: %1', $e->getMessage()),
-                            $e
-                        );
+                /* A member is one email: update the customer on every website it has an account on */
+                $customerIds = $this->customerCollectionFactory->create()
+                    ->addAttributeToFilter('email', (string)$attribute['customer_email'])
+                    ->getAllIds();
+                if ($eavAttribute->getData('is_trueloyal_attribute') && $customerIds) {
+                    foreach ($customerIds as $customerId) {
+                        $customer = $this->customer->create()->load($customerId);
+                        $customerData = $customer->getDataModel();
+                        $customerData->setCustomAttribute($attribute['attribute_code'], $attribute['value']);
+                        $customer->updateData($customerData);
+                        try {
+                            /* TrueLoyal sent this value: don't send it back as customer_update */
+                            $this->customerSync->withoutSync(fn () => $customer->save());
+                        } catch (\Exception $e) {
+                            throw new CouldNotSaveException(
+                                __('Could not save data: %1', $e->getMessage()),
+                                $e
+                            );
+                        }
                     }
                     $response[] = [
                         'status' => true,

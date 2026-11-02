@@ -36,14 +36,6 @@
     <event name="checkout_cart_save_after">
         <observer name="removeTrueLoyalDiscountTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\RemoveTrueLoyalDiscount"/>
     </event>
-    <!-- Send customer delete event to trueloyal -->
-    <event name="customer_delete_after">
-        <observer name="customerDeleteAfterTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\CustomerDelete"/>
-    </event>
-    <!-- Send order update event to trueloyal -->
-    <event name="sales_order_status_history_save_after">
-        <observer name="orderUpdateTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\OrderUpdate"/>
-    </event>
     <!-- Send order invoice paid event to trueloyal -->
     <event name="sales_order_invoice_save_commit_after">
         <observer name="invoiceSaveAfterTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\OrderFullInvoicePaid"/>
@@ -55,12 +47,6 @@
     <!-- Send order cancel event to trueloyal -->
     <event name="order_cancel_after">
         <observer name="orderCancelAfterTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\OrderCancel"/>
-    </event>
-    <!-- Send order refund  event to trueloyal when order partial or Full refunded
-        This event will call only for Magento version 2.3.0
-     -->
-    <event name="sales_order_creditmemo_save_after">
-        <observer name="orderRefundTrueLoyal" instance="TrueLoyal\LoyaltyRewards\Observer\OrderRefund"/>
     </event>
     <!-- Send order refund  event to trueloyal when order partial or Full refunded -->
     <event name="sales_order_creditmemo_save_commit_after">

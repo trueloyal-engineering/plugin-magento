@@ -1,173 +1,44 @@
 <?php
+declare(strict_types=1);
 
 namespace TrueLoyal\LoyaltyRewards\Observer;
 
-use Exception;
-use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use TrueLoyal\LoyaltyRewards\Helper\Data;
 use Magento\Sales\Model\OrderFactory;
-use Magento\Sales\Api\CreditmemoRepositoryInterface;
+use TrueLoyal\LoyaltyRewards\Model\Event\EventSender;
+use TrueLoyal\LoyaltyRewards\Model\Event\Order\RefundPayload;
+use TrueLoyal\LoyaltyRewards\Model\ModuleState;
 
+/**
+ * sales_order_creditmemo_save_commit_after: full_order_refund when one credit memo covers the whole order,
+ * partial_order_refund otherwise (admin event option order_refund)
+ */
 class OrderRefund implements ObserverInterface
 {
-    /**
-     * @var OrderFactory
-     */
-    private $orderFactory;
-
-    /**
-     * Order Refund constructor.
-     *
-     * @param Data $helper
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param OrderFactory $orderFactory
-     * @param CreditmemoRepositoryInterface $creditMemoRepository
-     * @param ProductMetadataInterface $productMetadata
-     */
     public function __construct(
-        private readonly Data $helper,
-        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
-        OrderFactory $orderFactory,
-        private readonly CreditmemoRepositoryInterface $creditMemoRepository,
-        private readonly ProductMetadataInterface $productMetadata
+        private readonly ModuleState $moduleState,
+        private readonly OrderFactory $orderFactory,
+        private readonly RefundPayload $payload,
+        private readonly EventSender $sender
     ) {
-        $this->orderFactory = $orderFactory;
     }
 
-    /**
-     * Send order refund  event to trueloyal
-     *
-     * @param Observer $observer
-     * @return bool
-     */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
-        $version = $this->productMetadata->getVersion();
-        $event = $this->helper->getRewardEvents();
-        /*Check the order_refund event is enabled, if enabled then will send order_refund event to TrueLoyal*/
-        if (in_array('order_refund', $event)) {
-            try {
-                /*This event should call only for Magento version 2.3.0*/
-                if ($observer->getEvent()->getName() == "sales_order_creditmemo_save_after" && $version != "2.3.0") {
-                    return;
-                }
-                $refund = $observer->getEvent()->getCreditmemo();
-                if ($refund->getTotalQty() > 0) {
-                    $orderId = $observer->getEvent()->getCreditmemo()->getOrderId();
-                    $order = $this->orderFactory->create()->load($orderId);
-                    if (!$order->canCreditmemo() && $order->getCreditmemosCollection()->count() == 1) {
-                        /*For Full refund*/
-                        $searchCriteria = $this->searchCriteriaBuilder->addFilter('order_id', $orderId)->create();
-                        $refund = $this->creditMemoRepository->getList($searchCriteria);
-                        $refundsItems = $refund->toArray();
-                        $replacedOrderId = $this->helper->getReplacedOrderID($orderId);
-                        $refundsItems = $this->manageFullRefundItems($refundsItems, $replacedOrderId);
-                        $refundsItems["order_id"] = $replacedOrderId;
-                        $refundsItems["coupon_code"] = $this->helper->getCouponCodes($order);
-                        $this->sendRequest(
-                            $order,
-                            "full_order_refund",
-                            $refundsItems
-                        );
-                        return true;
-                    } else {
-                        /*For Partial refund*/
-                        $refund = $refund->debug();
-                        $refundData["items"][0] = $refund;
-                        $replacedOrderId = $this->helper->getReplacedOrderID($refund["order_id"]);
-                        $itemData = $refund["items"];
-                        $refundData["order_id"] = $replacedOrderId;
-                        $refundData["coupon_code"] = $this->helper->getCouponCodes($order);
-                        unset($refundData["items"][0]["items"]);
-                        $refundData = $this->managePartialRefundItems($itemData, $refundData);
-                        $this->sendRequest($order, "partial_order_refund", $refundData);
-                        return true;
-                    }
-                }
-            } catch (Exception) {
-                return false;
-            }
+        $creditmemo = $observer->getEvent()->getCreditmemo();
+        if (!$this->moduleState->isEventEnabled('order_refund') || !($creditmemo->getTotalQty() > 0)) {
+            return;
         }
-    }
-
-    /**
-     * Manage items and return updated items
-     *
-     * @param array $refundsItems
-     * @param mixed $replacedOrderId
-     * @return array
-     */
-    public function manageFullRefundItems($refundsItems, $replacedOrderId)
-    {
-        foreach ($refundsItems["items"] as $key => $refundItem) {
-            $refundsItems["items"][$key] = $this->helper->setFormatedPrice($refundsItems["items"][$key]);
-            $refundsItems["items"][$key]["order_id"] = $replacedOrderId;
-            $refundData = $this->creditMemoRepository->get($refundItem["entity_id"]);
-            foreach ($refundData->getItems() as $item) {
-                unset($item['refund']);
-                $refundItemData = $item->debug();
-                $refundItemData = $this->helper->setFormatedPrice($refundItemData);
-                $productId = $refundItemData['product_id'];
-                /*Product url and product image url not availale from CreditMemo item so we have to load product to get an additional required data*/
-                $productInfo = $this->helper->getProductUrlAndImageUrl($productId);
-                $refundItemData['product_url'] = $productInfo['product_url'];
-                $refundItemData['product_image_url'] = $productInfo['product_image_url'];
-                $refundItemData['category_name'] = $this->helper->getCategoryName($productId);
-                $refundItemData['category_ids'] = $this->helper->getCategoryData($productId)['ids'];
-                $refundsItems["items"][$key]['items'][] = $refundItemData;
+        try {
+            $order = $this->orderFactory->create()->load($creditmemo->getOrderId());
+            if ($this->payload->isFullRefund($order)) {
+                $this->sender->sendForOrder('full_order_refund', $order, $this->payload->full($order));
+            } else {
+                $this->sender->sendForOrder('partial_order_refund', $order, $this->payload->partial($creditmemo, $order));
             }
+        } catch (\Exception) {
+            return;
         }
-        return $refundsItems;
-    }
-
-    /**
-     * Manage items and return updated items
-     *
-     * @param array $itemData
-     * @param array $refundData
-     * @return array
-     */
-    public function managePartialRefundItems($itemData, $refundData)
-    {
-        foreach ($itemData as $item) {
-            $item = $this->helper->setFormatedPrice($item);
-            if ($item["qty"]) {
-                $item['qty'] = (int) $item['qty'];
-                $productId = $item['product_id'];
-                /*Product url and product image url not availale from CreditMemo item so we have to load product to get an additional required data*/
-                $productInfo = $this->helper->getProductUrlAndImageUrl($productId);
-                $item['product_url'] = $productInfo['product_url'];
-                $item['product_image_url'] = $productInfo['product_image_url'];
-                $item["category_name"] = $this->helper->getCategoryName($productId);
-                $item["category_ids"] = $this->helper->getCategoryData($productId)['ids'];
-                $refundData["items"][0]["items"][] = $item;
-            }
-        }
-        $refundData["items"][0] = $this->helper->setFormatedPrice($refundData["items"][0]);
-        return $refundData;
-    }
-
-    /**
-     * Send request to trueloyal when refund generated
-     *
-     * @param \Magento\Sales\Model\Order $order
-     * @param string $activityId
-     * @param array $refundData
-     * @return bool
-     */
-    public function sendRequest($order,$activityId, $refundData)
-    {
-        $params = [
-            "member_id" => $this->helper->getMemberIdentifierValueById($order->getCustomerId(), $order->getCustomerEmail()),
-            "activity_id" => $activityId,
-            "data" => $refundData
-        ];
-        $url = $this->helper->getWebHookUrl();
-        $params = $this->helper->json->serialize($params);
-        $this->helper->request($url, $params, "post");
-        return true;
     }
 }

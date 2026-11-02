@@ -1,72 +1,84 @@
 <?php
+declare(strict_types=1);
 
 namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use TrueLoyal\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Config;
+use TrueLoyal\LoyaltyRewards\Logger\Logger;
+use TrueLoyal\LoyaltyRewards\Model\Client\LiveApi;
+use TrueLoyal\LoyaltyRewards\Model\Event\EventSender;
+use TrueLoyal\LoyaltyRewards\Model\Event\Order\OrderCreatePayload;
+use TrueLoyal\LoyaltyRewards\Model\ModuleState;
 
+/**
+ * Once per order, from every channel (sales_order_save_commit_after of an order MarkPlacedOrder flagged): approve the
+ * redeemed reward, record it on the order and send order_create
+ */
 class CreateOrderAfter implements ObserverInterface
 {
-    /**
-     * CreateOrderAfter constructor.
-     *
-     * @param Data $helper
-     * @param OrderRepositoryInterface $orderRepository
-     * @param CartRepositoryInterface $quoteRepository
-     * @param SerializerInterface $serializer
-     */
     public function __construct(
-        private readonly Data $helper,
-        private readonly OrderRepositoryInterface $orderRepository,
+        private readonly Config $config,
         private readonly CartRepositoryInterface $quoteRepository,
-        private readonly SerializerInterface $serializer
+        private readonly SerializerInterface $serializer,
+        private readonly LiveApi $liveApi,
+        private readonly OrderCreatePayload $payload,
+        private readonly EventSender $sender,
+        private readonly ModuleState $moduleState,
+        private readonly Logger $logger
     ) {
     }
 
-    /**
-     * Order Create event to trueloyal, once per order: on the first save after it was placed (MarkPlacedOrder)
-     *
-     * @param Observer $observer
-     * @return void
-     * @throws NoSuchEntityException
-     */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
-        $placedOrder = $observer->getEvent()->getOrder();
-        if (!$placedOrder->getData(MarkPlacedOrder::FLAG)) {
+        $order = $observer->getEvent()->getOrder();
+        if (!$order->getData(MarkPlacedOrder::FLAG)) {
             return;
         }
-        $placedOrder->unsetData(MarkPlacedOrder::FLAG);
-        $orderId = $placedOrder->getId();
-        $order = $this->orderRepository->get($orderId);
-        $trueloyalOrder = $this->helper->getTrueLoyalOrderByOrderId($orderId);
-        $replacedOrderId = $order->getIncrementId();
+        $order->unsetData(MarkPlacedOrder::FLAG);
+        $orderId = $order->getId();
+        $trueloyalOrder = $this->config->getTrueLoyalOrderByOrderId($orderId);
         if (!$trueloyalOrder->getData('trueloyal_reward')) {
-            if ($order->getQuoteId() !== null) {
-                $quote = $this->quoteRepository->get($order->getQuoteId());
-                $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($order->getQuoteId());
-            }
-            if ($order->getQuoteId() !== null && $trueloyalQuote->getRedeemRewardDiscount()) {
-                $redeemReward = $trueloyalQuote->getRedeemRewardDiscount();
-                $rewardData = $this->helper->getRewardRulesData($quote, $redeemReward);
-                $url = $this->helper->getLiveWebHookUrl() . "transactions/" . $rewardData['id'] . "/approve";
-                $this->helper->request($url, "", "post", "live_api");
-                $trueloyalOrder->setData('trueloyal_reward', $this->serializer->serialize($rewardData))->setOrderId($orderId);
-            } else {
-                $trueloyalOrder->setData('trueloyal_reward', "{}")->setOrderId($orderId);
-            }
+            $trueloyalOrder->setData('trueloyal_reward', $this->approveRedeemedReward($order))->setOrderId($orderId);
             try {
                 $trueloyalOrder->save();
             } catch (CouldNotSaveException $e) {
-                $this->helper->logger->addErrorLog($e->getMessage());
+                $this->logger->addErrorLog($e->getMessage());
             }
         }
-        $this->helper->createTrueLoyalOrder($orderId, $replacedOrderId);
+        // Built even when order_create is off: it also records each item's share of the reward discount
+        $data = $this->payload->build($orderId);
+        if ($this->moduleState->isEventEnabled('order_create')) {
+            $this->sender->sendForOrder('order_create', $order, $data);
+        }
+    }
+
+    /**
+     * Approve the pending redemption of the order's quote
+     *
+     * @return string the redeemed reward as JSON, '{}' without one
+     */
+    private function approveRedeemedReward($order): string
+    {
+        $quoteId = $order->getQuoteId();
+        if ($quoteId === null) {
+            return '{}';
+        }
+        $quote = $this->quoteRepository->get($quoteId);
+        $rewardId = $this->config->getTrueLoyalQuoteByQuoteId($quoteId)->getRedeemRewardDiscount();
+        if (!$rewardId) {
+            return '{}';
+        }
+        $reward = $this->config->getRewardRulesData($quote, $rewardId);
+        try {
+            $this->liveApi->request('post', $this->liveApi->transactionUrl($reward['id'] . '/approve'));
+        } catch (\Exception $e) {
+            $this->logger->addErrorLog($e->getMessage());
+        }
+        return $this->serializer->serialize($reward);
     }
 }

@@ -8,7 +8,7 @@ Connects a Magento 2 store to the [TrueLoyal](https://www.trueloyal.com) loyalty
 ## Features
 
 - **Rewards widget.** Shows the TrueLoyal widget on every storefront page. Logged-in customers are signed in to their loyalty account automatically. You can hide the widget from guests.
-- **Activity sync.** Sends store activity to TrueLoyal, which awards or deducts points according to your loyalty program. You choose which activities are sent:
+- **Activity sync.** Sends store activity to TrueLoyal, which awards or deducts points according to your loyalty program. Activity is sent whether it happens on the storefront, in the admin, over REST or GraphQL, or in a cron job. You choose which activities are sent:
   - customer sign-ups and profile or address changes;
   - orders created, paid, shipped, completed or cancelled;
   - full and partial refunds;
@@ -36,7 +36,7 @@ Install the module with Composer from the Magento root:
 
 ```bash
 composer config repositories.trueloyal vcs https://github.com/trueloyal-engineering/plugin-magento
-composer require trueloyal/extension:^2.5
+composer require trueloyal/extension:^2.6
 bin/magento module:enable TrueLoyal_LoyaltyRewards
 bin/magento setup:upgrade
 ```

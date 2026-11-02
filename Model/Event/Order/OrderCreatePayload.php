@@ -8,6 +8,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Item;
 use TrueLoyal\LoyaltyRewards\Helper\Config;
+use TrueLoyal\LoyaltyRewards\Model\Reward\DiscountCalculator;
 
 /**
  * order_create: the placed order, with each item's discount including its share of the redeemed TrueLoyal reward
@@ -20,7 +21,8 @@ class OrderCreatePayload
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly CartRepositoryInterface $quoteRepository,
         private readonly Config $config,
-        private readonly Formatter $formatter
+        private readonly Formatter $formatter,
+        private readonly DiscountCalculator $discountCalculator
     ) {
     }
 
@@ -81,10 +83,7 @@ class OrderCreatePayload
      */
     private function addRewardDiscount(Item $item, array $reward, $quote): array
     {
-        $value = $reward['reward_value'];
-        if ($reward['rule'] == 'flexible_points_reward') {
-            $value = $reward['points_to_be_redeemed'] / $reward['conversion_rate'];
-        }
+        $value = $this->discountCalculator->value($reward);
         if ($reward['rule'] == 'percentage_discount') {
             $discount = $item->getDiscountAmount() + ($item->getPrice() * $item->getQtyOrdered()) * $value / 100;
             $baseDiscount = $item->getBaseDiscountAmount()

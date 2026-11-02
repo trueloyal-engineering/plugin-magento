@@ -4,7 +4,7 @@ namespace TrueLoyal\LoyaltyRewards\Block\Cart;
 
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\View\Element\Template;
-use TrueLoyal\LoyaltyRewards\Helper\Reward;
+use TrueLoyal\LoyaltyRewards\Helper\Data;
 use TrueLoyal\LoyaltyRewards\Logger\Logger as TrueLoyalLogger;
 
 class RewardList extends Template
@@ -30,7 +30,7 @@ class RewardList extends Template
      */
     public function __construct(
         Template\Context $context,
-        Reward $helper,
+        Data $helper,
         private readonly CustomerSession $customerSession,
         TrueLoyalLogger $logger,
         array $data = []

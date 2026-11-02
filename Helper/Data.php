@@ -23,18 +23,8 @@ class Data extends Config
         $rewardData = $this->getRewardRulesData($quote, $redeemReward);
         $discountAmount = "";
         $discountLabel = "";
-        if (isset($rewardData['rule'])
-            && ($rewardData['rule'] == 'fixed_amount_discount'
-                || $rewardData['rule'] == 'percentage_discount'
-                ||  $rewardData['rule'] == 'flexible_points_reward')) {
-            $totalAmount = $order->getSubtotal();
-            if ($rewardData['rule'] == 'fixed_amount_discount') {
-                $discountAmount = -$rewardData['reward_value'];
-            } else if ($rewardData['rule'] == 'flexible_points_reward') {
-                $discountAmount = -($rewardData['points_to_be_redeemed'] / $rewardData['conversion_rate']);
-            } else {
-                $discountAmount = -$totalAmount * $rewardData['reward_value'] / 100;
-            }
+        if ($this->discountCalculator()->isDiscount($rewardData)) {
+            $discountAmount = $this->discountCalculator()->amount($rewardData, $order->getSubtotal());
             $discountLabel = $this->getRewardAppliedRuleLabel($quote);
         }
         return [
@@ -109,8 +99,7 @@ class Data extends Config
             $redeemReward = $trueloyalQuote->getRedeemRewardDiscount();
             $rewardData = $this->getRewardRulesData($quote, $redeemReward);
             if (!empty($rewardData)) {
-                $url = $this->getLiveWebHookUrl() . "transactions/" . $rewardData['id'] . "/reject";
-                $this->request($url, "", "post", "live_api");
+                $this->rewardService->reject((string)$rewardData['id']);
                 $items = $quote->getAllItems();
                 foreach ($items as $item) {
                     $trueloyalQuoteItem = $this->getTrueLoyalQuoteItemByItemId($item->getId());

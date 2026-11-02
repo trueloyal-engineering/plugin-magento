@@ -21,6 +21,7 @@ use Magento\Checkout\Model\Cart;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use TrueLoyal\LoyaltyRewards\Logger\Logger;
+use TrueLoyal\LoyaltyRewards\Model\Reward\RewardService;
 use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuote;
 
 class ApplyPoint implements HttpPostActionInterface
@@ -51,7 +52,8 @@ class ApplyPoint implements HttpPostActionInterface
         private readonly SerializerInterface $serializer,
         private readonly Product $product,
         private readonly CheckoutSession $checkoutSession,
-        private readonly Logger $logger
+        private readonly Logger $logger,
+        private readonly RewardService $rewardService
     ) {
     }
 
@@ -176,10 +178,7 @@ class ApplyPoint implements HttpPostActionInterface
      */
     public function getApiResponse($rewardData)
     {
-        $url = $this->helper->getLiveWebHookUrl() . "transactions/redeem";
-        $paramsData = $this->getParamsData($rewardData);
-        $params = $this->helper->jsonSerialize($paramsData);
-        return $this->helper->request($url, $params, "post", "live_api");
+        return $this->rewardService->redeem((string)$this->helper->jsonSerialize($this->getParamsData($rewardData)));
     }
 
     /**

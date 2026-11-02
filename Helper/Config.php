@@ -39,6 +39,8 @@ use TrueLoyal\LoyaltyRewards\Model\Client\HttpClient;
 use TrueLoyal\LoyaltyRewards\Model\Client\LiveApi;
 use TrueLoyal\LoyaltyRewards\Model\Client\ResponseParser;
 use TrueLoyal\LoyaltyRewards\Model\MemberIdResolver;
+use TrueLoyal\LoyaltyRewards\Model\Reward\DiscountCalculator;
+use TrueLoyal\LoyaltyRewards\Model\Reward\RewardService;
 use TrueLoyal\LoyaltyRewards\Model\Settings;
 use TrueLoyal\LoyaltyRewards\Model\TrueLoyalEavAttributeFactory;
 use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuoteFactory;
@@ -228,6 +230,8 @@ class Config extends AbstractHelper
      * @param EventPublisher $eventPublisher
      * @param HttpClient $httpClient
      * @param ResponseParser $responseParser
+     * @param RewardService $rewardService
+     * @param DiscountCalculator $discountCalculator
      */
     public function __construct(
         Context $context,
@@ -262,7 +266,9 @@ class Config extends AbstractHelper
         protected readonly LiveApi $liveApi,
         private readonly EventPublisher $eventPublisher,
         private readonly HttpClient $httpClient,
-        private readonly ResponseParser $responseParser
+        private readonly ResponseParser $responseParser,
+        protected readonly RewardService $rewardService,
+        private readonly DiscountCalculator $discountCalculator
     ) {
         $this->escaper = $escaper;
         $this->request = $request;
@@ -686,10 +692,7 @@ class Config extends AbstractHelper
      */
     public function getRedeemRules()
     {
-        $memberId = $this->getMemberIdentifierValue();
-        $url = $this->getLiveWebHookUrl() . "members/" . $memberId . "/rewards";
-        $url = $this->getIdParam($url);
-        $response = $this->request($url, "", "get", "live_api");
+        $response = $this->rewardService->getRewards($this->getMemberIdentifierValue());
         $rewardRules = [];
         if ($response && $response["success"] && !empty($response["result"]["data"]["rewards"])) {
             $rules = $response["result"]["data"]["rewards"];
@@ -892,6 +895,16 @@ class Config extends AbstractHelper
     }
 
     /**
+     * The reward discount formula
+     *
+     * @return DiscountCalculator
+     */
+    protected function discountCalculator(): DiscountCalculator
+    {
+        return $this->discountCalculator;
+    }
+
+    /**
      * Decode a TrueLoyal response: success false when the body has an error_code
      *
      * @param mixed $responseData
@@ -984,9 +997,7 @@ class Config extends AbstractHelper
     private function fetchRewardPoints(string $memberId)
     {
         try {
-            $url = $this->getLiveWebHookUrl() . "members/" . $memberId;
-            $url = $this->getIdParam($url);
-            $response = $this->request($url, "", "get", "live_api");
+            $response = $this->rewardService->getMember($memberId);
             if ($response) {
                 if ($response["success"] && !empty($response["result"]["data"]["available_points"])) {
                     $point = $response["result"]["data"]["available_points"];

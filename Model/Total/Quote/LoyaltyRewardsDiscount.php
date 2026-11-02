@@ -7,6 +7,7 @@ use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Total;
 use Magento\Quote\Model\Quote\Address\Total\AbstractTotal;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Model\Reward\DiscountCalculator;
 
 class LoyaltyRewardsDiscount extends AbstractTotal
 {
@@ -16,7 +17,8 @@ class LoyaltyRewardsDiscount extends AbstractTotal
      * @param Data $helper
      */
     public function __construct(
-        private readonly Data $helper
+        private readonly Data $helper,
+        private readonly DiscountCalculator $discountCalculator
     ) {
     }
 
@@ -35,26 +37,13 @@ class LoyaltyRewardsDiscount extends AbstractTotal
     ) {
         parent::collect($quote, $shippingAssignment, $total);
         $rewardData = $this->helper->getRewardRulesData($quote);
-        if (isset($rewardData['rule'])
-            && ($rewardData['rule'] == 'fixed_amount_discount'
-                || $rewardData['rule'] == 'percentage_discount'
-                || $rewardData['rule'] == 'flexible_points_reward')
-        ) {
-
-            $totalAmount = $total->getSubtotal();
-            if ($rewardData['rule'] == 'fixed_amount_discount') {
-                $totalAmount = -$rewardData['reward_value'];
-            } else if ($rewardData['rule'] == 'flexible_points_reward') {
-                $totalAmount = -($rewardData['points_to_be_redeemed'] / $rewardData['conversion_rate']);
-            }
-            else {
-                $totalAmount = -($totalAmount * $rewardData['reward_value'] / 100);
-            }
+        if ($this->discountCalculator->isDiscount($rewardData)) {
+            $totalAmount = $this->discountCalculator->amount($rewardData, $total->getSubtotal());
             $total->addTotalAmount('trueloyal_discount', $totalAmount);
             $total->addBaseTotalAmount('trueloyal_discount', $totalAmount);
             $quote->setCustomDiscount($totalAmount);
-            return $this;
         }
+        return $this;
     }
 
     /**
@@ -68,29 +57,14 @@ class LoyaltyRewardsDiscount extends AbstractTotal
     public function fetch(Quote $quote, Total $total)
     {
         $rewardData = $this->helper->getRewardRulesData($quote);
-        $rewardRules = [
-            'fixed_amount_discount',
-            'percentage_discount',
-            'product_redemption',
-            'flexible_points_reward'
-        ];
-        if (!empty($rewardData)
-            && in_array($rewardData['rule'], $rewardRules)) {
-            $totalAmount = $total->getSubtotal();
-            if ($rewardData['rule'] == 'fixed_amount_discount') {
-                $totalAmount = -$rewardData['reward_value'];
-            } elseif ($rewardData['rule'] == 'percentage_discount') {
-                $totalAmount = -$totalAmount * $rewardData['reward_value'] / 100;
-            } elseif ($rewardData['rule'] == 'product_redemption') {
-                $totalAmount = '';
-            } elseif ($rewardData['rule'] == 'flexible_points_reward') {
-                $totalAmount = -($rewardData['points_to_be_redeemed'] / $rewardData['conversion_rate']);
-            }
+        if ($this->discountCalculator->isDiscount($rewardData) || ($rewardData['rule'] ?? null) === 'product_redemption') {
             return [
                 'code' => 'trueloyal_discount',
                 'title' => __($this->helper->getRewardAppliedRuleLabel($quote)),
-                'value' => $totalAmount
+                /* A gift has no amount: the row only names it */
+                'value' => $this->discountCalculator->amount($rewardData, $total->getSubtotal()) ?? ''
             ];
         }
+        return [];
     }
 }

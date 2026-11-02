@@ -10,10 +10,10 @@ use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use TrueLoyal\LoyaltyRewards\Helper\Config;
 use TrueLoyal\LoyaltyRewards\Logger\Logger;
-use TrueLoyal\LoyaltyRewards\Model\Client\LiveApi;
 use TrueLoyal\LoyaltyRewards\Model\Event\EventSender;
 use TrueLoyal\LoyaltyRewards\Model\Event\Order\OrderCreatePayload;
 use TrueLoyal\LoyaltyRewards\Model\ModuleState;
+use TrueLoyal\LoyaltyRewards\Model\Reward\RewardService;
 
 /**
  * Once per order, from every channel (sales_order_save_commit_after of an order MarkPlacedOrder flagged): approve the
@@ -25,7 +25,7 @@ class CreateOrderAfter implements ObserverInterface
         private readonly Config $config,
         private readonly CartRepositoryInterface $quoteRepository,
         private readonly SerializerInterface $serializer,
-        private readonly LiveApi $liveApi,
+        private readonly RewardService $rewardService,
         private readonly OrderCreatePayload $payload,
         private readonly EventSender $sender,
         private readonly ModuleState $moduleState,
@@ -74,12 +74,7 @@ class CreateOrderAfter implements ObserverInterface
             return '{}';
         }
         $reward = $this->config->getRewardRulesData($quote, $rewardId);
-        try {
-            $storeId = $order->getStoreId();
-            $this->liveApi->request('post', $this->liveApi->transactionUrl($reward['id'] . '/approve', $storeId), '', $storeId);
-        } catch (\Exception $e) {
-            $this->logger->addErrorLog($e->getMessage());
-        }
+        $this->rewardService->approve((string)$reward['id'], $order->getStoreId());
         return $this->serializer->serialize($reward);
     }
 }

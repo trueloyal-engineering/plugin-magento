@@ -20,6 +20,12 @@
         </arguments>
     </type>
 
+    <type name="TrueLoyal\LoyaltyRewards\Model\Reward\RewardService">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+
     <!-- Adding log file for TrueLoyal log -->
     <type name="TrueLoyal\LoyaltyRewards\Logger\Handler">
         <arguments>

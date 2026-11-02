@@ -82,6 +82,9 @@ class RewardList implements ArgumentInterface
             'url' => $this->urlBuilder->getUrl('loyaltyRewards/loyaltyrewards/applyPoint', ['_secure' => true]),
             'points' => $this->getPoints(),
             'applied' => $this->getAppliedReward() !== null,
+            'giftItemIds' => array_map('intval', $this->helper->getTrueLoyalFreeProductItemIds(
+                array_map(fn ($item) => $item->getId(), $this->helper->getQuote()->getAllVisibleItems())
+            )),
         ];
     }
 

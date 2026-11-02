@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Collections should be used directly via factory, not via Magento\\Quote\\Model\\Quote\:\:getCollection\(\) method$#'
-			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
-			count: 1
-			path: Cron/RejectRedeemReward.php
-
-		-
-			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalQuote\:\:getCollection\(\) method$#'
-			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
-			count: 1
-			path: Cron/RejectRedeemReward.php
-
-		-
 			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalEavAttribute\:\:getCollection\(\) method$#'
 			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
 			count: 1
@@ -55,12 +43,6 @@ parameters:
 			path: Helper/Config.php
 
 		-
-			message: '#^Method TrueLoyal\\LoyaltyRewards\\Helper\\Reward\:\:getCollectRewardValueData\(\) should return \$this\(TrueLoyal\\LoyaltyRewards\\Helper\\Reward\) but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: Helper/Reward.php
-
-		-
 			message: '#^Class TrueLoyal\\LoyaltyRewards\\Logger\\Logger extends @final class Monolog\\Logger\.$#'
 			identifier: class.extendsFinalByPhpDoc
 			count: 1
@@ -71,18 +53,6 @@ parameters:
 			identifier: constructor.unusedParameter
 			count: 1
 			path: Model/Api/CustomerAttributeUpdate.php
-
-		-
-			message: '#^Method TrueLoyal\\LoyaltyRewards\\Model\\Total\\Quote\\LoyaltyRewardsDiscount\:\:collect\(\) should return TrueLoyal\\LoyaltyRewards\\Model\\Total\\Quote\\LoyaltyRewardsDiscount but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: Model/Total/Quote/LoyaltyRewardsDiscount.php
-
-		-
-			message: '#^Method TrueLoyal\\LoyaltyRewards\\Model\\Total\\Quote\\LoyaltyRewardsDiscount\:\:fetch\(\) should return array but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: Model/Total/Quote/LoyaltyRewardsDiscount.php
 
 		-
 			message: '#^Method TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\FlagRewardPointAttributes\:\:apply\(\) should return \$this\(TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\FlagRewardPointAttributes\) but return statement is missing\.$#'

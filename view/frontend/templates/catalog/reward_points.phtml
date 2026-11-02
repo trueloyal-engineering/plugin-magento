@@ -1,12 +1,20 @@
 <?php
+/**
+ * Product page: "earn N points" (the admin's label, N filled in by the TrueLoyal SDK)
+ *
+ * @var \Magento\Catalog\Block\Product\View $block
+ */
 $viewModel = $block->getData('viewModel');
-if ($viewModel->isPdpPointEnabled()) {
-    $rewardLabel = $viewModel->getRewardLabel();
-    if (str_contains($rewardLabel, "{{EARN_POINTS}}")) {
-        $rewardLabel = str_replace("{{EARN_POINTS}}", "<div class='trueloyal-product-price' id='potential_product_points'data-zrl-product-points></div>", $rewardLabel);
-    } else {
-        $rewardLabel = "<div class='trueloyal-product-price' id='potential_product_points' data-zrl-product-points></div>" . $rewardLabel;
-    }
-    ?>
-    <div class="trueloyal-earn-product-points"> <?=  /* @noEscape */  $rewardLabel;?> </div>
-<?php } ?>
+if (!$viewModel->isPdpPointEnabled()) {
+    return;
+}
+$points = '<div class="trueloyal-product-price" id="potential_product_points" data-zrl-product-points></div>';
+$rewardLabel = (string)$viewModel->getRewardLabel();
+$rewardLabel = str_contains($rewardLabel, '{{EARN_POINTS}}')
+    ? str_replace('{{EARN_POINTS}}', $points, $rewardLabel)
+    : $points . $rewardLabel;
+?>
+<div class="trueloyal-earn-product-points"><?= /* @noEscape: the admin's label (HTML) */ $rewardLabel ?></div>
+<script type="text/x-magento-init">
+    {"*": {"TrueLoyal_LoyaltyRewards/js/product-points": {}}}
+</script>

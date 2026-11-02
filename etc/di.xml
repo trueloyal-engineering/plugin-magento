@@ -9,9 +9,9 @@
     <type name="Magento\Checkout\CustomerData\DefaultItem">
         <plugin name="trueloyal_add" type="TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData\AroundPluginDefaultItem" disabled="false" sortOrder="10"/>
     </type>
-    <!--Disable quantity box on checkout/cart page-->
-    <type name="Magento\Checkout\Block\Cart\AbstractCart">
-        <plugin name="item-disable-qty" type="TrueLoyal\LoyaltyRewards\Plugin\Cart\DisableQty" sortOrder="1"/>
+    <!-- No remove/edit/move-to-wishlist actions on the redeemed gift in the cart -->
+    <type name="Magento\Checkout\Block\Cart\Item\Renderer\Actions\Generic">
+        <plugin name="trueloyal_hide_gift_actions" type="TrueLoyal\LoyaltyRewards\Plugin\Cart\HideGiftActions"/>
     </type>
 
     <type name="TrueLoyal\LoyaltyRewards\Model\MemberIdResolver">

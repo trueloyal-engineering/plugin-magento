@@ -80,6 +80,18 @@ define([
             $root.find('#redeem').prop('disabled', true);
         }
 
+        /* The redeemed gift's quantity is fixed (the server enforces it too); the cart table can be re-rendered */
+        function lockGiftQty() {
+            (config.giftItemIds || []).forEach(function (itemId) {
+                $('input[name="cart[' + itemId + '][qty]"]').not('[readonly]').prop('readonly', true).addClass('disable');
+            });
+        }
+
+        lockGiftQty();
+        if ((config.giftItemIds || []).length && window.MutationObserver) {
+            new MutationObserver(lockGiftQty).observe(document.body, {childList: true, subtree: true});
+        }
+
         if (!config.applied && $.mage.cookies.get('trueloyal_shipping_selected')) {
             $.mage.cookies.clear('trueloyal_shipping_selected');
         }

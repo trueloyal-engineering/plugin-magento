@@ -26,41 +26,6 @@ class ProfileChangedObserver implements ObserverInterface
     public const COOKIE_NAME = 'trueloyal_profile';
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var CookieManagerInterface
-     */
-    private $cookieManager;
-
-    /**
-     * @var CookieMetadataFactory
-     */
-    private $cookieMetadataFactory;
-
-    /**
-     * @var SessionManagerInterface
-     */
-    private $sessionManager;
-
-    /**
-     * @var UserContextInterface
-     */
-    private $userContext;
-
-    /**
-     * @var State
-     */
-    private $appState;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * ProfileChangedObserver constructor.
      *
      * @param Config $config
@@ -72,21 +37,14 @@ class ProfileChangedObserver implements ObserverInterface
      * @param LoggerInterface $logger
      */
     public function __construct(
-        Config $config,
-        CookieManagerInterface $cookieManager,
-        CookieMetadataFactory $cookieMetadataFactory,
-        SessionManagerInterface $sessionManager,
-        UserContextInterface $userContext,
-        State $appState,
-        LoggerInterface $logger
+        private readonly Config $config,
+        private readonly CookieManagerInterface $cookieManager,
+        private readonly CookieMetadataFactory $cookieMetadataFactory,
+        private readonly SessionManagerInterface $sessionManager,
+        private readonly UserContextInterface $userContext,
+        private readonly State $appState,
+        private readonly LoggerInterface $logger
     ) {
-        $this->config = $config;
-        $this->cookieManager = $cookieManager;
-        $this->cookieMetadataFactory = $cookieMetadataFactory;
-        $this->sessionManager = $sessionManager;
-        $this->userContext = $userContext;
-        $this->appState = $appState;
-        $this->logger = $logger;
     }
 
     /**

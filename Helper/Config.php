@@ -121,10 +121,6 @@ class Config extends AbstractHelper
      */
     protected $writeConfig;
     /**
-     * @var ReinitableConfigInterface
-     */
-    private $reinitableConfig;
-    /**
      * @var Session
      */
     protected $customerSession;
@@ -184,18 +180,6 @@ class Config extends AbstractHelper
      * @var Escaper
      */
     protected $escaper;
-    /**
-     * @var CookieManagerInterface
-     */
-    private $cookieManager;
-    /**
-     * @var CookieMetadataFactory
-     */
-    private $cookieMetadataFactory;
-    /**
-     * @var SessionManagerInterface
-     */
-    private $sessionManager;
     /**
      * @var TrueLoyalEavAttributeFactory
      */
@@ -276,9 +260,9 @@ class Config extends AbstractHelper
         ScopeConfigInterface $scopeConfig,
         WriterInterface $writeConfig,
         Json $json,
-        CookieManagerInterface $cookieManager,
-        CookieMetadataFactory $cookieMetadataFactory,
-        SessionManagerInterface $sessionManager,
+        private readonly CookieManagerInterface $cookieManager,
+        private readonly CookieMetadataFactory $cookieMetadataFactory,
+        private readonly SessionManagerInterface $sessionManager,
         CartRepositoryInterface $quoteRepository,
         TrueLoyalEavAttributeFactory $trueloyalEavAttributeFactory,
         TrueLoyalQuoteFactory $trueloyalQuoteFactory,
@@ -286,7 +270,7 @@ class Config extends AbstractHelper
         TrueLoyalReviewFactory $trueloyalReviewFactory,
         TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory,
         Attribute $eavAttribute,
-        ReinitableConfigInterface $reinitableConfig
+        private readonly ReinitableConfigInterface $reinitableConfig
     ) {
         $this->curl = $curl;
         $this->escaper = $escaper;
@@ -307,9 +291,6 @@ class Config extends AbstractHelper
         $this->json = $json;
         $this->helperImageFactory = $helperImageFactory;
         $this->assetRepos = $assetRepos;
-        $this->cookieManager = $cookieManager;
-        $this->cookieMetadataFactory = $cookieMetadataFactory;
-        $this->sessionManager = $sessionManager;
         $this->trueloyalEavAttributeFactory = $trueloyalEavAttributeFactory;
         $this->trueloyalQuoteFactory = $trueloyalQuoteFactory;
         $this->trueloyalQuoteItemFactory = $trueloyalQuoteItemFactory;
@@ -317,7 +298,6 @@ class Config extends AbstractHelper
         $this->trueloyalSalesOrderFactory = $trueloyalSalesOrderFactory;
         $this->quoteRepository = $quoteRepository;
         $this->eavAttribute = $eavAttribute;
-        $this->reinitableConfig = $reinitableConfig;
         parent::__construct($context);
     }
 
@@ -778,7 +758,7 @@ class Config extends AbstractHelper
                                 "minimum_redemption_limit" => $minimumRedemption,
                                 "conversion_rate" => !empty($rule["extra_parameters"]["conversion_rate"])
                                     ? $rule["extra_parameters"]["conversion_rate"] : "",
-                                "product_id" => isset($rule["product_id"]) ? $rule["product_id"] : ""
+                                "product_id" => $rule["product_id"] ?? ""
                             ];
                         }
                     }
@@ -986,7 +966,7 @@ class Config extends AbstractHelper
                 $this->curl->post($url, $params);
             } else {
                 if (!empty($params)) {
-                    $this->curl->get($url, $params);
+                    $this->curl->get($url);
                 } else {
                     $this->curl->get($url);
                 }

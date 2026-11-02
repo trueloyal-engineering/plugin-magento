@@ -12,27 +12,15 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class CustomerDelete implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var CustomerRepositoryInterface
-     */
-    private $customerRepository;
-
-    /**
      * Customer Delete constructor.
      *
      * @param Data $helper
      * @param CustomerRepositoryInterface $customerRepository
      */
     public function __construct(
-        Data $helper,
-        CustomerRepositoryInterface $customerRepository
+        private readonly Data $helper,
+        private readonly CustomerRepositoryInterface $customerRepository
     ) {
-        $this->customerRepository = $customerRepository;
-        $this->helper = $helper;
     }
 
     /**

@@ -9,18 +9,13 @@ use Magento\Framework\Setup\Patch\SchemaPatchInterface;
 class DefaultTabelUpdate implements SchemaPatchInterface
 {
     /**
-     * @var ModuleDataSetupInterface $moduleDataSetup
-     */
-    private $moduleDataSetup;
-
-    /**
      * DefaultTabelUpdate construct
      *
      * @param ModuleDataSetupInterface $moduleDataSetup
      */
-    public function __construct(ModuleDataSetupInterface $moduleDataSetup)
-    {
-        $this->moduleDataSetup = $moduleDataSetup;
+    public function __construct(
+        private readonly ModuleDataSetupInterface $moduleDataSetup
+    ) {
     }
 
     /**

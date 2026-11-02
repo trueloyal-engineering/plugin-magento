@@ -9,19 +9,13 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class LockFreeProductQty implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
      * Lock Free Product Qty constructor.
      *
      * @param Data $helper
      */
     public function __construct(
-        Data $helper
+        private readonly Data $helper
     ) {
-        $this->helper = $helper;
     }
 
     /**

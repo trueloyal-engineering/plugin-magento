@@ -18,14 +18,6 @@ class TrueLoyalInvoiceCreateDiscount extends Template
      * @var Source
      */
     protected $source;
-    /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
 
     /**
      * TrueLoyal Invoice Create Discount constructor.
@@ -37,12 +29,10 @@ class TrueLoyalInvoiceCreateDiscount extends Template
      */
     public function __construct(
         Context $context,
-        Data $helper,
-        OrderRepositoryInterface $orderRepository,
+        private readonly Data $helper,
+        private readonly OrderRepositoryInterface $orderRepository,
         array $data = []
     ) {
-        $this->helper = $helper;
-        $this->orderRepository = $orderRepository;
         parent::__construct($context, $data);
     }
 

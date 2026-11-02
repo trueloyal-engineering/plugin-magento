@@ -14,30 +14,6 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class CustomerSaveAfter implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var CustomerRepositoryInterface
-     */
-    private $customerRepository;
-
-    /**
-     * @var AddressRepositoryInterface
-     */
-    private $addressRepository;
-    /**
-     * @var Http
-     */
-    private $request;
-
-    /**
-     * @var Registry
-     */
-    private $registry;
-
-    /**
      * Customer Register constructor.
      *
      * @param Data $helper
@@ -47,17 +23,12 @@ class CustomerSaveAfter implements ObserverInterface
      * @param AddressRepositoryInterface $addressRepository
      */
     public function __construct(
-        Data $helper,
-        Http $request,
-        Registry $registry,
-        CustomerRepositoryInterface $customerRepository,
-        AddressRepositoryInterface $addressRepository
+        private readonly Data $helper,
+        private readonly Http $request,
+        private readonly Registry $registry,
+        private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly AddressRepositoryInterface $addressRepository
     ) {
-        $this->helper = $helper;
-        $this->request = $request;
-        $this->registry = $registry;
-        $this->customerRepository = $customerRepository;
-        $this->addressRepository = $addressRepository;
     }
 
     /**
@@ -105,7 +76,7 @@ class CustomerSaveAfter implements ObserverInterface
             }
             unset($customerAddressData["entity_id"], $customerAddressData["parent_id"]);
             $customerId = $customerAddressData["customer_id"];
-            $addressId = isset($customerAddressData["id"]) ? $customerAddressData["id"] : null;
+            $addressId = $customerAddressData["id"] ?? null;
             $activity_id = "customer_update";
             if($this->registry->registry('customer_address_save_event')) {
                 $this->registry->unregister('customer_address_save_event');

@@ -13,23 +13,6 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class OrderUpdate implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var Http
-     */
-    private $request;
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-    /**
-     * @var Request
-     */
-    private $restRequest;
-
-    /**
      * Order Update constructor.
      *
      * @param Data $helper
@@ -38,15 +21,11 @@ class OrderUpdate implements ObserverInterface
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        Data $helper,
-        Http $request,
-        Request $restRequest,
-        OrderRepositoryInterface $orderRepository
+        private readonly Data $helper,
+        private readonly Http $request,
+        private readonly Request $restRequest,
+        private readonly OrderRepositoryInterface $orderRepository
     ) {
-        $this->helper = $helper;
-        $this->request = $request;
-        $this->orderRepository = $orderRepository;
-        $this->restRequest = $restRequest;
     }
 
     /**

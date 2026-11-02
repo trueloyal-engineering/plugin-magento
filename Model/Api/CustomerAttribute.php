@@ -18,23 +18,6 @@ class CustomerAttribute
      * @var EavSetupFactory
      */
     private $eavSetupFactory;
-    /**
-     * @var Config
-     */
-    private $eavConfig;
-
-    /**
-     * @var Attribute
-     */
-    private $attributeResource;
-    /**
-     * @var Request
-     */
-    private $request;
-    /**
-     * @var Data
-     */
-    private $helper;
 
     /**
      * CustomerAttribute Constructor
@@ -47,16 +30,12 @@ class CustomerAttribute
      */
     public function __construct(
         EavSetupFactory $eavSetupFactory,
-        Config $eavConfig,
-        Request $request,
-        Attribute $attributeResource,
-        Data $helper
+        private readonly Config $eavConfig,
+        private readonly Request $request,
+        private readonly Attribute $attributeResource,
+        private readonly Data $helper
     ) {
         $this->eavSetupFactory = $eavSetupFactory;
-        $this->eavConfig = $eavConfig;
-        $this->attributeResource = $attributeResource;
-        $this->request = $request;
-        $this->helper = $helper;
     }
 
     /**

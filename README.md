@@ -26,8 +26,8 @@ Connects a Magento 2 store to the [TrueLoyal](https://www.trueloyal.com) loyalty
 
 ## Requirements
 
-- Magento Open Source or Adobe Commerce 2.4. The module is tested on 2.4.9.
-- PHP 8.1 to 8.5.
+- Magento Open Source or Adobe Commerce 2.4.7 or later. The module is tested on 2.4.9.
+- PHP 8.3 to 8.5. Version 2.5.x of the module still supports PHP 8.1 and 8.2.
 - A TrueLoyal account with its Partner ID, API Key and API Key Identifier.
 
 ## Installation

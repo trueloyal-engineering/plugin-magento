@@ -20,11 +20,6 @@ class RewardList extends Template
     public $logger;
 
     /**
-     * @var CustomerSession
-     */
-    private $customerSession;
-
-    /**
      * RewardList constructor.
      *
      * @param Template\Context $context
@@ -36,12 +31,11 @@ class RewardList extends Template
     public function __construct(
         Template\Context $context,
         Reward $helper,
-        CustomerSession $customerSession,
+        private readonly CustomerSession $customerSession,
         TrueLoyalLogger $logger,
         array $data = []
     ) {
         $this->logger = $logger;
-        $this->customerSession = $customerSession;
         $this->helper = $helper;
         parent::__construct(
             $context,

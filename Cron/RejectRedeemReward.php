@@ -17,16 +17,6 @@ class RejectRedeemReward
      * @var QuoteFactory
      */
     private $quoteFactory;
-
-    /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var Logger
-     */
-    private $trueloyalLogger;
     /**
      * @var int minutes
      */
@@ -41,12 +31,10 @@ class RejectRedeemReward
      */
     public function __construct(
         QuoteFactory $quoteFactory,
-        Data $helper,
-        Logger $trueloyalLogger
+        private readonly Data $helper,
+        private readonly Logger $trueloyalLogger
     ) {
         $this->quoteFactory = $quoteFactory;
-        $this->helper = $helper;
-        $this->trueloyalLogger = $trueloyalLogger;
     }
 
     /**

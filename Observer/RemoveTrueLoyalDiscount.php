@@ -12,26 +12,15 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class RemoveTrueLoyalDiscount implements ObserverInterface
 {
     /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-    /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
      * Remove TrueLoyal Discount constructor.
      *
      * @param CheckoutSession $checkoutSession
      * @param Data $helper
      */
     public function __construct(
-        CheckoutSession $checkoutSession,
-        Data $helper
+        private readonly CheckoutSession $checkoutSession,
+        private readonly Data $helper
     ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->helper = $helper;
     }
 
     /**

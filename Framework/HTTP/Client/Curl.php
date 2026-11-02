@@ -17,7 +17,7 @@ class Curl extends MainCurl
      */
     protected function parseHeaders($ch, $data)
     {
-        $data = $data !== null ? $data : '';
+        $data ??= '';
         if ($this->_headerCount == 0) {
             $line = explode(" ", trim($data), 3);
             if (count($line) < 2) {

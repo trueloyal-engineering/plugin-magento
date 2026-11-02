@@ -11,30 +11,19 @@ use Magento\Sales\Api\CreditmemoRepositoryInterface;
 class TrueLoyalCreditMemoViewDiscount extends Template
 {
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var CreditmemoRepositoryInterface
-     */
-    private $creditMemoRepository;
-
-    /**
      * TrueLoyal Credit Memo View Discount constructor.
      *
      * @param Context $context
      * @param Data $helper
-     * @param CreditmemoRepositoryInterface $creditedRepository
+     * @param CreditmemoRepositoryInterface $creditMemoRepository
      * @param array $data
      */
     public function __construct(
         Context $context,
-        Data $helper,
-        CreditmemoRepositoryInterface $creditedRepository,
+        private readonly Data $helper,
+        private readonly CreditmemoRepositoryInterface $creditMemoRepository,
         array $data = []
     ) {
-        $this->helper = $helper;
-        $this->creditMemoRepository = $creditedRepository;
         parent::__construct(
             $context,
             $data

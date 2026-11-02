@@ -35,14 +35,6 @@ class TrueLoyalShipping extends AbstractCarrier implements CarrierInterface
      * @var MethodFactory
      */
     protected $rateMethodFactory;
-    /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-    /**
-     * @var Data
-     */
-    private $helper;
 
     /**
      * TrueLoyalShipping constructor.
@@ -60,16 +52,14 @@ class TrueLoyalShipping extends AbstractCarrier implements CarrierInterface
         ScopeConfigInterface $scopeConfig,
         ErrorFactory $rateErrorFactory,
         LoggerInterface $logger,
-        Data $helper,
-        CheckoutSession $checkoutSession,
+        private readonly Data $helper,
+        private readonly CheckoutSession $checkoutSession,
         ResultFactory $rateResultFactory,
         MethodFactory $rateMethodFactory,
         array $data = []
     ) {
-        $this->checkoutSession = $checkoutSession;
         $this->rateResultFactory = $rateResultFactory;
         $this->rateMethodFactory = $rateMethodFactory;
-        $this->helper = $helper;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
 

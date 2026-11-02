@@ -406,12 +406,12 @@ class Data extends Config
     public function setFormatedPrice($priceData)
     {
         foreach ($priceData as $key => $itemData) {
-            if ((strpos($key, 'price') !== false || strpos($key, 'amount') !== false ||
-                    strpos($key, 'rate') !== false || strpos($key, 'incl') !== false ||
-                    strpos($key, 'discount') !== false || strpos($key, 'base_shipping') !== false ||
-                    strpos($key, 'base_tax') !== false || strpos($key, 'row_') !== false ||
-                    strpos($key, 'shipping_invoiced') !== false || strpos($key, 'tax_invoiced') !== false ||
-                    strpos($key, 'shipping_captured') !== false || strpos($key, 'total') !== false
+            if ((str_contains($key, 'price') || str_contains($key, 'amount') ||
+                    str_contains($key, 'rate') || str_contains($key, 'incl') ||
+                    str_contains($key, 'discount') || str_contains($key, 'base_shipping') ||
+                    str_contains($key, 'base_tax') || str_contains($key, 'row_') ||
+                    str_contains($key, 'shipping_invoiced') || str_contains($key, 'tax_invoiced') ||
+                    str_contains($key, 'shipping_captured') || str_contains($key, 'total')
                 ) && $itemData != ""
             ) {
                 $priceData[$key] = (float)$itemData;

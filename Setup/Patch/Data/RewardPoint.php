@@ -15,25 +15,9 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class RewardPoint implements DataPatchInterface
 {
     /**
-     * @var ModuleDataSetupInterface
-     */
-    private $moduleDataSetup;
-    /**
      * @var EavSetupFactory
      */
     private $eavSetupFactory;
-    /**
-     * @var Config
-     */
-    private $eavConfig;
-    /**
-     * @var Attribute
-     */
-    private $attributeResource;
-    /**
-     * @var Data
-     */
-    private $helper;
 
     /**
      * RewardPoint Constructor
@@ -46,16 +30,12 @@ class RewardPoint implements DataPatchInterface
      */
     public function __construct(
         EavSetupFactory $eavSetupFactory,
-        Config $eavConfig,
-        Attribute $attributeResource,
-        ModuleDataSetupInterface $moduleDataSetup,
-        Data $helper
+        private readonly Config $eavConfig,
+        private readonly Attribute $attributeResource,
+        private readonly ModuleDataSetupInterface $moduleDataSetup,
+        private readonly Data $helper
     ) {
         $this->eavSetupFactory = $eavSetupFactory;
-        $this->eavConfig = $eavConfig;
-        $this->attributeResource = $attributeResource;
-        $this->moduleDataSetup = $moduleDataSetup;
-        $this->helper = $helper;
     }
 
     /**

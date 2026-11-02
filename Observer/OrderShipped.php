@@ -13,25 +13,6 @@ use TrueLoyal\LoyaltyRewards\Helper\OrderComplete;
 class OrderShipped implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var ShipmentRepositoryInterface
-     */
-    private $shipmentRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    private $searchCriteriaBuilder;
-    /**
-     * @var OrderComplete
-     */
-    private $orderCompleteHelper;
-
-    /**
      * Order shipped constructor.
      *
      * @param Data $helper
@@ -40,15 +21,11 @@ class OrderShipped implements ObserverInterface
      * @param ShipmentRepositoryInterface $shipmentRepository
      */
     public function __construct(
-        Data $helper,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        OrderComplete $orderCompleteHelper,
-        ShipmentRepositoryInterface $shipmentRepository
+        private readonly Data $helper,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly OrderComplete $orderCompleteHelper,
+        private readonly ShipmentRepositoryInterface $shipmentRepository
     ) {
-        $this->helper = $helper;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->shipmentRepository = $shipmentRepository;
-        $this->orderCompleteHelper = $orderCompleteHelper;
     }
 
     /**
@@ -136,7 +113,7 @@ class OrderShipped implements ObserverInterface
                     $params = $this->helper->json->serialize($params);
                     $this->helper->request($url, $params, "post");
                     return true;
-                } catch (Exception $e) {
+                } catch (Exception) {
                     return false;
                 }
             }

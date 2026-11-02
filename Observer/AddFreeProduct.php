@@ -19,10 +19,6 @@ class AddFreeProduct implements ObserverInterface
      * @var Data
      */
     protected $helper;
-    /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
 
     /**
      * Add free product constructor.
@@ -33,11 +29,10 @@ class AddFreeProduct implements ObserverInterface
      */
     public function __construct(
         Http $request,
-        CheckoutSession $checkoutSession,
+        private readonly CheckoutSession $checkoutSession,
         Data $helper
     ) {
         $this->request = $request;
-        $this->checkoutSession = $checkoutSession;
         $this->helper = $helper;
     }
 

@@ -13,16 +13,6 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
 {
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
      * @var OrderFactory
      */
     private $orderFactory;
@@ -35,12 +25,10 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
      * @param OrderFactory $orderFactory
      */
     public function __construct(
-        Data $helper,
-        OrderRepositoryInterface $orderRepository,
+        private readonly Data $helper,
+        private readonly OrderRepositoryInterface $orderRepository,
         OrderFactory $orderFactory
     ) {
-        $this->helper = $helper;
-        $this->orderRepository = $orderRepository;
         $this->orderFactory = $orderFactory;
     }
 

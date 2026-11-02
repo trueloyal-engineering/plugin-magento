@@ -9,20 +9,15 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class AroundPluginDefaultItem
 {
     public const GROUP = 'grouped';
-    /**
-     * @var Data
-     */
-    private $helperData;
 
     /**
      * AroundPluginDefaultItem constructor
      *
      * @param Data $helperData
      */
-    public function __construct(Data $helperData)
-    {
-
-        $this->helperData = $helperData;
+    public function __construct(
+        private readonly Data $helperData
+    ) {
     }
 
     /**

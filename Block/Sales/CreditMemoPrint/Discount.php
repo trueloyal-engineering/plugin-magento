@@ -21,31 +21,19 @@ class Discount extends Template
     protected $_source;
 
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var CreditmemoRepositoryInterface
-     */
-    private $creditmemoRepository;
-
-    /**
      * CreditMemo Print Discount constructor.
      *
      * @param Context $context
      * @param Data $helper
-     * @param CreditmemoRepositoryInterface $creditMemoRepository
+     * @param CreditmemoRepositoryInterface $creditmemoRepository
      * @param array $data
      */
     public function __construct(
         Context $context,
-        Data $helper,
-        CreditmemoRepositoryInterface $creditMemoRepository,
+        private readonly Data $helper,
+        private readonly CreditmemoRepositoryInterface $creditmemoRepository,
         array $data = []
     ) {
-        $this->helper = $helper;
-        $this->creditmemoRepository = $creditMemoRepository;
         parent::__construct($context, $data);
     }
 

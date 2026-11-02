@@ -13,10 +13,6 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class ProductReviewSaveAfter implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
      * @var ReviewFactory
      */
     private $reviewFactory;
@@ -28,10 +24,9 @@ class ProductReviewSaveAfter implements ObserverInterface
      * @param ReviewFactory $reviewFactory
      */
     public function __construct(
-        Data $helper,
+        private readonly Data $helper,
         ReviewFactory $reviewFactory
     ) {
-        $this->helper = $helper;
         $this->reviewFactory = $reviewFactory;
     }
 

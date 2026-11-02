@@ -10,27 +10,15 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class OrderCancel implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
      * Order Cancel constructor.
      *
      * @param Data $helper
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        Data $helper,
-        OrderRepositoryInterface $orderRepository
+        private readonly Data $helper,
+        private readonly OrderRepositoryInterface $orderRepository
     ) {
-        $this->helper = $helper;
-        $this->orderRepository = $orderRepository;
     }
 
     /**

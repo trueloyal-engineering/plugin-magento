@@ -26,53 +26,6 @@ use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuote;
 class ApplyPoint implements HttpPostActionInterface
 {
     /**
-     * @var JsonFactory
-     */
-    private $jsonFactory;
-
-    /**
-     * @var RequestInterface
-     */
-    private $request;
-
-    /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-    /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var ManagerInterface
-     */
-    private $messageManager;
-    /**
-     * @var FormKey
-     */
-    private $formKey;
-    /**
-     * @var Cart
-     */
-    private $cart;
-    /**
-     * @var Product
-     */
-    private $product;
-    /**
-     * @var Session
-     */
-    private $customerSession;
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-    /**
-     * @var Logger
-     */
-    private $logger;
-
-    /**
      * ApplyPoint construct
      *
      * @param JsonFactory $jsonFactory
@@ -88,29 +41,18 @@ class ApplyPoint implements HttpPostActionInterface
      * @param Logger $logger
      */
     public function __construct(
-        JsonFactory $jsonFactory,
-        RequestInterface $request,
-        Data $helper,
-        ManagerInterface $messageManager,
-        FormKey $formKey,
-        Session $customerSession,
-        Cart $cart,
-        SerializerInterface $serializer,
-        Product $product,
-        CheckoutSession $checkoutSession,
-        Logger $logger
+        private readonly JsonFactory $jsonFactory,
+        private readonly RequestInterface $request,
+        private readonly Data $helper,
+        private readonly ManagerInterface $messageManager,
+        private readonly FormKey $formKey,
+        private readonly Session $customerSession,
+        private readonly Cart $cart,
+        private readonly SerializerInterface $serializer,
+        private readonly Product $product,
+        private readonly CheckoutSession $checkoutSession,
+        private readonly Logger $logger
     ) {
-        $this->formKey = $formKey;
-        $this->cart = $cart;
-        $this->product = $product;
-        $this->jsonFactory = $jsonFactory;
-        $this->checkoutSession = $checkoutSession;
-        $this->request = $request;
-        $this->messageManager = $messageManager;
-        $this->helper = $helper;
-        $this->customerSession = $customerSession;
-        $this->serializer = $serializer;
-        $this->logger = $logger;
     }
 
     /**

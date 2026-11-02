@@ -11,19 +11,13 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class LoyaltyRewardsDiscount extends AbstractTotal
 {
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
      * LoyaltyRewardsDiscount constructor.
      *
      * @param Data $helper
      */
     public function __construct(
-        Data $helper
+        private readonly Data $helper
     ) {
-        $this->helper = $helper;
     }
 
     /**

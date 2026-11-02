@@ -9,26 +9,15 @@ use TrueLoyal\LoyaltyRewards\Helper\Config as TrueLoyalHelper;
 class DisableQty
 {
     /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-    /**
-     * @var TrueLoyalHelper
-     */
-    private $trueloyalHelper;
-
-    /**
      * Disable Qty for Free product
      *
      * @param CheckoutSession $checkoutSession
      * @param TrueLoyalHelper $trueloyalHelper
      */
     public function __construct(
-        CheckoutSession $checkoutSession,
-        TrueLoyalHelper $trueloyalHelper
+        private readonly CheckoutSession $checkoutSession,
+        private readonly TrueLoyalHelper $trueloyalHelper
     ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->trueloyalHelper = $trueloyalHelper;
     }
 
     /**

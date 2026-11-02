@@ -12,15 +12,6 @@ class TrueLoyalInvoiceViewDiscount extends Template
 {
 
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var InvoiceRepositoryInterface
-     */
-    private $invoiceRepository;
-
-    /**
      * TrueLoyal Invoice View Discount constructor.
      *
      * @param Context $context
@@ -30,12 +21,10 @@ class TrueLoyalInvoiceViewDiscount extends Template
      */
     public function __construct(
         Context $context,
-        Data $helper,
-        InvoiceRepositoryInterface $invoiceRepository,
+        private readonly Data $helper,
+        private readonly InvoiceRepositoryInterface $invoiceRepository,
         array $data = []
     ) {
-        $this->helper = $helper;
-        $this->invoiceRepository = $invoiceRepository;
         parent::__construct(
             $context,
             $data

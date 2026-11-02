@@ -16,18 +16,6 @@ class OrderFullInvoicePaid implements ObserverInterface
      * @var SearchCriteriaBuilder
      */
     protected $searchCriteriaBuilder;
-    /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var InvoiceRepositoryInterface
-     */
-    private $invoiceRepository;
-    /**
-     * @var OrderComplete
-     */
-    private $orderCompleteHelper;
 
     /**
      * OrderFullInvoicePaid constructor.
@@ -38,15 +26,12 @@ class OrderFullInvoicePaid implements ObserverInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
-        Data $helper,
-        OrderComplete $orderCompleteHelper,
-        InvoiceRepositoryInterface $invoiceRepository,
+        private readonly Data $helper,
+        private readonly OrderComplete $orderCompleteHelper,
+        private readonly InvoiceRepositoryInterface $invoiceRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
-        $this->helper = $helper;
-        $this->invoiceRepository = $invoiceRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->orderCompleteHelper = $orderCompleteHelper;
     }
 
     /**

@@ -14,25 +14,9 @@ use Magento\Sales\Api\CreditmemoRepositoryInterface;
 class OrderRefund implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var CreditmemoRepositoryInterface
-     */
-    private $creditMemoRepository;
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    private $searchCriteriaBuilder;
-    /**
      * @var OrderFactory
      */
     private $orderFactory;
-    /**
-     * @var ProductMetadataInterface
-     */
-    private $productMetadata;
 
     /**
      * Order Refund constructor.
@@ -44,17 +28,13 @@ class OrderRefund implements ObserverInterface
      * @param ProductMetadataInterface $productMetadata
      */
     public function __construct(
-        Data $helper,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly Data $helper,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         OrderFactory $orderFactory,
-        CreditmemoRepositoryInterface $creditMemoRepository,
-        ProductMetadataInterface $productMetadata
+        private readonly CreditmemoRepositoryInterface $creditMemoRepository,
+        private readonly ProductMetadataInterface $productMetadata
     ) {
-        $this->helper = $helper;
         $this->orderFactory = $orderFactory;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->creditMemoRepository = $creditMemoRepository;
-        $this->productMetadata = $productMetadata;
     }
 
     /**
@@ -107,7 +87,7 @@ class OrderRefund implements ObserverInterface
                         return true;
                     }
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 return false;
             }
         }

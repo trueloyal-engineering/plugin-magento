@@ -19,26 +19,6 @@ class CustomerAttributeUpdate
      * @var CustomerRepository
      */
     protected $customerRepository;
-    /**
-     * @var Request
-     */
-    private $request;
-    /**
-     * @var Customer
-     */
-    private $customer;
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-    /**
-     * @var Config
-     */
-    private $eavConfig;
-    /**
-     * @var Data
-     */
-    private $helper;
 
     /**
      * CustomerAttributeUpdate constructor.
@@ -52,17 +32,12 @@ class CustomerAttributeUpdate
      */
     public function __construct(
         Context $context,
-        Request $request,
-        Config $eavConfig,
-        StoreManagerInterface $storeManager,
-        CustomerFactory $customer,
-        Data $helper
+        private readonly Request $request,
+        private readonly Config $eavConfig,
+        private readonly StoreManagerInterface $storeManager,
+        private readonly CustomerFactory $customer,
+        private readonly Data $helper
     ) {
-        $this->request = $request;
-        $this->eavConfig = $eavConfig;
-        $this->customer = $customer;
-        $this->storeManager = $storeManager;
-        $this->helper = $helper;
     }
 
     /**

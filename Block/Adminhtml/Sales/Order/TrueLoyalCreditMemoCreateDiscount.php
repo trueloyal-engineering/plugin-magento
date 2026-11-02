@@ -11,15 +11,6 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class TrueLoyalCreditMemoCreateDiscount extends Template
 {
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
      * TrueLoyal Credit MemoCreate Discount constructor.
      *
      * @param Context $context
@@ -29,12 +20,10 @@ class TrueLoyalCreditMemoCreateDiscount extends Template
      */
     public function __construct(
         Context $context,
-        Data $helper,
-        OrderRepositoryInterface $orderRepository,
+        private readonly Data $helper,
+        private readonly OrderRepositoryInterface $orderRepository,
         array $data = []
     ) {
-        $this->orderRepository = $orderRepository;
-        $this->helper = $helper;
         parent::__construct(
             $context,
             $data

@@ -12,11 +12,6 @@ use TrueLoyal\LoyaltyRewards\Helper\Config;
 class Dashboard extends Template
 {
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
      * Dashboard constructor.
      *
      * @param Template\Context $context
@@ -25,10 +20,9 @@ class Dashboard extends Template
      */
     public function __construct(
         Template\Context $context,
-        Config $config,
+        private readonly Config $config,
         array $data = []
     ) {
-        $this->config = $config;
         parent::__construct($context, $data);
     }
 

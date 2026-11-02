@@ -9,19 +9,13 @@ class CustomerLogoutObserver implements ObserverInterface
 {
 
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
      * CustomerLogoutObserver constructor.
      *
      * @param Data $helper
      */
     public function __construct(
-        Data $helper
+        private readonly Data $helper
     ) {
-        $this->helper = $helper;
     }
 
     /**

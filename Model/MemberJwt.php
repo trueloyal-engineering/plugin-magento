@@ -23,44 +23,14 @@ class MemberJwt
     public const LIFETIME = 3600;
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var JWT
-     */
-    private $jwt;
-
-    /**
      * @var CustomerFactory
      */
     private $customerFactory;
 
     /**
-     * @var CustomerRepositoryInterface
-     */
-    private $customerRepository;
-
-    /**
      * @var SessionFactory
      */
     private $sessionFactory;
-
-    /**
-     * @var Resolver
-     */
-    private $store;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
 
     /**
      * MemberJwt constructor.
@@ -75,23 +45,17 @@ class MemberJwt
      * @param StoreManagerInterface $storeManager
      */
     public function __construct(
-        Config $config,
-        JWT $jwt,
+        private readonly Config $config,
+        private readonly JWT $jwt,
         CustomerFactory $customerFactory,
-        CustomerRepositoryInterface $customerRepository,
+        private readonly CustomerRepositoryInterface $customerRepository,
         SessionFactory $sessionFactory,
-        Resolver $store,
-        SerializerInterface $serializer,
-        StoreManagerInterface $storeManager
+        private readonly Resolver $store,
+        private readonly SerializerInterface $serializer,
+        private readonly StoreManagerInterface $storeManager
     ) {
-        $this->config = $config;
-        $this->jwt = $jwt;
         $this->customerFactory = $customerFactory;
-        $this->customerRepository = $customerRepository;
         $this->sessionFactory = $sessionFactory;
-        $this->store = $store;
-        $this->serializer = $serializer;
-        $this->storeManager = $storeManager;
     }
 
     /**

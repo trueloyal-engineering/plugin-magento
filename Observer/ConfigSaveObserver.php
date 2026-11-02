@@ -10,25 +10,15 @@ use TrueLoyal\LoyaltyRewards\Logger\Logger as TrueLoyalLogger;
 class ConfigSaveObserver implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var TrueLoyalLogger
-     */
-    private $logger;
-    /**
      * Data constructor.
      *
      * @param Data $helper
      * @param TrueLoyalLogger $logger
      */
     public function __construct(
-        Data $helper,
-        TrueLoyalLogger $logger,
+        private readonly Data $helper,
+        private readonly TrueLoyalLogger $logger
     ) {
-        $this->helper = $helper;
-        $this->logger = $logger;
     }
 
     public function execute(Observer $observer)

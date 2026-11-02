@@ -17,10 +17,6 @@ class TrueLoyalDiscount extends Template
      * @var Source
      */
     protected $source;
-    /**
-     * @var Data
-     */
-    private $helper;
 
     /**
      * TrueLoyal Discount constructor.
@@ -31,10 +27,9 @@ class TrueLoyalDiscount extends Template
      */
     public function __construct(
         Context $context,
-        Data $helper,
+        private readonly Data $helper,
         array $data = []
     ) {
-        $this->helper = $helper;
         parent::__construct($context, $data);
     }
 

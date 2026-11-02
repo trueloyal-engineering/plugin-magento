@@ -20,11 +20,6 @@ class Discount extends Template
     protected $_source;
 
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
      * CreditMemo Discount constructor.
      *
      * @param Context $context
@@ -33,10 +28,9 @@ class Discount extends Template
      */
     public function __construct(
         Context $context,
-        Data $helper,
+        private readonly Data $helper,
         array $data = []
     ) {
-        $this->helper = $helper;
         parent::__construct($context, $data);
     }
 

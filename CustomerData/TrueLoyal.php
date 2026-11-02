@@ -14,27 +14,15 @@ use TrueLoyal\LoyaltyRewards\Observer\Customer\ProfileChangedObserver;
 class TrueLoyal implements SectionSourceInterface
 {
     /**
-     * @var MemberJwt
-     */
-    private $memberJwt;
-
-    /**
-     * @var CookieManagerInterface
-     */
-    private $cookieManager;
-
-    /**
      * TrueLoyal section constructor.
      *
      * @param MemberJwt $memberJwt
      * @param CookieManagerInterface $cookieManager
      */
     public function __construct(
-        MemberJwt $memberJwt,
-        CookieManagerInterface $cookieManager
+        private readonly MemberJwt $memberJwt,
+        private readonly CookieManagerInterface $cookieManager
     ) {
-        $this->memberJwt = $memberJwt;
-        $this->cookieManager = $cookieManager;
     }
 
     /**

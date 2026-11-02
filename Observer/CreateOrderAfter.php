@@ -14,23 +14,6 @@ use TrueLoyal\LoyaltyRewards\Helper\Data;
 class CreateOrderAfter implements ObserverInterface
 {
     /**
-     * @var Data
-     */
-    private $helper;
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $quoteRepository;
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
      * CreateOrderAfter constructor.
      *
      * @param Data $helper
@@ -39,15 +22,11 @@ class CreateOrderAfter implements ObserverInterface
      * @param SerializerInterface $serializer
      */
     public function __construct(
-        Data $helper,
-        OrderRepositoryInterface $orderRepository,
-        CartRepositoryInterface $quoteRepository,
-        SerializerInterface $serializer
+        private readonly Data $helper,
+        private readonly OrderRepositoryInterface $orderRepository,
+        private readonly CartRepositoryInterface $quoteRepository,
+        private readonly SerializerInterface $serializer
     ) {
-        $this->helper = $helper;
-        $this->orderRepository = $orderRepository;
-        $this->quoteRepository = $quoteRepository;
-        $this->serializer = $serializer;
     }
 
     /**

@@ -21,16 +21,6 @@ class Discount extends Template
     protected $_source;
 
     /**
-     * @var Data
-     */
-    private $helper;
-
-    /**
-     * @var InvoiceRepositoryInterface
-     */
-    private $invoiceRepository;
-
-    /**
      * Invoice Print Discount constructor.
      *
      * @param Context $context
@@ -40,12 +30,10 @@ class Discount extends Template
      */
     public function __construct(
         Context $context,
-        Data $helper,
-        InvoiceRepositoryInterface $invoiceRepository,
+        private readonly Data $helper,
+        private readonly InvoiceRepositoryInterface $invoiceRepository,
         array $data = []
     ) {
-        $this->helper = $helper;
-        $this->invoiceRepository = $invoiceRepository;
         parent::__construct($context, $data);
     }
 

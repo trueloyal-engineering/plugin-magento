@@ -475,20 +475,22 @@ class Data extends Config
     /**
      * Check API header api-key and partner-id with configured auth key
      *
+     * Missing headers and unconfigured keys never match, and the comparison is constant-time.
+     *
      * @param mixed $requestedApiKey
      * @param mixed $requestedPartnerId
      * @return bool
      */
     public function isValidateApiAuth($requestedApiKey, $requestedPartnerId)
     {
-        $configuredApiKey = $this->getApiKey();
-        $configuredPartnerId = $this->getPartnerId();
-        if (strcmp($requestedApiKey, $configuredApiKey) ||
-            strcmp($requestedPartnerId, $configuredPartnerId)
+        $configuredApiKey = (string)$this->getApiKey();
+        $configuredPartnerId = (string)$this->getPartnerId();
+        if (!is_string($requestedApiKey) || !is_string($requestedPartnerId) ||
+            $configuredApiKey === '' || $configuredPartnerId === ''
         ) {
             return false;
-        } else {
-            return true;
         }
+        return hash_equals($configuredApiKey, $requestedApiKey) &&
+            hash_equals($configuredPartnerId, $requestedPartnerId);
     }
 }

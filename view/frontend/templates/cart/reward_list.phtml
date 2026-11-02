@@ -1,0 +1,73 @@
+<?php
+/**
+ * Cart page: apply a TrueLoyal reward, or cancel the applied one
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \TrueLoyal\LoyaltyRewards\ViewModel\Cart\RewardList $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+if (!$viewModel->isVisible()) {
+    return;
+}
+$applied = $viewModel->getAppliedReward();
+?>
+<div class="reward-point" data-mage-init='<?= $escaper->escapeHtmlAttr(json_encode([
+    'TrueLoyal_LoyaltyRewards/js/reward-list' => $viewModel->getJsConfig(),
+])) ?>'>
+    <div class="redeem-label">
+        <?= /* @noEscape: the admin's label (HTML) and an integer */ $viewModel->getMessageHtml() ?>
+    </div>
+    <div class="reward-list">
+        <?php if ($applied === null): ?>
+            <select class="redeem-reward-selector" name="redeem-reward" id="redeem-reward">
+                <option value=""><?= $escaper->escapeHtml(__('Select a reward')) ?></option>
+                <?php foreach ($viewModel->getRewards() as $reward): ?>
+                    <option value="<?= $escaper->escapeHtmlAttr($reward['reward_id']) ?>"
+                            data-rule="<?= $escaper->escapeHtmlAttr($reward['rule']) ?>"
+                            data-conversion-rate="<?= $escaper->escapeHtmlAttr($reward['conversion_rate'] ?? 0) ?>"
+                            data-min-redemption="<?= $escaper->escapeHtmlAttr($reward['minimum_redemption_limit'] ?? 0) ?>"
+                            data-max-redemption="<?= $escaper->escapeHtmlAttr($reward['maximum_redemption_limit'] ?? 0) ?>">
+                        <?= $escaper->escapeHtml($reward['reward_name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <input type="submit" class="redeem" id="redeem"
+                   value="<?= $escaper->escapeHtmlAttr(__('Apply')) ?>"
+                   title="<?= $escaper->escapeHtmlAttr(__('Apply reward')) ?>">
+        <?php else: ?>
+            <select class="redeem-reward-selector" name="redeem-reward" id="cancel-reward" disabled>
+                <option value="<?= $escaper->escapeHtmlAttr($applied['reward_id']) ?>" selected>
+                    <?= $escaper->escapeHtml($applied['reward_name']) ?>
+                </option>
+            </select>
+            <input type="submit" class="cancel-redeem" id="cancel-redeem"
+                   value="<?= $escaper->escapeHtmlAttr(__('Cancel')) ?>"
+                   title="<?= $escaper->escapeHtmlAttr(__('Cancel reward')) ?>">
+        <?php endif; ?>
+    </div>
+    <div id="modalOverlay"></div>
+    <div id="flexiblePointsModal" class="modal-container">
+        <div class="modal-header">
+            <h2><?= $escaper->escapeHtml(__('Redeem Flexible Reward')) ?></h2>
+            <span class="close-btn">×</span>
+        </div>
+        <div class="modal-body">
+            <p>
+                <?= $escaper->escapeHtml(__('You have %1 points.', $viewModel->getPoints())) ?><br>
+                <?= $escaper->escapeHtml(__("Enter the number of points you'd like to redeem")) ?>
+                (<?= $escaper->escapeHtml(__('minimum')) ?> <strong id="minRedemption"></strong>,
+                <?= $escaper->escapeHtml(__('maximum')) ?> <strong id="maxRedemption"></strong>)
+            </p>
+            <input type="number" id="redeemPointsInput" value="">
+            <p class="discount-preview">
+                <?= $escaper->escapeHtml(__('You will get a discount of')) ?> <strong id="discountAmount"></strong>.
+                <?= $escaper->escapeHtml(__('Maximum discount applicable')) ?>: <strong id="maxdiscountAmount"></strong>.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="apply-btn"><?= $escaper->escapeHtml(__('Apply')) ?></button>
+            <button type="button" class="cancel-btn"><?= $escaper->escapeHtml(__('Cancel')) ?></button>
+        </div>
+    </div>
+</div>

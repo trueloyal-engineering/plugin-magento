@@ -3,7 +3,7 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="order_totals">
-            <block class="TrueLoyal\LoyaltyRewards\Block\Sales\Order\Discount" name="loyaltyRewards"/>
+            <block class="TrueLoyal\LoyaltyRewards\Block\Sales\RewardDiscountTotal" name="loyaltyRewards"/>
         </referenceContainer>
     </body>
 </page>

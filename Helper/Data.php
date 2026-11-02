@@ -75,23 +75,7 @@ class Data extends Config
      */
     public function getMemberIdentifierValueById($customerId, $email = null): string
     {
-        $prefix = $this->getMemberIdentifierPrefix() ?? '';
-        if ($this->getMemberIdentifier() === 'member_id') {
-            if ($customerId) {
-                $customerIdStr = (string)$customerId;
-                if (strlen($prefix) + strlen($customerIdStr) < 3) {
-                    $padLength = max(0, 3 - strlen($prefix));
-                    return $prefix . str_pad($customerIdStr, $padLength, "0", STR_PAD_LEFT);
-                }
-                return $prefix . $customerIdStr;
-            }
-            return $email ? $prefix . $email : '';
-        }
-        if ($email !== null) {
-            return $email ? $prefix . $email : '';
-        }
-        $resolvedEmail = $customerId ? ($this->getCustomerEmailById($customerId) ?? '') : '';
-        return $resolvedEmail ? $prefix . $resolvedEmail : '';
+        return $this->memberIdResolver->forCustomer($customerId, $email);
     }
 
     /**
@@ -164,37 +148,6 @@ class Data extends Config
             $this->logger->addErrorLog($e->getMessage());
         }
         return false;
-    }
-
-    /**
-     * Decode json response and handle response Data
-     *
-     * @param mixed $responseData
-     * @return array|bool[]
-     */
-    public function returnResponseData($responseData): array
-    {
-        $response = (!empty($responseData) && $this->isJson($responseData)) ?
-            $this->json->unserialize($responseData) : [];
-        if (!empty($response)) {
-            if (!isset($response['error_code']) && !isset($response['error'])) {
-                $result = [
-                    "success" => true,
-                    "result" => $response
-                ];
-            } else {
-                $result = [
-                    "success" => false,
-                    "result" => $response['reason']
-                ];
-            }
-        } else {
-            $result = [
-                "success" => false,
-                "result" => __("Something went wrong, check and try again")
-            ];
-        }
-        return $result;
     }
 
     /**

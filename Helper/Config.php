@@ -12,9 +12,6 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\SessionFactory;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute;
 use Magento\Customer\Model\Customer as CustomerModel;
-use Magento\Framework\App\Config\ReinitableConfigInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\RequestInterface;
@@ -22,7 +19,6 @@ use Magento\Framework\Escaper;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Stdlib\Cookie\CookieSizeLimitReachedException;
 use Magento\Framework\Stdlib\Cookie\FailureToSendException;
@@ -31,7 +27,6 @@ use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
@@ -39,6 +34,12 @@ use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
 use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\Session\SessionManagerInterface;
 use TrueLoyal\LoyaltyRewards\Logger\Logger as TrueLoyalLogger;
+use TrueLoyal\LoyaltyRewards\Model\Client\EventPublisher;
+use TrueLoyal\LoyaltyRewards\Model\Client\HttpClient;
+use TrueLoyal\LoyaltyRewards\Model\Client\LiveApi;
+use TrueLoyal\LoyaltyRewards\Model\Client\ResponseParser;
+use TrueLoyal\LoyaltyRewards\Model\MemberIdResolver;
+use TrueLoyal\LoyaltyRewards\Model\Settings;
 use TrueLoyal\LoyaltyRewards\Model\TrueLoyalEavAttributeFactory;
 use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuoteFactory;
 use TrueLoyal\LoyaltyRewards\Model\TrueLoyalQuoteItemFactory;
@@ -47,36 +48,35 @@ use TrueLoyal\LoyaltyRewards\Model\TrueLoyalSalesOrderFactory;
 
 class Config extends AbstractHelper
 {
-    public const XML_PATH_LOYALTY_REWARDS_ACTIVE = "trueloyal_loyaltyRewards/settings/loyalty_rewards_active";
-    public const XML_PATH_DASHBOARD_HIDDEN_FOR_GUESTS = "trueloyal_loyaltyRewards/settings/hide_for_guests";
-    public const XML_PATH_WEB_HOOK_URL = "trueloyal_loyaltyRewards/settings/web_hook_url";
-    public const XML_PATH_WEBHOOK_INTEGRATION_ID = 'trueloyal_loyaltyRewards/settings/webhook_integration_id';
-    public const XML_PATH_WEBHOOK_INTEGRATION_URL = 'trueloyal_loyaltyRewards/settings/webhook_integration_url';
+    public const XML_PATH_LOYALTY_REWARDS_ACTIVE = Settings::XML_PATH_LOYALTY_REWARDS_ACTIVE;
+    public const XML_PATH_DASHBOARD_HIDDEN_FOR_GUESTS = Settings::XML_PATH_DASHBOARD_HIDDEN_FOR_GUESTS;
+    public const XML_PATH_WEB_HOOK_URL = Settings::XML_PATH_WEB_HOOK_URL;
+    public const XML_PATH_WEBHOOK_INTEGRATION_ID = Settings::XML_PATH_WEBHOOK_INTEGRATION_ID;
+    public const XML_PATH_WEBHOOK_INTEGRATION_URL = Settings::XML_PATH_WEBHOOK_INTEGRATION_URL;
     /* Integration on the "Magento v2 -> TrueLoyal" ZIF connector; older builds created magento_to_zinrelo (v1) */
     public const INTEGRATION_TYPE = 'magento_to_trueloyal';
-    public const XML_PATH_LIVE_WEB_HOOK_URL = "trueloyal_loyaltyRewards/settings/live_web_hook_url";
-    public const XML_PATH_ABANDONED_CART_TIME = "trueloyal_loyaltyRewards/settings/abandoned_cart_time";
-    public const XML_PATH_PARTNER_ID = "trueloyal_loyaltyRewards/settings/partner_id";
-    public const XML_PATH_API_KEY = "trueloyal_loyaltyRewards/settings/api_key";
-    public const XML_PATH_API_KEY_IDENTIFIER = "trueloyal_loyaltyRewards/settings/api_key_identifier";
-    public const XML_PATH_REWARD_EVENTS = "trueloyal_loyaltyRewards/settings/reward_events";
-    public const XML_PATH_REWARDS_DROPDOWN_ACTIVE = "trueloyal_loyaltyRewards/settings/rewards_event_drop_down_active";
-    public const XML_PATH_REWARDS_POINTS_AT_PDP = "trueloyal_loyaltyRewards/settings/product_page_rewards_point_enable";
-    public const XML_PATH_FREE_SHIPPING_LABEL = "trueloyal_loyaltyRewards/settings/free_shipping_label";
-    public const XML_PATH_PRODUCT_PAGE_REWARD_LABEL = "trueloyal_loyaltyRewards/settings/product_page_reward_label";
-    public const XML_PATH_PDP_CART_PAGE = "trueloyal_loyaltyRewards/settings/cart_page_rewards_point_enable";
-    public const XML_PATH_PDP_CART_PAGE_REWARD_LABEL = "trueloyal_loyaltyRewards/settings/cart_page_reward_label";
-    public const XML_PATH_CART_PAGE_REWARD_DROPDOWN_LABEL =
-        "trueloyal_loyaltyRewards/settings/cart_page_reward_dropdown_label";
-    public const XML_PATH_LANGUAGES = 'trueloyal_loyaltyRewards/settings/languages_mapping';
-    public const XML_PATH_AUTO_ENROLLMENT = 'trueloyal_loyaltyRewards/settings/auto_enrollment';
-    public const XML_PATH_OPT_IN_FIELD_NAME = 'trueloyal_loyaltyRewards/settings/opt_in_field_name';
-    public const XML_PATH_MEMBER_IDENTIFIER_PREFIX = 'trueloyal_loyaltyRewards/settings/member_identifier_prefix';
-    public const XML_PATH_MEMBER_IDENTIFIER = 'trueloyal_loyaltyRewards/settings/member_identifier';
-    public const XML_PATH_CUSTOM_MEMBER_STORE_CODE = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_code';
-    public const XML_PATH_CUSTOM_MEMBER_STORE_ID = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_id';
-    public const XML_PATH_CUSTOM_MEMBER_STORE_CURRENCY = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_currency';
-    public const XML_PATH_PREFERRED_LANGUAGE = 'trueloyal_loyaltyRewards/settings/preferred_language';
+    public const XML_PATH_LIVE_WEB_HOOK_URL = Settings::XML_PATH_LIVE_WEB_HOOK_URL;
+    public const XML_PATH_ABANDONED_CART_TIME = Settings::XML_PATH_ABANDONED_CART_TIME;
+    public const XML_PATH_PARTNER_ID = Settings::XML_PATH_PARTNER_ID;
+    public const XML_PATH_API_KEY = Settings::XML_PATH_API_KEY;
+    public const XML_PATH_API_KEY_IDENTIFIER = Settings::XML_PATH_API_KEY_IDENTIFIER;
+    public const XML_PATH_REWARD_EVENTS = Settings::XML_PATH_REWARD_EVENTS;
+    public const XML_PATH_REWARDS_DROPDOWN_ACTIVE = Settings::XML_PATH_REWARDS_DROPDOWN_ACTIVE;
+    public const XML_PATH_REWARDS_POINTS_AT_PDP = Settings::XML_PATH_REWARDS_POINTS_AT_PDP;
+    public const XML_PATH_FREE_SHIPPING_LABEL = Settings::XML_PATH_FREE_SHIPPING_LABEL;
+    public const XML_PATH_PRODUCT_PAGE_REWARD_LABEL = Settings::XML_PATH_PRODUCT_PAGE_REWARD_LABEL;
+    public const XML_PATH_PDP_CART_PAGE = Settings::XML_PATH_PDP_CART_PAGE;
+    public const XML_PATH_PDP_CART_PAGE_REWARD_LABEL = Settings::XML_PATH_PDP_CART_PAGE_REWARD_LABEL;
+    public const XML_PATH_CART_PAGE_REWARD_DROPDOWN_LABEL = Settings::XML_PATH_CART_PAGE_REWARD_DROPDOWN_LABEL;
+    public const XML_PATH_LANGUAGES = Settings::XML_PATH_LANGUAGES;
+    public const XML_PATH_AUTO_ENROLLMENT = Settings::XML_PATH_AUTO_ENROLLMENT;
+    public const XML_PATH_OPT_IN_FIELD_NAME = Settings::XML_PATH_OPT_IN_FIELD_NAME;
+    public const XML_PATH_MEMBER_IDENTIFIER_PREFIX = Settings::XML_PATH_MEMBER_IDENTIFIER_PREFIX;
+    public const XML_PATH_MEMBER_IDENTIFIER = Settings::XML_PATH_MEMBER_IDENTIFIER;
+    public const XML_PATH_CUSTOM_MEMBER_STORE_CODE = Settings::XML_PATH_CUSTOM_MEMBER_STORE_CODE;
+    public const XML_PATH_CUSTOM_MEMBER_STORE_ID = Settings::XML_PATH_CUSTOM_MEMBER_STORE_ID;
+    public const XML_PATH_CUSTOM_MEMBER_STORE_CURRENCY = Settings::XML_PATH_CUSTOM_MEMBER_STORE_CURRENCY;
+    public const XML_PATH_PREFERRED_LANGUAGE = Settings::XML_PATH_PREFERRED_LANGUAGE;
 
     /**
      * Cookie life time
@@ -89,8 +89,8 @@ class Config extends AbstractHelper
     /**
      * Outbound call limits in seconds (Magento's Curl default is 300 s, which would hang a checkout or cart page)
      */
-    public const HTTP_CONNECT_TIMEOUT = 5;
-    public const HTTP_TIMEOUT = 10;
+    public const HTTP_CONNECT_TIMEOUT = HttpClient::CONNECT_TIMEOUT;
+    public const HTTP_TIMEOUT = HttpClient::TIMEOUT;
     public const HTTP_INTEGRATION_TIMEOUT = 30;
 
     /**
@@ -113,21 +113,9 @@ class Config extends AbstractHelper
      */
     public $quoteRepository;
     /**
-     * @var ScopeConfigInterface $scopeConfig
-     */
-    protected $scopeConfig;
-    /**
-     * @var WriterInterface $writeConfig
-     */
-    protected $writeConfig;
-    /**
      * @var Session
      */
     protected $customerSession;
-    /**
-     * @var Curl
-     */
-    protected $curl;
     /**
      * @var ProductRepositoryInterface
      */
@@ -210,7 +198,6 @@ class Config extends AbstractHelper
      *
      * @param Context $context
      * @param TrueLoyalLogger $logger
-     * @param Curl $curl
      * @param RequestInterface $request
      * @param ProductCategoryList $productCategory
      * @param CustomerRepositoryInterface $customerRepository
@@ -225,8 +212,6 @@ class Config extends AbstractHelper
      * @param OrderRepositoryInterface $orderRepository
      * @param CategoryRepositoryInterface $categoryRepository
      * @param StoreManagerInterface $storeManager
-     * @param ScopeConfigInterface $scopeConfig
-     * @param WriterInterface $writeConfig
      * @param Json $json
      * @param CookieManagerInterface $cookieManager
      * @param CookieMetadataFactory $cookieMetadataFactory
@@ -237,12 +222,16 @@ class Config extends AbstractHelper
      * @param TrueLoyalReviewFactory $trueloyalReviewFactory
      * @param TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory
      * @param Attribute $eavAttribute
-     * @param ReinitableConfigInterface $reinitableConfig
+     * @param Settings $settings
+     * @param MemberIdResolver $memberIdResolver
+     * @param LiveApi $liveApi
+     * @param EventPublisher $eventPublisher
+     * @param HttpClient $httpClient
+     * @param ResponseParser $responseParser
      */
     public function __construct(
         Context $context,
         TrueLoyalLogger $logger,
-        Curl $curl,
         RequestInterface $request,
         ProductCategoryList $productCategory,
         CustomerRepositoryInterface $customerRepository,
@@ -257,8 +246,6 @@ class Config extends AbstractHelper
         OrderRepositoryInterface $orderRepository,
         CategoryRepositoryInterface $categoryRepository,
         StoreManagerInterface $storeManager,
-        ScopeConfigInterface $scopeConfig,
-        WriterInterface $writeConfig,
         Json $json,
         private readonly CookieManagerInterface $cookieManager,
         private readonly CookieMetadataFactory $cookieMetadataFactory,
@@ -270,9 +257,13 @@ class Config extends AbstractHelper
         TrueLoyalReviewFactory $trueloyalReviewFactory,
         TrueLoyalSalesOrderFactory $trueloyalSalesOrderFactory,
         Attribute $eavAttribute,
-        private readonly ReinitableConfigInterface $reinitableConfig
+        protected readonly Settings $settings,
+        protected readonly MemberIdResolver $memberIdResolver,
+        protected readonly LiveApi $liveApi,
+        private readonly EventPublisher $eventPublisher,
+        private readonly HttpClient $httpClient,
+        private readonly ResponseParser $responseParser
     ) {
-        $this->curl = $curl;
         $this->escaper = $escaper;
         $this->request = $request;
         $this->checkoutSession = $checkoutSession;
@@ -286,8 +277,6 @@ class Config extends AbstractHelper
         $this->customerSession = $customerSession;
         $this->logger = $logger;
         $this->storeManager = $storeManager;
-        $this->scopeConfig = $scopeConfig;
-        $this->writeConfig = $writeConfig;
         $this->json = $json;
         $this->helperImageFactory = $helperImageFactory;
         $this->assetRepos = $assetRepos;
@@ -325,11 +314,7 @@ class Config extends AbstractHelper
      */
     public function getConfig($config_path)
     {
-        return $this->scopeConfig->getValue(
-            $config_path,
-            ScopeInterface::SCOPE_STORE,
-            $this->storeManager->getStore()->getStoreId()
-        );
+        return $this->settings->getValue($config_path);
     }
 
     /**
@@ -341,13 +326,7 @@ class Config extends AbstractHelper
      */
     public function saveConfig($config_path, $config_value)
     {
-        $this->writeConfig->save(
-            $config_path,
-            $config_value
-        );
-        /*The admin config save rebuilds the config cache before its observers run: clean it, or the store keeps
-        posting to the old webhook URL until the next cache clean*/
-        $this->reinitableConfig->reinit();
+        $this->settings->save($config_path, $config_value === null ? null : (string)$config_value);
     }
     
     /**
@@ -401,19 +380,9 @@ class Config extends AbstractHelper
             ],
             "status" => "active"
         ];
-        $jsonBody = json_encode($body);
-        $this->setHttpTimeouts(self::HTTP_INTEGRATION_TIMEOUT);
-        $this->curl->setHeaders($headers);
-        $this->curl->post($url, $jsonBody);
-        $response = $this->curl->getBody();
-        $responseCode = $this->curl->getStatus();
-        $data = json_decode($response, true);
-        $this->logger->info("==============Start==============");
-        $this->logger->info("URL: " . $url);
-        $this->logger->info("RequestType: " . "post");
-        $this->logger->info("Headers: " . json_encode($headers));
-        $this->logger->info("Response: " . $response);
-        $this->logger->info("==============End===============");
+        $response = $this->httpClient->send('post', $url, $headers, json_encode($body), self::HTTP_INTEGRATION_TIMEOUT);
+        $responseCode = $response['status'];
+        $data = json_decode($response['body'], true);
         if ($responseCode === 200 && !empty($data['success'])
             && !empty($data['data']['config']['zif_config']['workflow_url'])) {
             return $data['data'];
@@ -841,32 +810,7 @@ class Config extends AbstractHelper
      */
     public function getMemberIdentifierValue(): string
     {
-        $prefix = $this->getMemberIdentifierPrefix();
-        if ($this->getMemberIdentifier() === 'member_id') {
-            $value = $this->getFormattedMemberId($prefix);
-            return $value ?? '';
-        }
-        $value = $this->getCustomerEmailBySession();
-        return $value ? $prefix . $value : '';
-    }
-
-    /**
-     * Get Formatted Member ID (ID as string with leading zeros)
-     *
-     * @return string
-     */
-    public function getFormattedMemberId($prefix = '')
-    {
-        $customerId = $this->customerSession->create()->getCustomerId();
-        if (!$customerId) {
-            return '';
-        }
-        $customerIdStr = (string)$customerId;
-        if (strlen($prefix) + strlen($customerIdStr) < 3) {
-            $padLength = max(0, 3 - strlen($prefix));
-            return $prefix . str_pad($customerIdStr, $padLength, "0", STR_PAD_LEFT);
-        }
-        return $prefix . $customerIdStr;
+        return $this->memberIdResolver->forSession();
     }
 
     /**
@@ -938,57 +882,24 @@ class Config extends AbstractHelper
     public function request($url, $params, $requestType = "post", $apiType = "event_api")
     {
         try {
-            $message = '';
-            /* Add request data to log file*/
             if ($apiType == "live_api") {
-                $headers = [
-                    "content-type" => "application/json",
-                    "api-key" => $this->getApiKey(),
-                    "partner-id" => $this->getPartnerId()
-                ];
-            } else {
-                $milliseconds = round(microtime(true) * 1000);
-                $nonce = $milliseconds;
-                $request_body = $params;
-                $secret_key = $this->getApiKey();
-                $message = $request_body . ":" . $nonce;
-                $computed_signature = $this->generateHasHmac('sha512', $message, $secret_key);
-                $headers = [
-                    "content-type" => "application/json",
-                    "x-magento-signature" => $computed_signature,
-                    'nonce' => $nonce,
-                    "partner-id" => $this->getPartnerId()
-                ];
+                return $this->liveApi->request($requestType == "post" ? "post" : "get", (string)$url, (string)$params);
             }
-            $this->setHttpTimeouts(self::HTTP_TIMEOUT);
-            $this->curl->setHeaders($headers);
-            if ($requestType == "post") {
-                $this->curl->post($url, $params);
-            } else {
-                if (!empty($params)) {
-                    $this->curl->get($url);
-                } else {
-                    $this->curl->get($url);
-                }
-            }
-            $response = $this->curl->getBody();
-            $this->logger->loggedAsInfoData($url, $requestType, $message, $headers, $params, $response);
-            return $this->returnResponseData($response);
+            return $this->eventPublisher->send((string)$url, (string)$params);
         } catch (Exception $e) {
             $this->logger->addErrorLog($e->getMessage());
         }
     }
 
     /**
-     * Set connect and total timeouts for the next outbound call
+     * Decode a TrueLoyal response: success false when the body has an error_code
      *
-     * @param int $timeout
-     * @return void
+     * @param mixed $responseData
+     * @return array{success: bool, result: mixed}
      */
-    private function setHttpTimeouts(int $timeout): void
+    public function returnResponseData($responseData): array
     {
-        $this->curl->setOption(CURLOPT_CONNECTTIMEOUT, self::HTTP_CONNECT_TIMEOUT);
-        $this->curl->setTimeout($timeout);
+        return $this->responseParser->parse((string)$responseData);
     }
 
     /**

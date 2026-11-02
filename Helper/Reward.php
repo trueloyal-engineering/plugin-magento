@@ -55,35 +55,4 @@ class Reward extends Config
             return $this;
         }
     }
-
-    /**
-     * Decode json response and handle response Data
-     *
-     * @param mixed $responseData
-     * @return array|bool[]
-     */
-    public function returnResponseData($responseData): array
-    {
-        $response = (!empty($responseData) && $this->isJson($responseData)) ?
-            $this->json->unserialize($responseData) : [];
-        if (!empty($response)) {
-            if (!isset($response['error_code']) && !isset($response['error'])) {
-                $result = [
-                    "success" => true,
-                    "result" => $response
-                ];
-            } else {
-                $result = [
-                    "success" => false,
-                    "result" => $response['reason']
-                ];
-            }
-        } else {
-            $result = [
-                "success" => false,
-                "result" => __("Something went wrong, check and try again")
-            ];
-        }
-        return $result;
-    }
 }

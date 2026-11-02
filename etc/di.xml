@@ -9,12 +9,15 @@
     <type name="Magento\Checkout\CustomerData\DefaultItem">
         <plugin name="trueloyal_add" type="TrueLoyal\LoyaltyRewards\Plugin\Checkout\CustomerData\AroundPluginDefaultItem" disabled="false" sortOrder="10"/>
     </type>
-    <!-- We need to use prefrences due to backward compatibility of M230  otherwise not need. The parseHeaders function is a protected of its class.-->
-    <preference for="Magento\Framework\HTTP\Client\Curl" type="TrueLoyal\LoyaltyRewards\Framework\HTTP\Client\Curl"/>
-
     <!--Disable quantity box on checkout/cart page-->
     <type name="Magento\Checkout\Block\Cart\AbstractCart">
         <plugin name="item-disable-qty" type="TrueLoyal\LoyaltyRewards\Plugin\Cart\DisableQty" sortOrder="1"/>
+    </type>
+
+    <type name="TrueLoyal\LoyaltyRewards\Model\MemberIdResolver">
+        <arguments>
+            <argument name="logger" xsi:type="object">TrueLoyal\LoyaltyRewards\Logger\Logger</argument>
+        </arguments>
     </type>
 
     <!-- Adding log file for TrueLoyal log -->

@@ -31,10 +31,13 @@ class MemberIdResolver
      *
      * Without an email in member_email mode, the customer's email is looked up.
      */
-    public function forCustomer(int|string|null $customerId, ?string $email = null): string
-    {
-        $prefix = $this->settings->getMemberIdentifierPrefix();
-        if ($this->settings->getMemberIdentifierType() === 'member_id') {
+    public function forCustomer(
+        int|string|null $customerId,
+        ?string $email = null,
+        int|string|null $storeId = null
+    ): string {
+        $prefix = $this->settings->getMemberIdentifierPrefix($storeId);
+        if ($this->settings->getMemberIdentifierType($storeId) === 'member_id') {
             if ($customerId) {
                 return $this->formatId($prefix, (string)$customerId);
             }

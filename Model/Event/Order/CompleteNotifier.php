@@ -29,7 +29,7 @@ class CompleteNotifier
     public function notifyIfComplete(Order $order): void
     {
         $trueloyalOrder = $this->config->getTrueLoyalOrderByOrderId($order->getEntityId());
-        if (!$this->moduleState->isEventEnabled('order_complete')
+        if (!$this->moduleState->isEventEnabled('order_complete', $order->getStoreId())
             || $order->getState() != Order::STATE_COMPLETE
             || $trueloyalOrder->getCompleteRequestSent() != 0
         ) {

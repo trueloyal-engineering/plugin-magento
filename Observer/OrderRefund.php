@@ -27,7 +27,9 @@ class OrderRefund implements ObserverInterface
     public function execute(Observer $observer): void
     {
         $creditmemo = $observer->getEvent()->getCreditmemo();
-        if (!$this->moduleState->isEventEnabled('order_refund') || !($creditmemo->getTotalQty() > 0)) {
+        if (!$this->moduleState->isEventEnabled('order_refund', $creditmemo->getStoreId())
+            || !($creditmemo->getTotalQty() > 0)
+        ) {
             return;
         }
         try {

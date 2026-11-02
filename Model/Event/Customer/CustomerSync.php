@@ -19,7 +19,7 @@ use TrueLoyal\LoyaltyRewards\Model\ModuleState;
  */
 class CustomerSync
 {
-    /** @var array<int, array{activity: string, enabled: bool}> */
+    /** @var array<int, array{activity: string, enabled: bool, store: int|string|null}> */
     private array $pending = [];
     private bool $flushRegistered = false;
     private int $paused = 0;
@@ -54,15 +54,16 @@ class CustomerSync
     {
         $isNew = isset($this->creating[$customer]);
         unset($this->creating[$customer]);
-        $this->add((int)$customer->getId(), $isNew);
+        $this->add((int)$customer->getId(), $isNew, $customer->getStoreId());
     }
 
     /**
      * Record that a customer (or one of their addresses) was saved
      *
      * @param bool $isNew the customer was created by this save: customer_create instead of customer_update
+     * @param int|string|null $storeId the customer's store (where the account was created), default the current
      */
-    public function add(int $customerId, bool $isNew = false): void
+    public function add(int $customerId, bool $isNew = false, int|string|null $storeId = null): void
     {
         if ($this->paused || !$customerId) {
             return;
@@ -70,7 +71,12 @@ class CustomerSync
         $activity = $isNew || ($this->pending[$customerId]['activity'] ?? '') === 'customer_create'
             ? 'customer_create' : 'customer_update';
         // Decided now: whether the integration is on can depend on the session (opt-in)
-        $this->pending[$customerId] = ['activity' => $activity, 'enabled' => $this->moduleState->isEventEnabled($activity)];
+        $storeId ??= $this->pending[$customerId]['store'] ?? null;
+        $this->pending[$customerId] = [
+            'activity' => $activity,
+            'enabled' => $this->moduleState->isEventEnabled($activity, $storeId),
+            'store' => $storeId,
+        ];
         if (!$this->flushRegistered) {
             register_shutdown_function([$this, 'flush']);
             $this->flushRegistered = true;
@@ -108,8 +114,12 @@ class CustomerSync
             try {
                 $this->customerRegistry->remove($customerId);
                 $customer = $this->customerRepository->getById($customerId);
-                $memberId = $this->memberIdResolver->forCustomer($customerId, (string)$customer->getEmail());
-                $this->sender->send($event['activity'], $memberId, $customer->__toArray());
+                $memberId = $this->memberIdResolver->forCustomer(
+                    $customerId,
+                    (string)$customer->getEmail(),
+                    $event['store']
+                );
+                $this->sender->send($event['activity'], $memberId, $customer->__toArray(), $event['store']);
             } catch (\Throwable $e) {
                 $this->logger->addErrorLog('TrueLoyal: ' . $event['activity'] . ' failed: ' . $e->getMessage());
             }

@@ -111,6 +111,17 @@ class Formatter
     }
 
     /**
+     * URL of the product's base image, or of the placeholder
+     */
+    public function imageUrl(ProductInterface $product): string
+    {
+        if ($product->getImage()) {
+            return $this->storeManager->getStore()->getBaseUrl('media') . 'catalog/product' . $product->getImage();
+        }
+        return $this->assetRepository->getUrl($this->imageHelperFactory->create()->getPlaceholder('small_image'));
+    }
+
+    /**
      * All categories of a product, comma-separated: name = names, ids = IDs
      *
      * @return array{name: string, ids: string}
@@ -172,14 +183,6 @@ class Formatter
             $baseTotal += $baseBySku[$item->getSku()];
         }
         return [$bySku, $baseBySku, $total, $baseTotal];
-    }
-
-    private function imageUrl(ProductInterface $product): string
-    {
-        if ($product->getImage()) {
-            return $this->storeManager->getStore()->getBaseUrl('media') . 'catalog/product' . $product->getImage();
-        }
-        return $this->assetRepository->getUrl($this->imageHelperFactory->create()->getPlaceholder('small_image'));
     }
 
     private function isPriceKey(string $key): bool

@@ -26,22 +26,26 @@ class EventSender
     ) {
     }
 
-    public function send(string $activityId, string $memberId, array $data): void
+    /**
+     * @param int|string|null $storeId the store the event belongs to: its webhook URL and credentials are used
+     */
+    public function send(string $activityId, string $memberId, array $data, int|string|null $storeId = null): void
     {
         $body = $this->json->serialize(['member_id' => $memberId, 'activity_id' => $activityId, 'data' => $data]);
         try {
-            $this->publisher->send($this->settings->getWebhookUrl(), $body);
+            $this->publisher->send($this->settings->getWebhookUrl($storeId), $body, $storeId);
         } catch (\Exception $e) {
             $this->logger->addErrorLog($e->getMessage());
         }
     }
 
     /**
-     * Send an event on behalf of the order's customer (or guest)
+     * Send an event of the order's store on behalf of the order's customer (or guest)
      */
     public function sendForOrder(string $activityId, OrderInterface $order, array $data): void
     {
-        $memberId = $this->memberIdResolver->forCustomer($order->getCustomerId(), $order->getCustomerEmail());
-        $this->send($activityId, $memberId, $data);
+        $storeId = $order->getStoreId();
+        $memberId = $this->memberIdResolver->forCustomer($order->getCustomerId(), $order->getCustomerEmail(), $storeId);
+        $this->send($activityId, $memberId, $data, $storeId);
     }
 }

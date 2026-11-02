@@ -23,8 +23,8 @@ class OrderCancel implements ObserverInterface
 
     public function execute(Observer $observer): void
     {
-        if ($this->moduleState->isEventEnabled('order_cancelled')) {
-            $order = $observer->getEvent()->getOrder();
+        $order = $observer->getEvent()->getOrder();
+        if ($this->moduleState->isEventEnabled('order_cancelled', $order->getStoreId())) {
             $this->sender->sendForOrder('order_cancel', $order, $this->payload->build($order));
         }
     }

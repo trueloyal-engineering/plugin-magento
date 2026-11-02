@@ -23,19 +23,20 @@ class EventPublisher
     /**
      * @param string $url the webhook URL (normally Settings::getWebhookUrl())
      * @param string $body the JSON event
+     * @param int|string|null $storeId store whose credentials sign the event, default the current
      * @return array{success: bool, result: mixed} the workflow answers before it processes the event, so this only
      *     says the event was delivered
      * @throws \Exception when the request can't be sent
      */
-    public function send(string $url, string $body): array
+    public function send(string $url, string $body, int|string|null $storeId = null): array
     {
         $nonce = (string)round(microtime(true) * 1000);
         $message = $body . ':' . $nonce;
         $headers = [
             'content-type' => 'application/json',
-            'x-magento-signature' => hash_hmac('sha512', $message, $this->settings->getApiKey()),
+            'x-magento-signature' => hash_hmac('sha512', $message, $this->settings->getApiKey($storeId)),
             'nonce' => $nonce,
-            'partner-id' => $this->settings->getPartnerId(),
+            'partner-id' => $this->settings->getPartnerId($storeId),
         ];
         $response = $this->http->send('post', $url, $headers, $body, HttpClient::TIMEOUT, true, $message);
         return $this->parser->parse($response['body']);

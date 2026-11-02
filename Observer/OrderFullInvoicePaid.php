@@ -30,7 +30,7 @@ class OrderFullInvoicePaid implements ObserverInterface
     public function execute(Observer $observer): void
     {
         $order = $observer->getEvent()->getInvoice()->getOrder();
-        if ($this->moduleState->isEventEnabled('order_paid') && !$order->canInvoice()) {
+        if ($this->moduleState->isEventEnabled('order_paid', $order->getStoreId()) && !$order->canInvoice()) {
             try {
                 $this->sender->sendForOrder('order_paid', $order, $this->payload->build($order));
             } catch (\Exception $e) {

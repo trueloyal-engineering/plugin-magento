@@ -52,7 +52,7 @@ class CreateOrderAfter implements ObserverInterface
         }
         // Built even when order_create is off: it also records each item's share of the reward discount
         $data = $this->payload->build($orderId);
-        if ($this->moduleState->isEventEnabled('order_create')) {
+        if ($this->moduleState->isEventEnabled('order_create', $order->getStoreId())) {
             $this->sender->sendForOrder('order_create', $order, $data);
         }
     }
@@ -75,7 +75,8 @@ class CreateOrderAfter implements ObserverInterface
         }
         $reward = $this->config->getRewardRulesData($quote, $rewardId);
         try {
-            $this->liveApi->request('post', $this->liveApi->transactionUrl($reward['id'] . '/approve'));
+            $storeId = $order->getStoreId();
+            $this->liveApi->request('post', $this->liveApi->transactionUrl($reward['id'] . '/approve', $storeId), '', $storeId);
         } catch (\Exception $e) {
             $this->logger->addErrorLog($e->getMessage());
         }

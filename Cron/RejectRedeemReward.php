@@ -1,177 +1,106 @@
 <?php
+declare(strict_types=1);
 
 namespace TrueLoyal\LoyaltyRewards\Cron;
 
-use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
-use Magento\Quote\Model\QuoteFactory;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\ResourceModel\Quote\CollectionFactory as QuoteCollectionFactory;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
 use TrueLoyal\LoyaltyRewards\Logger\Logger;
+use TrueLoyal\LoyaltyRewards\Model\Event\Cart\AbandonedCartPayload;
+use TrueLoyal\LoyaltyRewards\Model\Event\EventSender;
+use TrueLoyal\LoyaltyRewards\Model\MemberIdResolver;
+use TrueLoyal\LoyaltyRewards\Model\ModuleState;
+use TrueLoyal\LoyaltyRewards\Model\ResourceModel\TrueLoyalQuote\CollectionFactory as TrueLoyalQuoteCollectionFactory;
+use TrueLoyal\LoyaltyRewards\Model\Settings;
 
+/**
+ * Every minute: for customers' carts idle longer than abandoned_cart_time, reject the pending redemption and send
+ * cart_abandonment (once per armed quote, with the configuration of the quote's store)
+ */
 class RejectRedeemReward
 {
     public const COLLECTION_LIMIT = 100;
-    /**
-     * @var QuoteFactory
-     */
-    private $quoteFactory;
-    /**
-     * @var int minutes
-     */
-    private $abandonedCartTime;
+    /** trueloyal_quote.is_abandoned_cart_sent: armed by a cart change, sent */
+    private const ARMED = 2;
+    private const SENT = 1;
 
-    /**
-     * AbandonedCart constructor.
-     *
-     * @param QuoteFactory $quoteFactory
-     * @param Data $helper
-     * @param Logger $trueloyalLogger
-     */
     public function __construct(
-        QuoteFactory $quoteFactory,
+        private readonly QuoteCollectionFactory $quoteCollectionFactory,
+        private readonly TrueLoyalQuoteCollectionFactory $trueloyalQuoteCollectionFactory,
         private readonly Data $helper,
-        private readonly Logger $trueloyalLogger
+        private readonly ModuleState $moduleState,
+        private readonly Settings $settings,
+        private readonly MemberIdResolver $memberIdResolver,
+        private readonly AbandonedCartPayload $payload,
+        private readonly EventSender $sender,
+        private readonly Logger $logger
     ) {
-        $this->quoteFactory = $quoteFactory;
     }
 
-    /**
-     * Send abandoned cart request to TrueLoyal and Reject redeemed point
-     *
-     * @return void
-     */
-    public function execute()
+    public function execute(): void
     {
-        /** Get all customer's active cart data*/
-        $event = $this->helper->getRewardEvents();
-        if (!in_array('cart_abandonment', $event, true)) {
-            return;
-        }
-        $url = $this->helper->getWebHookUrl();
-        $this->abandonedCartTime = (int)$this->helper->getAbandonedCartTime();
-
         try {
-            $quoteList = $this->getQuoteCollections()->getItems();
+            $quotes = $this->getArmedQuotes();
         } catch (\Throwable $e) {
-            $this->trueloyalLogger->addErrorLog($e->getMessage());
+            $this->logger->addErrorLog($e->getMessage());
             return;
         }
-        foreach ($quoteList as $item) {
+        foreach ($quotes as $quote) {
             /* One failing quote must not stop the others or fail the cron job */
             try {
-                $quoteObj = clone $item;
-                if ($this->isAbandoned($item->getUpdatedAt()) && $item->getItemsCount()) {
-                    /* Send reject reward request to Live API
-                    We have to request event customer Quote wise so need to send an API one by one.*/
-                    $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($item->getId());
-                    if ($trueloyalQuote->getRedeemRewardDiscount()) {
-                        $this->helper->sendRejectRewardRequest($item);
-                    }
-                    /*Send Cart abandonment request custom event API*/
-                    $itemsValues = [];
-                    foreach ($item->getItemsCollection() as $quoteItem) {
-                        $quoteItem->setData('product_url', $quoteItem->getProduct()->getProductUrl());
-                        $quoteItem->setData('product_image_url', $this->helper
-                            ->getImageFullUrl($quoteItem->getProduct()));
-                        $quoteItem->setData('category_name', $this->helper
-                            ->getCategoryName($quoteItem->getProduct()->getEntityId()));
-                        $quoteItem->unsetData('stock_state_result');
-                        $quoteItem->unsetData('product');
-                        $itemsValues[] = $quoteItem->debug();
-                    }
-                    $quoteData = $item->debug();
-                    $quoteData = $this->helper->setFormatedPrice($quoteData);
-                    $quoteData['items_qty'] = (int)$quoteData['items_qty'];
-                    $quoteData["coupon_code"] = $item->getCouponCode() ? [$item->getCouponCode()] : [];
-                    $itemData = $itemsValues;
-                    foreach ($itemData as $key => $qItem) {
-                        $qItem['qty'] = (int)$qItem['qty'];
-                        $qItem = $this->helper->setFormatedPrice($qItem);
-                        $quoteData["items"][] = $qItem;
-                    }
-                    $memberId = $this->helper->getMemberIdentifierValueById(
-                        $item->getCustomerId(),
-                        $item->getCustomer() ? $item->getCustomer()->getEmail() : ""
-                    );
-                    $this->sendToTrueLoyal($memberId, $quoteData, $url, $quoteObj);
+                $storeId = $quote->getStoreId();
+                if (!$this->moduleState->isEventEnabled('cart_abandonment', $storeId)
+                    || !$this->isAbandoned((string)$quote->getUpdatedAt(), $storeId)
+                    || !$quote->getItemsCount()
+                ) {
+                    continue;
                 }
-            } catch (\Throwable $e) {
-                $this->trueloyalLogger->addErrorLog('Abandoned cart, quote ' . $item->getId() . ': ' . $e->getMessage());
-            }
-        }
-    }
-
-    /**
-     * Get Quote Collections
-     *
-     * @return AbstractDb|AbstractCollection|null
-     */
-    public function getQuoteCollections()
-    {
-        try {
-            $trueloyalQuote = $this->helper->trueloyalQuoteFactory->create()
-                ->getCollection()
-                ->addFieldToSelect(['quote_id'])
-                ->addFieldToFilter('is_abandoned_cart_sent', ['eq' => '2']);
-            $quoteIds = [];
-            foreach ($trueloyalQuote as $quote) {
-                $quoteIds[] = $quote->getQuoteId();
-            }
-            $quote = $this->quoteFactory->create()
-                ->getCollection()
-                ->addFieldToFilter('is_active', ['eq' => '1'])
-                ->addFieldToFilter('customer_id', ['neq' => null])
-                ->addFieldToFilter('entity_id', ['in' => $quoteIds])
-                ->setOrder(
-                    'created_at',
-                    'desc'
+                if ($this->helper->getTrueLoyalQuoteByQuoteId($quote->getId())->getRedeemRewardDiscount()) {
+                    $this->helper->sendRejectRewardRequest($quote);
+                }
+                $memberId = $this->memberIdResolver->forCustomer(
+                    $quote->getCustomerId(),
+                    $quote->getCustomer() ? (string)$quote->getCustomer()->getEmail() : '',
+                    $storeId
                 );
-            $quote->getSelect()->limit(self::COLLECTION_LIMIT);
-            return $quote;
-        } catch (\Throwable $e) {
-            $this->trueloyalLogger->addErrorLog($e->getMessage());
+                $this->sender->send('cart_abandonment', $memberId, $this->payload->build($quote), $storeId);
+                $this->helper->getTrueLoyalQuoteByQuoteId($quote->getId())->setIsAbandonedCartSent(self::SENT)->save();
+            } catch (\Throwable $e) {
+                $this->logger->addErrorLog('Abandoned cart, quote ' . $quote->getId() . ': ' . $e->getMessage());
+            }
         }
     }
 
     /**
-     * Whether the quote has been idle for longer than the abandoned cart time.
-     * Compared as timestamps: quote updated_at is stored in UTC, whatever the store timezone.
+     * Active customer quotes armed for the abandoned-cart event, newest first
      *
-     * @param string $quoteTime
-     * @return bool
+     * @return Quote[]
      */
-    public function isAbandoned($quoteTime)
+    private function getArmedQuotes(): array
     {
-        $updatedAt = new \DateTime((string)$quoteTime, new \DateTimeZone('UTC'));
-        return $updatedAt->getTimestamp() + $this->abandonedCartTime * 60 <= time();
+        $quoteIds = $this->trueloyalQuoteCollectionFactory->create()
+            ->addFieldToFilter('is_abandoned_cart_sent', ['eq' => self::ARMED])
+            ->getColumnValues('quote_id');
+        if (!$quoteIds) {
+            return [];
+        }
+        $collection = $this->quoteCollectionFactory->create()
+            ->addFieldToFilter('is_active', ['eq' => '1'])
+            ->addFieldToFilter('customer_id', ['neq' => null])
+            ->addFieldToFilter('entity_id', ['in' => $quoteIds])
+            ->setOrder('created_at', 'desc');
+        $collection->getSelect()->limit(self::COLLECTION_LIMIT);
+        return $collection->getItems();
     }
 
     /**
-     * Send To TrueLoyal
-     *
-     * @param mixed $memberId
-     * @param mixed $quoteData
-     * @param mixed $url
-     * @param mixed $object
+     * Whether the quote has been idle for abandoned_cart_time minutes (updated_at is UTC)
      */
-    public function sendToTrueLoyal($memberId, $quoteData, $url, $object)
+    private function isAbandoned(string $updatedAt, int|string|null $storeId): bool
     {
-        try {
-            $params = [
-                "member_id" => $memberId,
-                "activity_id" => "cart_abandonment",
-                "data" => $quoteData
-            ];
-            $params = $this->helper->json->serialize($params);
-            /*We have to request event customer Quote wise so need to send an API one by one.*/
-            $this->helper->request($url, $params, "post");
-            $trueloyalQuote = $this->helper->getTrueLoyalQuoteByQuoteId($object->getId());
-            $trueloyalQuote->setIsAbandonedCartSent(1);
-            $trueloyalQuote->save();
-        } catch (\Throwable $e) {
-            $this->trueloyalLogger->addErrorLog($e->getMessage());
-        }
+        $minutes = (int)$this->settings->getValue(Settings::XML_PATH_ABANDONED_CART_TIME, $storeId);
+        $updated = new \DateTime($updatedAt, new \DateTimeZone('UTC'));
+        return $updated->getTimestamp() + $minutes * 60 <= time();
     }
 }

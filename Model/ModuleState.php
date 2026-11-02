@@ -20,14 +20,17 @@ class ModuleState
     ) {
     }
 
-    public function isEnabled(): bool
+    /**
+     * @param int|string|null $storeId the store the event belongs to (an order's, a customer's), default the current
+     */
+    public function isEnabled(int|string|null $storeId = null): bool
     {
-        if (!$this->settings->isActive()) {
+        if (!$this->settings->isActive($storeId)) {
             return false;
         }
-        if (!$this->settings->isAutoEnrollmentEnabled()) {
+        if (!$this->settings->isAutoEnrollmentEnabled($storeId)) {
             $customerId = $this->customerSessionFactory->create()->getCustomerId();
-            if ($customerId && !$this->getOptInValue((int)$customerId)) {
+            if ($customerId && !$this->getOptInValue((int)$customerId, $storeId)) {
                 return false;
             }
         }
@@ -37,10 +40,10 @@ class ModuleState
     /**
      * Value of the customer's opt-in attribute (Settings::getOptInAttributeCode()), null when not set
      */
-    public function getOptInValue(int $customerId): mixed
+    public function getOptInValue(int $customerId, int|string|null $storeId = null): mixed
     {
         $attribute = $this->customerRepository->getById($customerId)
-            ->getCustomAttribute($this->settings->getOptInAttributeCode());
+            ->getCustomAttribute($this->settings->getOptInAttributeCode($storeId));
         return $attribute?->getValue();
     }
 
@@ -49,17 +52,17 @@ class ModuleState
      *
      * @return string[]
      */
-    public function getRewardEvents(): array
+    public function getRewardEvents(int|string|null $storeId = null): array
     {
-        $events = $this->settings->getRewardEvents();
-        return $events && $this->isEnabled() ? $events : [];
+        $events = $this->settings->getRewardEvents($storeId);
+        return $events && $this->isEnabled($storeId) ? $events : [];
     }
 
     /**
      * @param string $event an option of the admin's event list, e.g. 'order_create', 'order_refund'
      */
-    public function isEventEnabled(string $event): bool
+    public function isEventEnabled(string $event, int|string|null $storeId = null): bool
     {
-        return in_array($event, $this->getRewardEvents(), true);
+        return in_array($event, $this->getRewardEvents($storeId), true);
     }
 }

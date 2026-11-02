@@ -27,7 +27,7 @@ class OrderShipped implements ObserverInterface
     {
         $order = $observer->getEvent()->getShipment()->getOrder();
         $this->completeNotifier->notifyIfComplete($order);
-        if ($this->moduleState->isEventEnabled('order_shipped') && !$order->canShip()) {
+        if ($this->moduleState->isEventEnabled('order_shipped', $order->getStoreId()) && !$order->canShip()) {
             try {
                 $this->sender->sendForOrder('order_shipped', $order, $this->payload->build($order));
             } catch (\Exception) {

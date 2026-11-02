@@ -1,96 +1,63 @@
 <?php
+declare(strict_types=1);
+
 namespace TrueLoyal\LoyaltyRewards\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Review\Model\Review;
 use Magento\Review\Model\ReviewFactory;
-use TrueLoyal\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Helper\Config;
+use TrueLoyal\LoyaltyRewards\Logger\Logger;
+use TrueLoyal\LoyaltyRewards\Model\Event\EventSender;
+use TrueLoyal\LoyaltyRewards\Model\Event\Review\ReviewPayload;
+use TrueLoyal\LoyaltyRewards\Model\MemberIdResolver;
+use TrueLoyal\LoyaltyRewards\Model\ModuleState;
 
+/**
+ * review_save_commit_after: review_submitted once per pending review, review_approved on each approval
+ */
 class ProductReviewSaveAfter implements ObserverInterface
 {
-    /**
-     * @var ReviewFactory
-     */
-    private $reviewFactory;
-
-    /**
-     * Product review constructor.
-     *
-     * @param Data $helper
-     * @param ReviewFactory $reviewFactory
-     */
     public function __construct(
-        private readonly Data $helper,
-        ReviewFactory $reviewFactory
+        private readonly ModuleState $moduleState,
+        private readonly ReviewFactory $reviewFactory,
+        private readonly Config $config,
+        private readonly ReviewPayload $payload,
+        private readonly MemberIdResolver $memberIdResolver,
+        private readonly EventSender $sender,
+        private readonly Logger $logger
     ) {
-        $this->reviewFactory = $reviewFactory;
     }
 
-    /**
-     * Product review create/approve event to TrueLoyal
-     *
-     * @param Observer $observer
-     * @throws NoSuchEntityException
-     * @throws LocalizedException
-     */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
-        $event = $this->helper->getRewardEvents();
-        $reviewObject = $observer->getEvent()->getObject();
-        $review = $reviewObject->getData();
-        $customerId = $review["customer_id"];
-        $productId = $review["entity_pk_value"];
-        $reviewId = $review["review_id"];
-        $statusId = $review["status_id"];
+        $saved = $observer->getEvent()->getObject();
+        $reviewId = $saved->getData('review_id');
+        $statusId = $saved->getData('status_id');
         $review = $this->reviewFactory->create()->load($reviewId);
-        $reviewData = $review->toArray();
-        $trueloyalReview = $this->helper->getTrueLoyalReviewByReviewId($reviewId);
-        if ($statusId == Review::STATUS_APPROVED && in_array('review_approved', $event, true)) {
-            $this->sendRequest($reviewData, $productId, $customerId, "review_approved");
-        } elseif ($statusId == Review::STATUS_PENDING &&
-            in_array('review_submitted', $event, true) &&
-            !$trueloyalReview->getData('submitted_to_trueloyal')
+        $storeId = $review->getStoreId() ?: $saved->getData('store_id');
+        $trueloyalReview = $this->config->getTrueLoyalReviewByReviewId($reviewId);
+        if ($statusId == Review::STATUS_APPROVED && $this->moduleState->isEventEnabled('review_approved', $storeId)) {
+            $this->send('review_approved', $saved, $review, $storeId);
+        } elseif ($statusId == Review::STATUS_PENDING
+            && $this->moduleState->isEventEnabled('review_submitted', $storeId)
+            && !$trueloyalReview->getData('submitted_to_trueloyal')
         ) {
-            $this->sendRequest($reviewData, $productId, $customerId, "review_submitted");
+            $this->send('review_submitted', $saved, $review, $storeId);
             try {
                 $trueloyalReview->setData('submitted_to_trueloyal', 1)->setReviewId($reviewId)->save();
             } catch (CouldNotSaveException $e) {
-                $this->helper->logger->addErrorLog($e->getMessage());
+                $this->logger->addErrorLog($e->getMessage());
             }
         }
-        return true;
     }
 
-    /**
-     * Send review created - approved event to TrueLoyal
-     *
-     * @param array $reviewData
-     * @param int $productId
-     * @param int $customerId
-     * @param string $activityId
-     * @return bool
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
-     */
-    public function sendRequest($reviewData, $productId, $customerId, $activityId): bool
+    private function send(string $activityId, $saved, Review $review, int|string|null $storeId): void
     {
-        /*Product url and product image url not availale from Review so we have to load product to get an additional required data*/
-        $productInfo = $this->helper->getProductUrlAndImageUrl($productId);
-        $reviewData['product_url'] = $productInfo['product_url'];
-        $reviewData['product_image_url'] = $productInfo['product_image_url'];
-        $reviewData['category_name'] = $this->helper->getCategoryName($productId);
-        $params = [
-            "member_id" => $this->helper->getMemberIdentifierValueById($customerId),
-            "activity_id" => $activityId,
-            "data" => $reviewData
-        ];
-        $url = $this->helper->getWebHookUrl();
-        $params = $this->helper->json->serialize($params);
-        $this->helper->request($url, $params, "post");
-        return true;
+        $memberId = $this->memberIdResolver->forCustomer($saved->getData('customer_id'), null, $storeId);
+        $data = $this->payload->build($review, $saved->getData('entity_pk_value'));
+        $this->sender->send($activityId, $memberId, $data, $storeId);
     }
 }

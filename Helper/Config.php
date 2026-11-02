@@ -724,7 +724,7 @@ class Config extends AbstractHelper
         if (!$trueloyalQuote->isEmpty()) {
             if ($trueloyalQuote->getRewardRulesData()) {
                 $rewardRules = $this->json->unserialize($trueloyalQuote->getRewardRulesData());
-                return $rewardRules[$ruleId] ?? [];
+                return $rewardRules[(string)$ruleId] ?? [];
             }
         }
         return [];

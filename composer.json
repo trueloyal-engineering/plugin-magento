@@ -7,6 +7,25 @@
         "php": "~8.1.0||~8.2.0||~8.3.0||~8.4.0||~8.5.0",
         "firebase/php-jwt": "^6.0||^7.0"
     },
+    "require-dev": {
+        "magento/framework": "^103.0.7",
+        "magento/module-backend": "*",
+        "magento/module-catalog": "*",
+        "magento/module-checkout": "*",
+        "magento/module-config": "*",
+        "magento/module-customer": "*",
+        "magento/module-eav": "*",
+        "magento/module-quote": "*",
+        "magento/module-review": "*",
+        "magento/module-sales": "*",
+        "magento/module-shipping": "*",
+        "magento/module-store": "*",
+        "magento/magento-coding-standard": "*",
+        "bitexpert/phpstan-magento": "^0.44",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/extension-installer": "^1.4",
+        "phpunit/phpunit": "^10.5"
+    },
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -18,5 +37,26 @@
         "psr-4": {
             "TrueLoyal\\LoyaltyRewards\\": ""
         }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://mirror.mage-os.org/"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "magento/composer-dependency-version-audit-plugin": false,
+            "magento/magento-composer-installer": false,
+            "phpstan/extension-installer": true
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "lint": "find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -d display_errors=1 | grep -v '^No syntax errors' || true",
+        "phpcs": "phpcs",
+        "phpstan": "phpstan analyse --memory-limit=2G",
+        "test": "phpunit"
     }
 }

@@ -1,0 +1,151 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Collections should be used directly via factory, not via Magento\\Quote\\Model\\Quote\:\:getCollection\(\) method$#'
+			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
+			count: 1
+			path: Cron/RejectRedeemReward.php
+
+		-
+			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalQuote\:\:getCollection\(\) method$#'
+			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
+			count: 1
+			path: Cron/RejectRedeemReward.php
+
+		-
+			message: '#^Call to an undefined method TrueLoyal\\LoyaltyRewards\\Helper\\Config\:\:returnResponseData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalEavAttribute\:\:getCollection\(\) method$#'
+			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalQuote\:\:getCollection\(\) method$#'
+			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalQuoteItem\:\:getCollection\(\) method$#'
+			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
+			count: 2
+			path: Helper/Config.php
+
+		-
+			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalReview\:\:getCollection\(\) method$#'
+			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalSalesOrder\:\:getCollection\(\) method$#'
+			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Helper\\Config\:\:jsonSerialize\(\) should return bool\|string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Helper\\Config\:\:jsonUnSerialize\(\) should return array\|bool\|string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Variable \$value on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: Helper/Config.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Helper\\OrderComplete\:\:getCompletedOrder\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Helper/OrderComplete.php
+
+		-
+			message: '#^Variable \$totalBaseDiscountAmount on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: Helper/OrderComplete.php
+
+		-
+			message: '#^Variable \$totalDiscountAmount on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: Helper/OrderComplete.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Helper\\Reward\:\:getCollectRewardValueData\(\) should return \$this\(TrueLoyal\\LoyaltyRewards\\Helper\\Reward\) but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Helper/Reward.php
+
+		-
+			message: '#^Class TrueLoyal\\LoyaltyRewards\\Logger\\Logger extends @final class Monolog\\Logger\.$#'
+			identifier: class.extendsFinalByPhpDoc
+			count: 1
+			path: Logger/Logger.php
+
+		-
+			message: '#^Caught class NoSuchEntityException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Model/Api/CustomerAttribute.php
+
+		-
+			message: '#^Constructor of class TrueLoyal\\LoyaltyRewards\\Model\\Api\\CustomerAttributeUpdate has an unused parameter \$context\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: Model/Api/CustomerAttributeUpdate.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Model\\Total\\Quote\\LoyaltyRewardsDiscount\:\:collect\(\) should return TrueLoyal\\LoyaltyRewards\\Model\\Total\\Quote\\LoyaltyRewardsDiscount but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Model/Total/Quote/LoyaltyRewardsDiscount.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Model\\Total\\Quote\\LoyaltyRewardsDiscount\:\:fetch\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Model/Total/Quote/LoyaltyRewardsDiscount.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Observer\\OrderCancel\:\:execute\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Observer/OrderCancel.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Observer\\OrderRefund\:\:execute\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: Observer/OrderRefund.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Observer\\OrderShipped\:\:execute\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: Observer/OrderShipped.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\FlagRewardPointAttributes\:\:apply\(\) should return \$this\(TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\FlagRewardPointAttributes\) but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Setup/Patch/Data/FlagRewardPointAttributes.php
+
+		-
+			message: '#^Method TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\RewardPoint\:\:apply\(\) should return \$this\(TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\RewardPoint\) but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: Setup/Patch/Data/RewardPoint.php

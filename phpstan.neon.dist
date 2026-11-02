@@ -1,0 +1,11 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 1
+    paths:
+        - .
+    excludePaths:
+        - vendor/*
+    magento:
+        checkServiceContracts: false

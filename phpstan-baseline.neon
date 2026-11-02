@@ -13,12 +13,6 @@ parameters:
 			path: Cron/RejectRedeemReward.php
 
 		-
-			message: '#^Call to an undefined method TrueLoyal\\LoyaltyRewards\\Helper\\Config\:\:returnResponseData\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: Helper/Config.php
-
-		-
 			message: '#^Collections should be used directly via factory, not via TrueLoyal\\LoyaltyRewards\\Model\\TrueLoyalEavAttribute\:\:getCollection\(\) method$#'
 			identifier: bitExpertMagento.abstractModelRetrieveCollectionViaFactory
 			count: 1
@@ -57,12 +51,6 @@ parameters:
 		-
 			message: '#^Method TrueLoyal\\LoyaltyRewards\\Helper\\Config\:\:jsonUnSerialize\(\) should return array\|bool\|string but return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: Helper/Config.php
-
-		-
-			message: '#^Variable \$value on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
 			count: 1
 			path: Helper/Config.php
 

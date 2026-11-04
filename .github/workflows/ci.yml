@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: PHP ${{ matrix.php }} syntax
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: Lint
+        run: |
+          find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 -P4 php -l -d display_errors=1 > lint.txt || true
+          ! grep -v '^No syntax errors' lint.txt
+
+  static:
+    name: PHPCS, PHPStan, PHPUnit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ hashFiles('composer.json') }}
+      - name: Install Magento packages (Mage-OS mirror) and tools
+        run: composer update --no-interaction --no-progress --ignore-platform-req=ext-*
+      - name: Validate composer.json
+        run: composer validate --no-check-lock --no-check-publish
+      - name: PHPCS (Magento2 standard, errors only)
+        run: vendor/bin/phpcs
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=2G --no-progress
+      - name: PHPUnit
+        run: vendor/bin/phpunit
+
+  conventions:
+    name: Module conventions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Magic accessors on trueloyal columns
+        # DataObject maps setIsTrueLoyalFreeProduct() to is_true_loyal_free_product, so the value is silently dropped.
+        # Use ...Trueloyal... (lowercase l) or getData()/setData('column').
+        run: |
+          ! grep -rnE --include='*.php' --include='*.phtml' --exclude-dir=vendor \
+            -e '->(get|set|has|uns)(Is)?(TrueLoyal(FreeProduct|Reward|Attribute|Discount)|SubmittedToTrueLoyal)\(' .
+      - name: composer.json version matches module.xml setup_version
+        run: |
+          v=$(jq -r .version composer.json)
+          grep -q "setup_version=\"$v\"" etc/module.xml || { echo "composer.json $v != etc/module.xml setup_version"; exit 1; }
+
+  tag:
+    name: Tag matches composer.json version
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: test "$(jq -r .version composer.json)" = "${GITHUB_REF_NAME}"

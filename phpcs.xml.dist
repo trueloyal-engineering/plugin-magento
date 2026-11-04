@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="TrueLoyal">
+    <description>Magento 2 coding standard for the TrueLoyal module.</description>
+    <file>.</file>
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <arg name="extensions" value="php,phtml"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <config name="ignore_warnings_on_exit" value="1"/>
+    <rule ref="Magento2"/>
+</ruleset>

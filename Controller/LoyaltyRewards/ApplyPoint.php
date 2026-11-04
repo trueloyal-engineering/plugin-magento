@@ -284,6 +284,10 @@ class ApplyPoint implements HttpPostActionInterface
             }
             $allRewardRules = $this->helper->json->unserialize($trueloyalQuote->getRewardRulesData());
             $allRewardRules[$responseData["reward_info"]["reward_id"]]["id"] = $responseData["id"];
+            // TrueLoyal links a redemption to an order by this code: it goes out with the order events,
+            // so the redeemed points are given back when the order is cancelled or refunded
+            $allRewardRules[$responseData["reward_info"]["reward_id"]]["coupon_code"] =
+                (string)($responseData["reward_info"]["coupon_code"] ?? '');
             $encodedRule = $this->helper->json->serialize($allRewardRules);
             $trueloyalQuote->setRewardRulesData($encodedRule);
             $trueloyalQuote->setRedeemRewardDiscount($redeemReward);

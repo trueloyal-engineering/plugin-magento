@@ -77,7 +77,13 @@ class CreateOrderAfter implements ObserverInterface
                 $redeemReward = $trueloyalQuote->getRedeemRewardDiscount();
                 $rewardData = $this->helper->getRewardRulesData($quote, $redeemReward);
                 $url = $this->helper->getLiveWebHookUrl() . "transactions/" . $rewardData['id'] . "/approve";
-                $this->helper->request($url, "", "post", "live_api");
+                $response = $this->helper->request($url, "", "post", "live_api");
+                // Order events send the redemption's coupon code (see Data::getCouponCodes()): prefer the approved
+                // one, carts redeemed before it was stored at redeem time have none
+                $couponCode = $this->getApprovedCouponCode($response);
+                if ($couponCode !== '') {
+                    $rewardData['coupon_code'] = $couponCode;
+                }
                 $trueloyalOrder->setData('trueloyal_reward', $this->serializer->serialize($rewardData))->setOrderId($orderId);
             } else {
                 $trueloyalOrder->setData('trueloyal_reward', "{}")->setOrderId($orderId);
@@ -89,5 +95,20 @@ class CreateOrderAfter implements ObserverInterface
             }
         }
         $this->helper->createTrueLoyalOrder($orderId, $replacedOrderId);
+    }
+
+    /**
+     * Coupon code of the redemption from the approve response, '' when it failed or has none
+     *
+     * @param mixed $response
+     * @return string
+     */
+    private function getApprovedCouponCode($response): string
+    {
+        if (!is_array($response) || empty($response['success']) || !is_array($response['result'] ?? null)) {
+            return '';
+        }
+        $couponCode = $response['result']['data']['reward_info']['coupon_code'] ?? '';
+        return is_string($couponCode) ? $couponCode : '';
     }
 }

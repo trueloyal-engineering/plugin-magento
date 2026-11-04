@@ -332,14 +332,32 @@ class Data extends Config
     }
 
     /**
-     * Get Coupon Codes
+     * Get Coupon Codes: Magento's coupon and the coupon code of the TrueLoyal reward redeemed for the order.
+     * TrueLoyal links the redemption to the order by that code, to give the points back on a cancel or refund.
      *
      * @param Order $order
      * @return array|string[]
      */
     public function getCouponCodes($order)
     {
-        return $order->getCouponCode() ? [$order->getCouponCode()] : [];
+        $couponCode = $order->getCouponCode();
+        // createTrueLoyalOrder() sets the list on the order itself, don't nest it on a second call
+        if (is_array($couponCode)) {
+            $couponCodes = $couponCode;
+        } else {
+            $couponCodes = $couponCode ? [$couponCode] : [];
+        }
+        if ($order->getId()) {
+            $rewardData = json_decode(
+                (string)$this->getTrueLoyalOrderByOrderId($order->getId())->getData('trueloyal_reward'),
+                true
+            );
+            if (is_array($rewardData) && is_string($rewardData['coupon_code'] ?? null)
+                && $rewardData['coupon_code'] !== '') {
+                $couponCodes[] = $rewardData['coupon_code'];
+            }
+        }
+        return array_values(array_unique($couponCodes));
     }
 
     /**

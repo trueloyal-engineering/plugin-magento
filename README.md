@@ -21,6 +21,8 @@ Connects a Magento 2 store to the [TrueLoyal](https://www.trueloyal.com) loyalty
   - flexible points discount, where the member chooses how many points to spend;
   - free shipping;
   - a free product.
+
+  When an order with a redeemed reward is cancelled or fully refunded, TrueLoyal gives the redeemed points back, if the program's *Redeemed Points Rollback* activity is on and the order was awarded purchase points.
 - **Member identifier.** Identify members by email or by Magento customer ID, with an optional prefix, for example to separate several stores in one program.
 - **Profile sync from TrueLoyal.** A REST API lets TrueLoyal update customer attributes in Magento, such as `loyalty_tier` and `available_points`.
 

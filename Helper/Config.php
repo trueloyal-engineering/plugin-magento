@@ -431,8 +431,8 @@ class Config extends AbstractHelper
         $this->logger->info("==============Start==============");
         $this->logger->info("URL: " . $url);
         $this->logger->info("RequestType: " . "post");
-        $this->logger->info("Headers: " . json_encode($headers));
-        $this->logger->info("Response: " . $response);
+        $this->logger->info("Headers: " . json_encode($this->logger->redactHeaders($headers)));
+        $this->logger->info("Response: " . $this->logger->redactSecrets($response));
         $this->logger->info("==============End===============");
         if ($responseCode === 200 && !empty($data['success'])
             && !empty($data['data']['config']['zif_config']['workflow_url'])) {

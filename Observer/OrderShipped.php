@@ -59,9 +59,20 @@ class OrderShipped implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        $order = $observer->getEvent()->getShipment()->getOrder();
+        /*Settings of the order's store: in the admin, cron and the API the current store is another one*/
+        return $this->helper->runInStoreScope($order->getStoreId(), fn () => $this->sendOrderShipped($order));
+    }
+
+    /**
+     * Send the order complete and order shipped events, when enabled
+     *
+     * @param \Magento\Sales\Model\Order $order
+     * @return bool|void
+     */
+    private function sendOrderShipped($order)
+    {
         $event = $this->helper->getRewardEvents();
-        $shipment = $observer->getEvent()->getShipment();
-        $order = $shipment->getOrder();
         $this->orderCompleteHelper->getCompletedOrder($order);
         /*Check the order_shipped event is enabled, if enabled then will send order_shipped event to TrueLoyal*/
         if (in_array('order_shipped', $event)) {

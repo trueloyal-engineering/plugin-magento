@@ -101,6 +101,11 @@ class Config extends AbstractHelper
     private $rewardPointsByMember = [];
 
     /**
+     * Store whose settings getConfig() reads instead of the current store, set by runInStoreScope()
+     */
+    private ?int $scopeStoreId = null;
+
+    /**
      * @var Json
      */
     public $json;
@@ -337,7 +342,7 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Get Config
+     * Get Config: the setting of the store set by runInStoreScope(), else of the current store
      *
      * @param mixed $config_path
      * @return mixed
@@ -348,8 +353,31 @@ class Config extends AbstractHelper
         return $this->scopeConfig->getValue(
             $config_path,
             ScopeInterface::SCOPE_STORE,
-            $this->storeManager->getStore()->getStoreId()
+            $this->scopeStoreId ?? $this->storeManager->getStore()->getStoreId()
         );
+    }
+
+    /**
+     * Run the callback with the settings of the given store (the store of the order, customer, review or quote
+     * the event is about). In the admin, cron and the API the current store is not that store.
+     * Without a store (null or 0) the callback reads the current store's settings.
+     *
+     * @param int|string|null $storeId
+     * @param callable $callback
+     * @return mixed the callback's result
+     */
+    public function runInStoreScope($storeId, callable $callback)
+    {
+        if ((int)$storeId <= 0) {
+            return $callback();
+        }
+        $previousStoreId = $this->scopeStoreId;
+        $this->scopeStoreId = (int)$storeId;
+        try {
+            return $callback();
+        } finally {
+            $this->scopeStoreId = $previousStoreId;
+        }
     }
 
     /**

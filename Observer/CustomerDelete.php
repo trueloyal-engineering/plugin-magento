@@ -44,10 +44,28 @@ class CustomerDelete implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        $deletedCustomer = $observer->getEvent()->getCustomer();
+        /*Settings of the customer's website: in the admin and the API the current store is another one*/
+        return $this->helper->runInStoreScope(
+            $this->helper->getCustomerScopeStoreId($deletedCustomer),
+            fn () => $this->sendCustomerDelete($deletedCustomer)
+        );
+    }
+
+    /**
+     * Send the customer delete event, when enabled
+     *
+     * @param \Magento\Customer\Model\Customer $deletedCustomer
+     * @return bool|void
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    private function sendCustomerDelete($deletedCustomer)
+    {
         $event = $this->helper->getRewardEvents();
         /*Check the customer_delete event is enabled, if enabled then will send customer_delete event to TrueLoyal*/
         if (in_array('customer_delete', $event)) {
-            $customerId = $observer->getEvent()->getCustomer()->getEntityId();
+            $customerId = $deletedCustomer->getEntityId();
             $customer = $this->customerRepository->getById($customerId);
             $customerData = $customer->__toArray();
             $params = [

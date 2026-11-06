@@ -3,14 +3,20 @@ declare(strict_types=1);
 
 namespace TrueLoyal\LoyaltyRewards\Test\Unit\Helper;
 
+use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Customer\Model\Customer;
 use Magento\Framework\DataObject;
 use Magento\Sales\Model\Order;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use TrueLoyal\LoyaltyRewards\Helper\Config;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
+use TrueLoyal\LoyaltyRewards\Test\Unit\StoreScopeTrait;
 
 class DataTest extends TestCase
 {
+    use StoreScopeTrait;
+
     public static function credentials(): array
     {
         return [
@@ -93,5 +99,93 @@ class DataTest extends TestCase
         $helper->expects($this->never())->method('getTrueLoyalOrderByOrderId');
 
         $this->assertSame(['SAVE10'], $helper->getCouponCodes($order));
+    }
+
+    public function testMemberIdentifierFollowsTheStoreScope(): void
+    {
+        $helper = $this->getMockBuilder(Data::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $this->setStoreScope($helper, [
+            1 => [Config::XML_PATH_MEMBER_IDENTIFIER => 'member_email'],
+            2 => [
+                Config::XML_PATH_MEMBER_IDENTIFIER => 'member_id',
+                Config::XML_PATH_MEMBER_IDENTIFIER_PREFIX => 'abc_',
+            ],
+        ], 1);
+
+        $this->assertSame('abc_1400037', $helper->runInStoreScope(
+            2,
+            fn () => $helper->getMemberIdentifierValueById(1400037, 'member@example.com')
+        ));
+        $this->assertSame('member@example.com', $helper->getMemberIdentifierValueById(1400037, 'member@example.com'));
+    }
+
+    public static function customerScopes(): array
+    {
+        return [
+            'admin, customer in a store of their website' => [0, 2, 4, 4],
+            'admin, customer in the default store of their website' => [0, 2, 2, 2],
+            'admin, customer without a store' => [0, 2, 0, 2],
+            'admin, customer store on another website' => [0, 2, 3, 2],
+            'admin, deleted customer store' => [0, 2, 99, null],
+            'cron in the default store, customer of another website' => [1, 2, 4, 4],
+            'storefront of the customer\'s website' => [4, 2, 2, null],
+            'default store, customer of its website' => [1, 1, 3, null],
+            'unknown website' => [0, 9, 0, null],
+            'no website' => [0, 0, 2, null],
+        ];
+    }
+
+    #[DataProvider('customerScopes')]
+    public function testGetCustomerScopeStoreId(int $currentStoreId, int $websiteId, int $storeId, ?int $expected): void
+    {
+        $helper = $this->getMockBuilder(Data::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $this->setStoreScope($helper, [], $currentStoreId);
+        $customer = $this->createMock(CustomerInterface::class);
+        $customer->method('getWebsiteId')->willReturn((string)$websiteId);
+        $customer->method('getStoreId')->willReturn($storeId);
+
+        $this->assertSame($expected, $helper->getCustomerScopeStoreId($customer));
+    }
+
+    public function testGetCustomerScopeStoreIdAcceptsTheCustomerModel(): void
+    {
+        $helper = $this->getMockBuilder(Data::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $this->setStoreScope($helper, [], 0);
+        $customer = $this->getMockBuilder(Customer::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $customer->setData(['entity_id' => '37', 'website_id' => '2', 'store_id' => '4']);
+
+        $this->assertSame(4, $helper->getCustomerScopeStoreId($customer));
+    }
+
+    public static function reviewScopes(): array
+    {
+        return [
+            'review store' => [['store_id' => '2'], 2],
+            'admin store' => [['store_id' => '0'], null],
+            'no store' => [[], null],
+        ];
+    }
+
+    #[DataProvider('reviewScopes')]
+    public function testGetReviewScopeStoreId(array $review, ?int $expected): void
+    {
+        $helper = $this->getMockBuilder(Data::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+
+        $this->assertSame($expected, $helper->getReviewScopeStoreId($review));
     }
 }

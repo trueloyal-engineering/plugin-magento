@@ -73,6 +73,8 @@ Go to **Stores > Configuration > TrueLoyal Loyalty Rewards > TrueLoyal Settings*
 
 Save the configuration again after changing the keys or the selected events.
 
+Settings saved for a website or store view also apply to events about that website's orders, customers, reviews and carts triggered from the admin, cron or the API.
+
 ## Support
 
 Contact your TrueLoyal account manager.

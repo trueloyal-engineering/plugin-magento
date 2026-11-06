@@ -44,7 +44,6 @@ class ProductReviewSaveAfter implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $event = $this->helper->getRewardEvents();
         $reviewObject = $observer->getEvent()->getObject();
         $review = $reviewObject->getData();
         $customerId = $review["customer_id"];
@@ -54,20 +53,45 @@ class ProductReviewSaveAfter implements ObserverInterface
         $review = $this->reviewFactory->create()->load($reviewId);
         $reviewData = $review->toArray();
         $trueloyalReview = $this->helper->getTrueLoyalReviewByReviewId($reviewId);
-        if ($statusId == Review::STATUS_APPROVED && in_array('review_approved', $event, true)) {
-            $this->sendRequest($reviewData, $productId, $customerId, "review_approved");
-        } elseif ($statusId == Review::STATUS_PENDING &&
-            in_array('review_submitted', $event, true) &&
-            !$trueloyalReview->getData('submitted_to_trueloyal')
-        ) {
-            $this->sendRequest($reviewData, $productId, $customerId, "review_submitted");
-            try {
-                $trueloyalReview->setData('submitted_to_trueloyal', 1)->setReviewId($reviewId)->save();
-            } catch (CouldNotSaveException $e) {
-                $this->helper->logger->addErrorLog($e->getMessage());
+        /*Settings of the review's store: in the admin and the API the current store is another one*/
+        $scopeStoreId = $this->getScopeStoreId($reviewData, $customerId);
+        return $this->helper->runInStoreScope(
+            $scopeStoreId,
+            function () use ($reviewData, $productId, $customerId, $reviewId, $statusId, $trueloyalReview) {
+                $event = $this->helper->getRewardEvents();
+                if ($statusId == Review::STATUS_APPROVED && in_array('review_approved', $event, true)) {
+                    $this->sendRequest($reviewData, $productId, $customerId, "review_approved");
+                } elseif ($statusId == Review::STATUS_PENDING &&
+                    in_array('review_submitted', $event, true) &&
+                    !$trueloyalReview->getData('submitted_to_trueloyal')
+                ) {
+                    $this->sendRequest($reviewData, $productId, $customerId, "review_submitted");
+                    try {
+                        $trueloyalReview->setData('submitted_to_trueloyal', 1)->setReviewId($reviewId)->save();
+                    } catch (CouldNotSaveException $e) {
+                        $this->helper->logger->addErrorLog($e->getMessage());
+                    }
+                }
+                return true;
             }
+        );
+    }
+
+    /**
+     * Store whose settings apply to the review: the store it was written in, else the reviewer's
+     *
+     * @param array $reviewData
+     * @param mixed $customerId
+     * @return int|null
+     */
+    private function getScopeStoreId(array $reviewData, $customerId): ?int
+    {
+        $storeId = $this->helper->getReviewScopeStoreId($reviewData);
+        if ($storeId === null && $customerId) {
+            $customer = $this->helper->getCustomerById($customerId);
+            $storeId = $customer ? $this->helper->getCustomerScopeStoreId($customer) : null;
         }
-        return true;
+        return $storeId;
     }
 
     /**

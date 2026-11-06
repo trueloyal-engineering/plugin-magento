@@ -66,6 +66,22 @@ class CreateOrderAfter implements ObserverInterface
         $placedOrder->unsetData(MarkPlacedOrder::FLAG);
         $orderId = $placedOrder->getId();
         $order = $this->orderRepository->get($orderId);
+        /*Settings of the order's store: in the admin, cron and the API the current store is another one*/
+        $this->helper->runInStoreScope($order->getStoreId(), function () use ($orderId, $order): void {
+            $this->sendOrderCreate($orderId, $order);
+        });
+    }
+
+    /**
+     * Approve the redemption of the order's cart, then send the order create event
+     *
+     * @param mixed $orderId
+     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @return void
+     * @throws NoSuchEntityException
+     */
+    private function sendOrderCreate($orderId, $order): void
+    {
         $trueloyalOrder = $this->helper->getTrueLoyalOrderByOrderId($orderId);
         $replacedOrderId = $order->getIncrementId();
         if (!$trueloyalOrder->getData('trueloyal_reward')) {

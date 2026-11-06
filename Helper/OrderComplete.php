@@ -53,6 +53,19 @@ class OrderComplete extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getCompletedOrder($order)
     {
+        /*Settings of the order's store: in the admin, cron and the API the current store is another one*/
+        return $this->helper->runInStoreScope($order->getStoreId(), fn () => $this->sendCompletedOrder($order));
+    }
+
+    /**
+     * Send the order complete event, once per order, when enabled
+     *
+     * @param $order
+     * @return bool|void
+     * @throws NoSuchEntityException
+     */
+    private function sendCompletedOrder($order)
+    {
         $event = $this->helper->getRewardEvents();
         $orderId = $order->getEntityId();
         $trueloyalOrder = $this->helper->getTrueLoyalOrderByOrderId($orderId);

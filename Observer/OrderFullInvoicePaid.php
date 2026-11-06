@@ -57,15 +57,18 @@ class OrderFullInvoicePaid implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $event = $this->helper->getRewardEvents();
         /*Take the order from the saved invoice: request params are missing for online capture, cron or API invoices*/
         $order = $observer->getEvent()->getInvoice()->getOrder();
-        $orderId = $order->getEntityId();
-        if (in_array('order_paid', $event, true) && !$order->canInvoice()) {
-            $this->orderFullInvoiceData($order, $orderId);
-        }
-        $this->orderCompleteHelper->getCompletedOrder($order);
-        return true;
+        /*Settings of the order's store: in the admin, cron and the API the current store is another one*/
+        return $this->helper->runInStoreScope($order->getStoreId(), function () use ($order) {
+            $event = $this->helper->getRewardEvents();
+            $orderId = $order->getEntityId();
+            if (in_array('order_paid', $event, true) && !$order->canInvoice()) {
+                $this->orderFullInvoiceData($order, $orderId);
+            }
+            $this->orderCompleteHelper->getCompletedOrder($order);
+            return true;
+        });
     }
 
     /**

@@ -4,9 +4,53 @@ namespace TrueLoyal\LoyaltyRewards\Helper;
 
 use Exception;
 use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Customer\Model\Customer;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class Data extends Config
 {
+    /**
+     * Store whose settings apply to a customer's events (see runInStoreScope()): null keeps the current store,
+     * which is right on the customer's own website. In the admin, cron and the API it is the customer's store,
+     * or the default store of the customer's website.
+     *
+     * @param Customer|CustomerInterface $customer
+     * @return int|null
+     */
+    public function getCustomerScopeStoreId($customer): ?int
+    {
+        $websiteId = (int)$customer->getWebsiteId();
+        if ($websiteId <= 0) {
+            return null;
+        }
+        try {
+            if ((int)$this->storeManager->getStore()->getWebsiteId() === $websiteId) {
+                return null;
+            }
+            $storeId = (int)$customer->getStoreId();
+            if ($storeId > 0 && (int)$this->storeManager->getStore($storeId)->getWebsiteId() === $websiteId) {
+                return $storeId;
+            }
+            $groupId = (int)$this->storeManager->getWebsite($websiteId)->getDefaultGroupId();
+            $defaultStoreId = $groupId > 0 ? (int)$this->storeManager->getGroup($groupId)->getDefaultStoreId() : 0;
+            return $defaultStoreId > 0 ? $defaultStoreId : null;
+        } catch (NoSuchEntityException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Store whose settings apply to a review's events: the store it was written in, null when it has none
+     *
+     * @param array $review
+     * @return int|null
+     */
+    public function getReviewScopeStoreId(array $review): ?int
+    {
+        $storeId = (int)($review['store_id'] ?? 0);
+        return $storeId > 0 ? $storeId : null;
+    }
+
     /**
      * Set trueloyal reward when order from Admin, and get OrderID for TrueLoyal
      *

@@ -65,6 +65,19 @@ class OrderRefund implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        $order = $observer->getEvent()->getCreditmemo()->getOrder();
+        /*Settings of the order's store: in the admin, cron and the API the current store is another one*/
+        return $this->helper->runInStoreScope($order->getStoreId(), fn () => $this->sendRefund($observer));
+    }
+
+    /**
+     * Send the full or partial refund event, when enabled
+     *
+     * @param Observer $observer
+     * @return bool|void
+     */
+    private function sendRefund(Observer $observer)
+    {
         $version = $this->productMetadata->getVersion();
         $event = $this->helper->getRewardEvents();
         /*Check the order_refund event is enabled, if enabled then will send order_refund event to TrueLoyal*/

@@ -69,7 +69,6 @@ class CustomerSaveAfter implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $event = $this->helper->getRewardEvents();
         $customerAddressData = [];
         $addressId ='';
         $activity_id = "";
@@ -116,8 +115,36 @@ class CustomerSaveAfter implements ObserverInterface
             $customerId = $customerData['parent_id'];
             $activity_id = "customer_update";
         }
-        if (in_array($activity_id, $event, true)) {
-            $this->prepareParams($observer, $customerId, $addressId, $customerAddressData, $activity_id);
+        if ($activity_id === "") {
+            return;
+        }
+        /*Settings of the customer's website: in the admin and the API the current store is another one*/
+        $this->helper->runInStoreScope(
+            $this->getScopeStoreId($observer, $customerId),
+            function () use ($observer, $customerId, $addressId, $customerAddressData, $activity_id): void {
+                if (in_array($activity_id, $this->helper->getRewardEvents(), true)) {
+                    $this->prepareParams($observer, $customerId, $addressId, $customerAddressData, $activity_id);
+                }
+            }
+        );
+    }
+
+    /**
+     * Store whose settings apply to the saved customer (see Data::getCustomerScopeStoreId())
+     *
+     * @param Observer $observer
+     * @param int|mixed $customerId
+     * @return int|null
+     */
+    private function getScopeStoreId($observer, $customerId): ?int
+    {
+        try {
+            $customer = $observer->getEvent()->getName() == "customer_save_commit_after"
+                ? $observer->getCustomer()
+                : $this->customerRepository->getById($customerId);
+            return $this->helper->getCustomerScopeStoreId($customer);
+        } catch (NoSuchEntityException $e) {
+            return null;
         }
     }
 

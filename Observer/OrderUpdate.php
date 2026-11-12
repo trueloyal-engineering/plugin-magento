@@ -5,8 +5,10 @@ namespace TrueLoyal\LoyaltyRewards\Observer;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Webapi\Rest\Request;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
 
@@ -60,13 +62,31 @@ class OrderUpdate implements ObserverInterface
     {
         if (isset($this->request->getParam('history')['comment'])) {
             $id = $this->request->getParam('order_id') ?? $this->restRequest->getParam('id');
-            /*Settings of the order's store: in the admin and the API the current store is another one*/
-            $history = $observer->getEvent()->getStatusHistory();
-            $historyOrder = $history ? $history->getOrder() : null;
+            /*Settings of the order's store: in the admin and the API the current store is another one.
+            Load the order by ID: a status history saved through its repository has no order*/
+            $order = $this->getOrder($id);
             return $this->helper->runInStoreScope(
-                $historyOrder ? $historyOrder->getStoreId() : null,
-                fn () => $this->sendOrderUpdate($id)
+                $order ? $order->getStoreId() : null,
+                fn () => $this->sendOrderUpdate($id, $order)
             );
+        }
+    }
+
+    /**
+     * Order of the comment, or null when the ID is missing or unknown
+     *
+     * @param mixed $id
+     * @return OrderInterface|null
+     */
+    private function getOrder($id): ?OrderInterface
+    {
+        if (!$id) {
+            return null;
+        }
+        try {
+            return $this->orderRepository->get($id);
+        } catch (NoSuchEntityException|InputException $e) {
+            return null;
         }
     }
 
@@ -74,15 +94,16 @@ class OrderUpdate implements ObserverInterface
      * Send the order update event, when enabled
      *
      * @param mixed $id
+     * @param OrderInterface|null $order the order loaded by ID, if found
      * @return bool|void
      * @throws NoSuchEntityException
      */
-    private function sendOrderUpdate($id)
+    private function sendOrderUpdate($id, ?OrderInterface $order)
     {
         $event = $this->helper->getRewardEvents();
         /*Check the order_update event is enabled, if enabled then will send order_update event to TrueLoyal*/
         if (in_array('order_update', $event)) {
-            $order = $this->orderRepository->get($id);
+            $order = $order ?? $this->orderRepository->get($id);
             $order->getPayment()->setMethodInstance();
             $orderData = $order->debug();
             /*Get order price formated data*/

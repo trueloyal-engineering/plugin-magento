@@ -67,12 +67,6 @@ parameters:
 			path: Helper/Config.php
 
 		-
-			message: '#^Method TrueLoyal\\LoyaltyRewards\\Helper\\OrderComplete\:\:getCompletedOrder\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: Helper/OrderComplete.php
-
-		-
 			message: '#^Variable \$totalBaseDiscountAmount on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
@@ -119,24 +113,6 @@ parameters:
 			identifier: return.missing
 			count: 1
 			path: Model/Total/Quote/LoyaltyRewardsDiscount.php
-
-		-
-			message: '#^Method TrueLoyal\\LoyaltyRewards\\Observer\\OrderCancel\:\:execute\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: Observer/OrderCancel.php
-
-		-
-			message: '#^Method TrueLoyal\\LoyaltyRewards\\Observer\\OrderRefund\:\:execute\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: Observer/OrderRefund.php
-
-		-
-			message: '#^Method TrueLoyal\\LoyaltyRewards\\Observer\\OrderShipped\:\:execute\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: Observer/OrderShipped.php
 
 		-
 			message: '#^Method TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\FlagRewardPointAttributes\:\:apply\(\) should return \$this\(TrueLoyal\\LoyaltyRewards\\Setup\\Patch\\Data\\FlagRewardPointAttributes\) but return statement is missing\.$#'

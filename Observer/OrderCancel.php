@@ -41,9 +41,21 @@ class OrderCancel implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        $order = $observer->getEvent()->getOrder();
+        /*Settings of the order's store: in the admin, cron and the API the current store is another one*/
+        return $this->helper->runInStoreScope($order->getStoreId(), fn () => $this->sendOrderCancel($order));
+    }
+
+    /**
+     * Send the order cancel event, when enabled
+     *
+     * @param \Magento\Sales\Model\Order $order
+     * @return bool|void
+     */
+    private function sendOrderCancel($order)
+    {
         $event = $this->helper->getRewardEvents();
         if (in_array('order_cancelled', $event, true)) {
-            $order = $observer->getEvent()->getOrder();
             $order->getPayment()->setMethodInstance();
             $couponCode = $this->helper->getCouponCodes($order);
             $replacedOrderId = $this->helper->getReplacedOrderID($order->getEntityId());

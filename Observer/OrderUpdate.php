@@ -5,8 +5,10 @@ namespace TrueLoyal\LoyaltyRewards\Observer;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Webapi\Rest\Request;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
 
@@ -60,73 +62,110 @@ class OrderUpdate implements ObserverInterface
     {
         if (isset($this->request->getParam('history')['comment'])) {
             $id = $this->request->getParam('order_id') ?? $this->restRequest->getParam('id');
-            $event = $this->helper->getRewardEvents();
-            /*Check the order_update event is enabled, if enabled then will send order_update event to TrueLoyal*/
-            if (in_array('order_update', $event)) {
-                $order = $this->orderRepository->get($id);
-                $order->getPayment()->setMethodInstance();
-                $orderData = $order->debug();
-                /*Get order price formated data*/
-                $orderData = $this->helper->setFormatedPrice($orderData);
-                $orderData['payment'] = $order->getPayment()->debug();
-                /*Remove unwanted payment object data from Order Data*/
-                unset($orderData['payment (Magento\Sales\Model\Order\Payment\Interceptor)']);
-                /*Get payment price formated data*/
-                $orderData['payment'] = $this->helper->setFormatedPrice($orderData['payment']);
-                $orderData['last_comment'] = $this->request->getParam('history')['comment'];
-                $replacedOrderId = $this->helper->getReplacedOrderID($order->getEntityId());
-                $orderData["entity_id"] = $replacedOrderId;
-                $orderData["order_id"] = $replacedOrderId;
-                $orderData["coupon_code"] = $this->helper->getCouponCodes($order);
-                unset($orderData['items']);
-                foreach ($order->getItems() as $item) {
-                    $orderItemData = $item->debug();
-                    $orderItemData['qty_ordered'] = (int) $orderItemData['qty_ordered'];
-                    if (isset($orderItemData['qty_canceled'])) {
-                        $orderItemData['qty_canceled'] = (int) $orderItemData['qty_canceled'];
-                    }
-                    if (isset($orderItemData['qty_invoiced'])) {
-                        $orderItemData['qty_invoiced'] = (int) $orderItemData['qty_invoiced'];
-                    }
-                    if (isset($orderItemData['qty_refunded'])) {
-                        $orderItemData['qty_refunded'] = (int) $orderItemData['qty_refunded'];
-                    }
-                    if (isset($orderItemData['qty_shipped'])) {
-                        $orderItemData['qty_shipped'] = (int) $orderItemData['qty_shipped'];
-                    }
-                    $orderItemData = $this->helper->setFormatedPrice($orderItemData);
-                    $orderItemData['order_id'] = $replacedOrderId;
-                    $productId = $orderItemData['product_id'];
-                    /*Product url and product image url not availale from order item so we have to load product to get an additional required data*/
-                    $productInfo = $this->helper->getProductUrlAndImageUrl($productId);
-                    $orderItemData['product_url'] = $productInfo['product_url'];
-                    $orderItemData['product_image_url'] = $productInfo['product_image_url'];
-                    $orderItemData['category_name'] = $this->helper->getCategoryName($productId);
-                    $orderData['items'][] = $orderItemData;
+            /*Settings of the order's store: in the admin and the API the current store is another one.
+            Load the order by ID: a status history saved through its repository has no order*/
+            $order = $this->getOrder($id);
+            return $this->helper->runInStoreScope(
+                $order ? $order->getStoreId() : null,
+                fn () => $this->sendOrderUpdate($id, $order)
+            );
+        }
+    }
+
+    /**
+     * Order of the comment, or null when the ID is missing or unknown
+     *
+     * @param mixed $id
+     * @return OrderInterface|null
+     */
+    private function getOrder($id): ?OrderInterface
+    {
+        if (!$id) {
+            return null;
+        }
+        try {
+            return $this->orderRepository->get($id);
+        } catch (NoSuchEntityException|InputException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Send the order update event, when enabled
+     *
+     * @param mixed $id
+     * @param OrderInterface|null $order the order loaded by ID, if found
+     * @return bool|void
+     * @throws NoSuchEntityException
+     */
+    private function sendOrderUpdate($id, ?OrderInterface $order)
+    {
+        $event = $this->helper->getRewardEvents();
+        /*Check the order_update event is enabled, if enabled then will send order_update event to TrueLoyal*/
+        if (in_array('order_update', $event)) {
+            $order = $order ?? $this->orderRepository->get($id);
+            $order->getPayment()->setMethodInstance();
+            $orderData = $order->debug();
+            /*Get order price formated data*/
+            $orderData = $this->helper->setFormatedPrice($orderData);
+            $orderData['payment'] = $order->getPayment()->debug();
+            /*Remove unwanted payment object data from Order Data*/
+            unset($orderData['payment (Magento\Sales\Model\Order\Payment\Interceptor)']);
+            /*Get payment price formated data*/
+            $orderData['payment'] = $this->helper->setFormatedPrice($orderData['payment']);
+            $orderData['last_comment'] = $this->request->getParam('history')['comment'];
+            $replacedOrderId = $this->helper->getReplacedOrderID($order->getEntityId());
+            $orderData["entity_id"] = $replacedOrderId;
+            $orderData["order_id"] = $replacedOrderId;
+            $orderData["coupon_code"] = $this->helper->getCouponCodes($order);
+            unset($orderData['items']);
+            foreach ($order->getItems() as $item) {
+                $orderItemData = $item->debug();
+                $orderItemData['qty_ordered'] = (int) $orderItemData['qty_ordered'];
+                if (isset($orderItemData['qty_canceled'])) {
+                    $orderItemData['qty_canceled'] = (int) $orderItemData['qty_canceled'];
                 }
-                if (isset($orderData["addresses"])) {
-                    $addressesData = $orderData["addresses"];
-                    unset($orderData["addresses"]);
-                    foreach ($addressesData as $key => $address) {
-                        $orderData["addresses"][] = $address;
-                    }
+                if (isset($orderItemData['qty_invoiced'])) {
+                    $orderItemData['qty_invoiced'] = (int) $orderItemData['qty_invoiced'];
                 }
-                unset($orderData['status_histories']);
-                foreach ($order->getStatusHistories() as $statusHistories) {
-                    $statusItemData = $statusHistories->debug();
-                    $orderData['status_histories'][] = $statusItemData;
+                if (isset($orderItemData['qty_refunded'])) {
+                    $orderItemData['qty_refunded'] = (int) $orderItemData['qty_refunded'];
                 }
-                $orderData['total_qty_ordered'] = (int) $orderData['total_qty_ordered'];
-                $params = [
-                    "member_id" => $this->helper->getMemberIdentifierValueById($order->getCustomerId(), $order->getCustomerEmail()),
-                    "activity_id" => "order_update",
-                    "data" => $orderData
-                ];
-                $url = $this->helper->getWebHookUrl();
-                $params = $this->helper->json->serialize($params);
-                $this->helper->request($url, $params, "post");
-                return true;
+                if (isset($orderItemData['qty_shipped'])) {
+                    $orderItemData['qty_shipped'] = (int) $orderItemData['qty_shipped'];
+                }
+                $orderItemData = $this->helper->setFormatedPrice($orderItemData);
+                $orderItemData['order_id'] = $replacedOrderId;
+                $productId = $orderItemData['product_id'];
+                /*Product url and product image url not availale from order item so we have to load product to get an additional required data*/
+                $productInfo = $this->helper->getProductUrlAndImageUrl($productId);
+                $orderItemData['product_url'] = $productInfo['product_url'];
+                $orderItemData['product_image_url'] = $productInfo['product_image_url'];
+                $orderItemData['category_name'] = $this->helper->getCategoryName($productId);
+                $orderData['items'][] = $orderItemData;
             }
+            if (isset($orderData["addresses"])) {
+                $addressesData = $orderData["addresses"];
+                unset($orderData["addresses"]);
+                foreach ($addressesData as $key => $address) {
+                    $orderData["addresses"][] = $address;
+                }
+            }
+            unset($orderData['status_histories']);
+            foreach ($order->getStatusHistories() as $statusHistories) {
+                $statusItemData = $statusHistories->debug();
+                $orderData['status_histories'][] = $statusItemData;
+            }
+            $orderData['total_qty_ordered'] = (int) $orderData['total_qty_ordered'];
+            $params = [
+                "member_id" => $this->helper->getMemberIdentifierValueById($order->getCustomerId(), $order->getCustomerEmail()),
+                "activity_id" => "order_update",
+                "data" => $orderData
+            ];
+            $url = $this->helper->getWebHookUrl();
+            $params = $this->helper->json->serialize($params);
+            $this->helper->request($url, $params, "post");
+            return true;
         }
     }
 }

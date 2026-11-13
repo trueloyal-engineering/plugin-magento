@@ -6,14 +6,18 @@ namespace TrueLoyal\LoyaltyRewards\Test\Unit\Helper;
 use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Serialize\Serializer\Json;
 use Monolog\Handler\TestHandler;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use TrueLoyal\LoyaltyRewards\Helper\Config;
 use TrueLoyal\LoyaltyRewards\Helper\Data;
 use TrueLoyal\LoyaltyRewards\Logger\Logger;
+use TrueLoyal\LoyaltyRewards\Test\Unit\StoreScopeTrait;
 
 class ConfigTest extends TestCase
 {
+    use StoreScopeTrait;
+
     private const API_KEY = 'unit-test-api-key-0123456789';
     private const PARTNER_ID = 'partner-1';
 
@@ -116,5 +120,85 @@ class ConfigTest extends TestCase
         $this->assertTrue($this->handler->hasInfoThatContains('"api-key":"***"'));
         $this->assertTrue($this->handler->hasInfoThatContains('"secret_key": "***"'));
         $this->assertTrue($this->handler->hasInfoThatContains('https:\/\/hooks.example.com\/webhook\/abc'));
+    }
+
+    private function scopedHelper(int $currentStoreId): Data
+    {
+        $helper = $this->getMockBuilder(Data::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $this->setStoreScope($helper, [
+            1 => [Config::XML_PATH_WEB_HOOK_URL => 'https://hooks.example.test/store1'],
+            2 => [Config::XML_PATH_WEB_HOOK_URL => 'https://hooks.example.test/store2'],
+            3 => [Config::XML_PATH_WEB_HOOK_URL => 'https://hooks.example.test/store3'],
+        ], $currentStoreId);
+        return $helper;
+    }
+
+    public function testGetConfigReadsTheCurrentStore(): void
+    {
+        $helper = $this->scopedHelper(1);
+
+        $this->assertSame('https://hooks.example.test/store1', $helper->getWebHookUrl());
+        $this->assertSame([1], $this->configStoreIds);
+    }
+
+    public function testRunInStoreScopeReadsTheGivenStoreAndRestoresTheCurrentOne(): void
+    {
+        $helper = $this->scopedHelper(1);
+
+        $result = $helper->runInStoreScope(2, fn () => $helper->getWebHookUrl());
+
+        $this->assertSame('https://hooks.example.test/store2', $result);
+        $this->assertSame('https://hooks.example.test/store1', $helper->getWebHookUrl());
+        $this->assertSame([2, 1], $this->configStoreIds);
+    }
+
+    public function testRunInStoreScopeRestoresTheCurrentStoreAfterAnException(): void
+    {
+        $helper = $this->scopedHelper(1);
+
+        try {
+            $helper->runInStoreScope('2', function () use ($helper): void {
+                $helper->getWebHookUrl();
+                throw new \RuntimeException('event failed');
+            });
+            $this->fail('The exception was swallowed');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('event failed', $e->getMessage());
+        }
+
+        $this->assertSame('https://hooks.example.test/store1', $helper->getWebHookUrl());
+        $this->assertSame([2, 1], $this->configStoreIds);
+    }
+
+    public function testNestedScopesRestoreTheOuterStore(): void
+    {
+        $helper = $this->scopedHelper(1);
+
+        $urls = $helper->runInStoreScope(3, fn () => [
+            $helper->runInStoreScope(2, fn () => $helper->getWebHookUrl()),
+            $helper->getWebHookUrl(),
+        ]);
+
+        $this->assertSame(['https://hooks.example.test/store2', 'https://hooks.example.test/store3'], $urls);
+        $this->assertSame('https://hooks.example.test/store1', $helper->getWebHookUrl());
+    }
+
+    public static function noStore(): array
+    {
+        return ['null' => [null], 'zero' => [0], 'zero as string' => ['0']];
+    }
+
+    #[DataProvider('noStore')]
+    public function testRunInStoreScopeWithoutAStoreKeepsTheCurrentStore(mixed $storeId): void
+    {
+        $helper = $this->scopedHelper(3);
+
+        $result = $helper->runInStoreScope($storeId, fn () => $helper->getWebHookUrl());
+
+        $this->assertSame('https://hooks.example.test/store3', $result);
+        $this->assertSame([3], $this->configStoreIds);
     }
 }

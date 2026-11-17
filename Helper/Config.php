@@ -76,6 +76,9 @@ class Config extends AbstractHelper
     public const XML_PATH_CUSTOM_MEMBER_STORE_CODE = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_code';
     public const XML_PATH_CUSTOM_MEMBER_STORE_ID = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_id';
     public const XML_PATH_CUSTOM_MEMBER_STORE_CURRENCY = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_currency';
+    public const XML_PATH_CUSTOM_MEMBER_STORE_VIEW_CODE = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_view_code';
+    public const XML_PATH_CUSTOM_MEMBER_STORE_LOCALE = 'trueloyal_loyaltyRewards/settings/custom_member_attributes/store_locale';
+    public const XML_PATH_STORE_LOCALE = 'general/locale/code';
     public const XML_PATH_PREFERRED_LANGUAGE = 'trueloyal_loyaltyRewards/settings/preferred_language';
 
     /**
@@ -847,7 +850,7 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Get Custom Member Attribute: Store ID
+     * Get Custom Member Attribute: Store Code
      *
      * @return string
      */
@@ -856,6 +859,11 @@ class Config extends AbstractHelper
         return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_CODE) ?? '';
     }
 
+    /**
+     * Get Custom Member Attribute: Store ID
+     *
+     * @return string
+     */
     public function getCustomMemberStoreId(): string
     {
         return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_ID) ?? '';
@@ -869,6 +877,36 @@ class Config extends AbstractHelper
     public function getCustomMemberStoreCurrency(): string
     {
         return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_CURRENCY) ?? '';
+    }
+
+    /**
+     * Get Custom Member Attribute: Store View Code
+     *
+     * @return string
+     */
+    public function getCustomMemberStoreViewCode(): string
+    {
+        return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_VIEW_CODE) ?? '';
+    }
+
+    /**
+     * Get Custom Member Attribute: Store Locale
+     *
+     * @return string
+     */
+    public function getCustomMemberStoreLocale(): string
+    {
+        return $this->getConfig(self::XML_PATH_CUSTOM_MEMBER_STORE_LOCALE) ?? '';
+    }
+
+    /**
+     * Get the store view's locale (General > Locale Options > Locale), inherited from the website or default
+     *
+     * @return string
+     */
+    public function getStoreLocale(): string
+    {
+        return (string)($this->getConfig(self::XML_PATH_STORE_LOCALE) ?? '');
     }
 
     /**

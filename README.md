@@ -84,7 +84,7 @@ These optional fields send store details to TrueLoyal member custom attributes. 
 | Store ID | The ID of the store (store group), not of the store view |
 | Store Code | The code of the store (store group), not of the store view |
 | Store View Code | The code of the current store view |
-| Store Currency | The currency the shopper is viewing |
+| Store Currency | The currency the shopper is viewing, not the base currency |
 | Store Locale | The store view's **General > Locale Options > Locale**, also when it is inherited from the website or default |
 
 The values are sent when the shopper signs in to the loyalty widget. The fields can be set per website or store view.

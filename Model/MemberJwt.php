@@ -156,19 +156,7 @@ class MemberJwt
             $memberIdentifierValue = $this->config->getMemberIdentifierValue();
         }
 
-        $customAttributes = [];
-        $customStoreIdKey = $this->config->getCustomMemberStoreId();
-        $customStoreCodeKey = $this->config->getCustomMemberStoreCode();
-        $customStoreCurrencyKey = $this->config->getCustomMemberStoreCurrency();
-        if ($customStoreIdKey) {
-            $customAttributes[$customStoreIdKey] = $this->storeManager->getGroup()->getId();
-        }
-        if ($customStoreCodeKey) {
-            $customAttributes[$customStoreCodeKey] = $this->storeManager->getGroup()->getCode();
-        }
-        if ($customStoreCurrencyKey) {
-            $customAttributes[$customStoreCurrencyKey] = $this->config->getStoreCurrencyCode();
-        }
+        $customAttributes = $this->getCustomAttributes();
 
         $payload = [
             'member_id'          => $memberIdentifierValue,
@@ -203,5 +191,37 @@ class MemberJwt
         }
 
         return $this->jwt->encode($payload, $key, 'HS256');
+    }
+
+    /**
+     * Member custom attributes of the current store, keyed by the TrueLoyal attribute names set in the admin.
+     * A field left empty sends nothing.
+     *
+     * @return array
+     */
+    private function getCustomAttributes(): array
+    {
+        $customAttributes = [];
+        $customStoreIdKey = $this->config->getCustomMemberStoreId();
+        $customStoreCodeKey = $this->config->getCustomMemberStoreCode();
+        $customStoreCurrencyKey = $this->config->getCustomMemberStoreCurrency();
+        $customStoreViewCodeKey = $this->config->getCustomMemberStoreViewCode();
+        $customStoreLocaleKey = $this->config->getCustomMemberStoreLocale();
+        if ($customStoreIdKey) {
+            $customAttributes[$customStoreIdKey] = $this->storeManager->getGroup()->getId();
+        }
+        if ($customStoreCodeKey) {
+            $customAttributes[$customStoreCodeKey] = $this->storeManager->getGroup()->getCode();
+        }
+        if ($customStoreCurrencyKey) {
+            $customAttributes[$customStoreCurrencyKey] = $this->config->getStoreCurrencyCode();
+        }
+        if ($customStoreViewCodeKey) {
+            $customAttributes[$customStoreViewCodeKey] = $this->storeManager->getStore()->getCode();
+        }
+        if ($customStoreLocaleKey) {
+            $customAttributes[$customStoreLocaleKey] = $this->config->getStoreLocale();
+        }
+        return $customAttributes;
     }
 }

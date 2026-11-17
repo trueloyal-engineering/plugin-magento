@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace TrueLoyal\LoyaltyRewards\Test\Unit\Helper;
 
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Store\Model\ScopeInterface;
 use Monolog\Handler\TestHandler;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -200,5 +202,106 @@ class ConfigTest extends TestCase
 
         $this->assertSame('https://hooks.example.test/store3', $result);
         $this->assertSame([3], $this->configStoreIds);
+    }
+
+    public function testCustomMemberStoreViewCodeAndLocaleReadTheCurrentStore(): void
+    {
+        $helper = $this->getMockBuilder(Data::class)->disableOriginalConstructor()->onlyMethods([])->getMock();
+        $this->setStoreScope($helper, [
+            1 => [
+                Config::XML_PATH_CUSTOM_MEMBER_STORE_VIEW_CODE => 'store_view_code',
+                Config::XML_PATH_CUSTOM_MEMBER_STORE_LOCALE => 'store_locale',
+            ],
+        ], 1);
+
+        $this->assertSame('store_view_code', $helper->getCustomMemberStoreViewCode());
+        $this->assertSame('store_locale', $helper->getCustomMemberStoreLocale());
+        $this->assertSame([1, 1], $this->configStoreIds);
+    }
+
+    public function testCustomMemberStoreViewCodeAndLocaleAreEmptyWhenNotSet(): void
+    {
+        $helper = $this->scopedHelper(1);
+
+        $this->assertSame('', $helper->getCustomMemberStoreViewCode());
+        $this->assertSame('', $helper->getCustomMemberStoreLocale());
+    }
+
+    public function testStoreLocaleReadsTheStoresOwnLocale(): void
+    {
+        $helper = $this->getMockBuilder(Data::class)->disableOriginalConstructor()->onlyMethods([])->getMock();
+        $this->setStoreScope($helper, [
+            1 => [Config::XML_PATH_STORE_LOCALE => 'en_US'],
+            3 => [Config::XML_PATH_STORE_LOCALE => 'fr_FR'],
+        ], 3);
+
+        $this->assertSame('fr_FR', $helper->getStoreLocale());
+        $this->assertSame([3], $this->configStoreIds);
+    }
+
+    /**
+     * Helper whose settings resolve like Magento's: a store-scope read falls back to the store's website, then to
+     * the default. Stores 1 and 3 are on website 1, 2 and 4 on website 2.
+     */
+    private function inheritingHelper(array $default, array $websites, array $stores, int $currentStoreId): Data
+    {
+        $helper = $this->getMockBuilder(Data::class)->disableOriginalConstructor()->onlyMethods([])->getMock();
+        $this->setStoreScope($helper, [], $currentStoreId);
+        $storeWebsites = [1 => 1, 2 => 2, 3 => 1, 4 => 2];
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturnCallback(
+            function (string $path, string $scope = 'default', $storeId = null) use (
+                $default,
+                $websites,
+                $stores,
+                $storeWebsites
+            ) {
+                if ($scope !== ScopeInterface::SCOPE_STORE) {
+                    return null;
+                }
+                $this->configStoreIds[] = $storeId;
+                $websiteId = $storeWebsites[(int)$storeId] ?? 0;
+                return $stores[(int)$storeId][$path] ?? $websites[$websiteId][$path] ?? $default[$path] ?? null;
+            }
+        );
+        (new \ReflectionProperty(Config::class, 'scopeConfig'))->setValue($helper, $scopeConfig);
+        return $helper;
+    }
+
+    public static function inheritedLocale(): array
+    {
+        return [
+            'own locale' => [3, 'fr_FR'],
+            'from the website' => [1, 'de_DE'],
+            'from the default' => [2, 'en_US'],
+        ];
+    }
+
+    #[DataProvider('inheritedLocale')]
+    public function testStoreLocaleIsInheritedFromTheWebsiteOrTheDefault(int $storeId, string $expected): void
+    {
+        $helper = $this->inheritingHelper(
+            [Config::XML_PATH_STORE_LOCALE => 'en_US'],
+            [1 => [Config::XML_PATH_STORE_LOCALE => 'de_DE']],
+            [3 => [Config::XML_PATH_STORE_LOCALE => 'fr_FR']],
+            $storeId
+        );
+
+        $this->assertSame($expected, $helper->getStoreLocale());
+        $this->assertSame([$storeId], $this->configStoreIds);
+    }
+
+    public function testStoreLocaleReadsTheStoreOfRunInStoreScope(): void
+    {
+        $helper = $this->inheritingHelper(
+            [Config::XML_PATH_STORE_LOCALE => 'en_US'],
+            [2 => [Config::XML_PATH_STORE_LOCALE => 'es_ES']],
+            [4 => [Config::XML_PATH_STORE_LOCALE => 'pt_PT']],
+            1
+        );
+
+        $this->assertSame('pt_PT', $helper->runInStoreScope(4, fn () => $helper->getStoreLocale()));
+        $this->assertSame('en_US', $helper->getStoreLocale());
+        $this->assertSame([4, 1], $this->configStoreIds);
     }
 }

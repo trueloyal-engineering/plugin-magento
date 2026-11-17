@@ -210,12 +210,23 @@
                     </comment>
                     <field id="store_id" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="text">
                         <label>Store ID</label>
+                        <comment>Sends the ID of the store (store group), not of the store view, e.g. 1.</comment>
                     </field>
                     <field id="store_code" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="text">
                         <label>Store Code</label>
+                        <comment>Sends the code of the store (store group), not of the store view, e.g. main_website_store.</comment>
                     </field>
-                    <field id="store_currency" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="text">
+                    <field id="store_view_code" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="30" translate="label" type="text">
+                        <label>Store View Code</label>
+                        <comment>Sends the code of the store view, e.g. main_en.</comment>
+                    </field>
+                    <field id="store_currency" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
                         <label>Store Currency</label>
+                        <comment>Sends the currency the shopper is viewing, not the base currency, e.g. EUR.</comment>
+                    </field>
+                    <field id="store_locale" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="text">
+                        <label>Store Locale</label>
+                        <comment>Sends the locale of the store view (General > Locale Options > Locale), e.g. en_US.</comment>
                     </field>
                 </group>
             </group>

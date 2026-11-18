@@ -226,7 +226,7 @@
                     </field>
                     <field id="store_locale" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="text">
                         <label>Store Locale</label>
-                        <comment>Sends the locale of the store view (General > Locale Options > Locale), e.g. en_US.</comment>
+                        <comment>Sends the English name of the store view's language (General > Locale Options > Locale), without region or script, e.g. Chinese for zh_Hant_HK.</comment>
                     </field>
                 </group>
             </group>

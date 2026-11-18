@@ -72,14 +72,14 @@ class MemberJwtTest extends TestCase
         ];
     }
 
-    public function testAllFieldsSendTheStoreGroupCurrencyViewCodeAndLocale(): void
+    public function testAllFieldsSendTheStoreGroupCurrencyViewCodeAndLanguage(): void
     {
         $this->assertSame([
             'store_id' => '2',
             'store_code' => 'main',
             'store_currency' => 'EUR',
             'store_view_code' => 'main_en',
-            'store_locale' => 'en_US',
+            'store_locale' => 'English',
         ], $this->customAttributes(self::ALL_FIELDS, self::store('main_en', 'en_US')));
     }
 
@@ -98,33 +98,86 @@ class MemberJwtTest extends TestCase
         ], $this->customAttributes($fields, self::store('main_en', 'en_US')));
     }
 
+    public function testWithoutTheStoreLocaleFieldNoLanguageIsSent(): void
+    {
+        $fields = self::ALL_FIELDS;
+        unset($fields['store_locale']);
+
+        $this->assertSame([
+            'store_id' => '2',
+            'store_code' => 'main',
+            'store_currency' => 'EUR',
+            'store_view_code' => 'main_en',
+        ], $this->customAttributes($fields, self::store('main_en', 'en_US')));
+    }
+
     public static function storeViewsOfOneStore(): array
     {
         return [
-            'english view' => ['main_en', 'en_US'],
-            'french view' => ['main_fr', 'fr_FR'],
+            'english view' => ['main_en', 'en_US', 'English'],
+            'french view' => ['main_fr', 'fr_FR', 'French'],
         ];
     }
 
     #[DataProvider('storeViewsOfOneStore')]
-    public function testStoreViewsOfOneStoreSendTheirOwnViewCodeAndLocale(string $viewCode, string $locale): void
-    {
+    public function testStoreViewsOfOneStoreSendTheirOwnViewCodeAndLanguage(
+        string $viewCode,
+        string $locale,
+        string $language
+    ): void {
         $attributes = $this->customAttributes(self::ALL_FIELDS, self::store($viewCode, $locale));
 
         $this->assertSame('main', $attributes['store_code']);
         $this->assertSame('2', $attributes['store_id']);
         $this->assertSame($viewCode, $attributes['store_view_code']);
-        $this->assertSame($locale, $attributes['store_locale']);
+        $this->assertSame($language, $attributes['store_locale']);
     }
 
-    public function testInheritedLocaleIsSent(): void
+    public function testLanguageOfAnInheritedLocaleIsSent(): void
     {
         // getStoreLocale() returns the website's locale for a store view without its own (see ConfigTest)
         $fields = ['store_locale' => 'language'];
 
         $this->assertSame(
-            ['language' => 'de_DE'],
+            ['language' => 'German'],
             $this->customAttributes($fields, self::store('main_de', 'de_DE'))
+        );
+    }
+
+    public static function localeLanguages(): array
+    {
+        return [
+            'en_US' => ['en_US', 'English'],
+            'en_GB' => ['en_GB', 'English'],
+            'en_AU' => ['en_AU', 'English'],
+            'zh_Hant_HK' => ['zh_Hant_HK', 'Chinese'],
+            'zh_Hans_CN' => ['zh_Hans_CN', 'Chinese'],
+            'ar_SA' => ['ar_SA', 'Arabic'],
+            'cs_CZ' => ['cs_CZ', 'Czech'],
+            'de_DE' => ['de_DE', 'German'],
+            'es_ES' => ['es_ES', 'Spanish'],
+            'es_MX' => ['es_MX', 'Spanish'],
+            'pl_PL' => ['pl_PL', 'Polish'],
+        ];
+    }
+
+    #[DataProvider('localeLanguages')]
+    public function testStoreLocaleSendsTheEnglishLanguageNameWithoutRegionOrScript(
+        string $locale,
+        string $language
+    ): void {
+        $this->assertSame(
+            ['language' => $language],
+            $this->customAttributes(['store_locale' => 'language'], self::store('main', $locale))
+        );
+    }
+
+    public function testEmptyLocaleSendsAnEmptyLanguage(): void
+    {
+        // \Locale would return the language of PHP's default locale for ''
+        $this->assertSame(
+            ['language' => ''],
+            $this->customAttributes(['store_locale' => 'language'], self::store('main', ''))
         );
     }
 

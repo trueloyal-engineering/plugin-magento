@@ -220,8 +220,23 @@ class MemberJwt
             $customAttributes[$customStoreViewCodeKey] = $this->storeManager->getStore()->getCode();
         }
         if ($customStoreLocaleKey) {
-            $customAttributes[$customStoreLocaleKey] = $this->config->getStoreLocale();
+            $customAttributes[$customStoreLocaleKey] = $this->getLanguageName($this->config->getStoreLocale());
         }
         return $customAttributes;
+    }
+
+    /**
+     * English name of the locale's language, without region or script, e.g. Chinese for zh_Hant_HK
+     *
+     * @param string $locale
+     * @return string
+     */
+    private function getLanguageName(string $locale): string
+    {
+        if ($locale === '') {
+            return ''; // \Locale would name the language of PHP's default locale
+        }
+        $name = \Locale::getDisplayLanguage($locale, 'en');
+        return is_string($name) && $name !== '' ? $name : $locale;
     }
 }
